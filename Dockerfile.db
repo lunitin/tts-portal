@@ -1,0 +1,9 @@
+# Stage one
+FROM mariadb:latest
+
+# Initial sql files to populate
+WORKDIR /docker-entrypoint-initdb.d/
+
+# SQL dumps should be placed here before build
+#COPY /src/data/*.sql /docker-entrypoint-initdb.d/
+#RUN chmod 777 /docker-entrypoint-initdb.d/*.sql

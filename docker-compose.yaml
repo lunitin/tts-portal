@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "8000:80"
+    networks:
+      - tts-net
+    volumes:
+      - ./docroot:/app
+    restart: on-failure
+
+  db:
+    container_name: db
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    volumes:
+      - tts-db:/var/lib/mysql
+    # Set max_allowed_packet to 256M (or any other value)
+    command: --max_allowed_packet=1073741824
+    environment:
+      MYSQL_ROOT_PASSWORD: "beastm0de"
+    networks:
+      - tts-net
+    restart: on-failure
+
+volumes:
+  tts-db:
+
+networks:
+  tts-net:
