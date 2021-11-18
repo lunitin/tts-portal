@@ -20,10 +20,10 @@ def db():
                                   host='db')
     cursor = cnx.cursor()
 
-    query = ("SHOW STATUS")
+    query = ("SELECT first_name FROM tts_portal.users")
     cursor.execute(query)
 
-    text = "Status Variables<br>"
+    text = "User Accounts<br>"
 
     if not cursor.rowcount:
         print("No results found")

@@ -19,8 +19,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.db
-    volumes:
-      - tts-db:/var/lib/mysql
+    # For persistent data between startup/shutdown
+    #volumes:
+    #  - tts-db:/var/lib/mysql
     # Set max_allowed_packet to 256M (or any other value)
     command: --max_allowed_packet=1073741824
     environment:
