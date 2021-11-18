@@ -39,6 +39,10 @@ persists between a stop and start of a container, put is purged when an image is
 
 The directory docroot/ is mounted inside the **db** container which is then served by the Flask UWSGI server.
 
+##### Python Packages
+
+New python packages should be added to the **_requirements.txt_** file. Upon container creation, pip will install all packages in that file.
+
 ## Operational Commands
 
 To start up the Docker stack
