@@ -4,6 +4,7 @@
 
 - [Install Docker](https://docs.docker.com/get-docker/)
 - [Install Docker Compose](https://docs.docker.com/compose/install/)
+- [Install Watchman](https://facebook.github.io/watchman/docs/install.html) (optional)
 
 ## Architecture
 
@@ -43,7 +44,7 @@ The directory docroot/ is mounted inside the **db** container which is then serv
 
 New python packages should be added to the **_requirements.txt_** file. Upon container creation, pip will install all packages in that file.
 
-## Operational Commands
+## Docker Compose Commands
 
 To start up the Docker stack
 
@@ -90,4 +91,28 @@ docker volume ls
 
 ```
 docker volume rm tts-portal_tts-db
+```
+
+## Watchman
+
+Watchman is a helper application that will watch files in the project for changes and trigger a reload of the Flask app when changes have been detected.
+
+To simplify things, the docker-compose and watchman commands are wrapped in a makefile.
+
+Bring up the Docker stack
+
+```
+make up
+```
+
+Stop the Docker stack
+
+```
+make down
+```
+
+Rebuild all Docker containers
+
+```
+make clean
 ```
