@@ -8,16 +8,27 @@ from datetime import datetime
 
 anon = Blueprint('anon', __name__)
 
+
+"""
+Default home page route
+"""
 @anon.route('/')
 def index():
     print(current_user, flush=True)
-    return render_template('index.html', )
+    return render_template('index.html')
 
 
+"""
+Display the login form
+"""
 @anon.route('/login')
 def login():
     return render_template('login.html')
 
+
+"""
+Attempt to log a user in to the system
+"""
 @anon.route('/login', methods=['POST'])
 def login_post():
     email = request.form.get('username')
@@ -35,7 +46,7 @@ def login_post():
 
     flash('You are logged in!')
     login_user(user, remember=remember)
-    return redirect(url_for('auth.contact_us'))
+    return redirect(url_for('auth.dashboard'))
 
 
 
@@ -48,6 +59,12 @@ def forgot_password():
 def recover_password():
     return 'Recover Password'
 
+
+
+
+"""
+Temporary account creation route to test hash generation
+"""
 @anon.route('/create-account')
 def create_account():
     # code to validate and add user to database goes here
@@ -59,10 +76,11 @@ def create_account():
 
 
     # if this returns a user, then the email already exists in database
-    user = User.query.filter_by(email=email_address).first()
+    user = User.query.filter_by(email_address=email_address).first()
 
     # if a user is found, we want to redirect back to signup page so user can try again
     if user:
+        flash("Account already exists!")
         return redirect(url_for('anon.login'))
 
     # create a new user with the form data.
@@ -74,7 +92,6 @@ def create_account():
             password=generate_password_hash(password, method='pbkdf2:sha256:310000', salt_length=128),
             date_created=datetime.now(),
             date_last_password_change=datetime.now()
-
             )
 
     # add the new user to the database
