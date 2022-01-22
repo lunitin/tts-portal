@@ -1,6 +1,6 @@
 up:
-	docker-compose up -d
-	watchman-make -p 'docroot/**/*.py' 'docroot/templates/**' -s 1 --run 'touch docroot/uwsgi-reload'
+	docker-compose up &
+	watchman-make -p 'docroot/**/*.py' 'docroot/templates/**' -s 1 --run 'touch docroot/uwsgi.ini'
 
 down:
 	docker-compose down
