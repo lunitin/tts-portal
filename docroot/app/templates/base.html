@@ -59,9 +59,9 @@
         </div>
       </div>
     </nav>
-    <div class="container">
+    <div class="container-fluid">
       {% with messages = get_flashed_messages() %} {% if messages %}
-      <div class="notification is-danger">
+      <div class="alert alert-info" role="alert">
         {{ messages[0] }}
       </div>
       {% endif %} {% endwith %}
