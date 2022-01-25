@@ -1,10 +1,15 @@
+""" anon.py
+
+Flask routes that do not require authentication
+
+"""
+
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, current_user
 from . import db
 from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-
 
 anon = Blueprint('anon', __name__)
 
@@ -49,12 +54,17 @@ def login_post():
     return redirect(url_for('auth.dashboard'))
 
 
-
+"""
+Route to request a password change
+"""
 @anon.route('/forgot-password')
 def forgot_password():
     return 'Forgot Password'
 
-
+"""
+Special route that takes a magic hash to identify a user and allows
+a password change
+"""
 @anon.route('/recover-password')
 def recover_password():
     return 'Recover Password'
@@ -78,7 +88,7 @@ def create_account():
     # if this returns a user, then the email already exists in database
     user = User.query.filter_by(email_address=email_address).first()
 
-    # if a user is found, we want to redirect back to signup page so user can try again
+    # if a user is found, don't create it
     if user:
         flash("Account already exists!")
         return redirect(url_for('anon.login'))
@@ -97,5 +107,6 @@ def create_account():
     # add the new user to the database
     db.session.add(new_user)
     db.session.commit()
+
     flash("Account" + email_address + " created!")
     return redirect(url_for('anon.login'))

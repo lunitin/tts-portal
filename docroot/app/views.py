@@ -1,3 +1,9 @@
+""" views.py
+
+LEGACY CODE FOR REFERENCE - NOT USED
+
+"""
+
 from app import app
 from flask import request, jsonify, make_response, render_template
 from functools import wraps

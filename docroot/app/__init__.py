@@ -1,3 +1,8 @@
+""" __init__.py
+
+Flask application initilizaton and configuration variables
+
+"""
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
