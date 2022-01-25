@@ -1,0 +1,480 @@
+---
+openapi: 3.0.0
+info:
+  title: TTS-PORTAL
+  description: |
+    API for tts-portal giving access to retrieval of all dashboard data, user information manipulation, and administrative operations.
+  contact:
+    email: jacomatt@oregonstate.edu
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/TTS_Dashboard/ttsportal/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: ttsportal.local
+tags:
+- name: dashboard
+  description: all operations required to operate the users dashboard
+- name: data
+  description: all operations available to manipulate data on vehicles and journeys
+- name: admin
+  description: all operations available to the administrator level user
+- name: user
+  description: all operations available to the user on their own account
+paths:
+  /vehicle:
+    get:
+      tags:
+      - data
+      summary: Get a single vehicle with id
+      operationId: getVehicle
+      parameters:
+      - name: id
+        in: query
+        description: id of object
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        "404":
+          description: Vehicle not found
+    put:
+      tags:
+      - data
+      summary: Update an existing vehicle
+      operationId: updateVehicle
+      parameters:
+      - name: id
+        in: query
+        description: id of object
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        $ref: '#/components/requestBodies/Vehicle'
+      responses:
+        "201":
+          description: Created
+        "400":
+          $ref: '#/compontents/responses/400BadRequest'
+        "404":
+          description: Vehicle not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+      - data
+      summary: Add a new vehicle to the db
+      operationId: addVehicle
+      requestBody:
+        $ref: '#/components/requestBodies/Vehicle'
+      responses:
+        "201":
+          description: Created
+        "405":
+          description: Invalid input
+    delete:
+      tags:
+      - data
+      summary: Delete a single vehicle with id
+      operationId: deleteVehicle
+      parameters:
+      - name: id
+        in: query
+        description: id of object
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: No content
+  /user:
+    get:
+      tags:
+      - admin
+      summary: get single user information
+      operationId: getUser
+      parameters:
+      - name: username
+        in: query
+        description: username
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Retrieve user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags:
+      - admin
+      summary: update single user
+      operationId: putUser
+      responses:
+        "200":
+          description: Retrieve user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+    post:
+      tags:
+      - admin
+      summary: create new user
+      operationId: postUser
+      requestBody:
+        $ref: '#/components/requestBodies/newUser'
+      responses:
+        "200":
+          description: Retrieve user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+      - admin
+      summary: delete user
+      operationId: deleteUser
+      responses:
+        "204":
+          description: No content
+  /create:
+    post:
+      tags:
+      - user
+      summary: User creation
+      operationId: createUser
+      requestBody:
+        $ref: '#/components/requestBodies/newUser'
+      responses:
+        "200":
+          description: Retrieve user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+  /login:
+    get:
+      tags:
+      - user
+      summary: Display login form
+      responses:
+        "200":
+          description: Successful response no body
+    post:
+      tags:
+      - user
+      summary: Attempt to log a user into the system
+      description: ""
+      operationId: loginUser
+      parameters:
+      - name: username
+        in: query
+        description: username
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: The password for login in clear text
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Retrieve user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid username/password supplied
+  /logout:
+    get:
+      tags:
+      - user
+      summary: Log out current logged in user
+      description: ""
+      operationId: logoutUser
+      responses:
+        "200":
+          description: Successful response no body
+  /forgot-password:
+    get:
+      tags:
+      - user
+      summary: Display forgot password form
+      responses:
+        "200":
+          description: Successful response no body
+    post:
+      tags:
+      - user
+      summary: Send a forgot password e-mail
+      description: ""
+      operationId: forgotPasswordRequest
+      parameters:
+      - name: username
+        in: query
+        description: The user name
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response no body
+        "400":
+          description: Invalid username/password supplied
+  /recover-password:
+    get:
+      tags:
+      - user
+      summary: Display recover password form
+      responses:
+        "200":
+          description: Successful response no body
+    post:
+      tags:
+      - user
+      summary: Set a new password
+      description: ""
+      operationId: recoverPasswordRequest
+      parameters:
+      - name: username
+        in: query
+        description: The new password
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response no body
+        "400":
+          description: Invalid username/password supplied
+components:
+  schemas:
+    newUser:
+      required:
+      - Last_name
+      - email_address
+      - first_name
+      - security_level
+      - username
+      type: object
+      properties:
+        username:
+          type: integer
+          format: int64
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email_address:
+          type: string
+        security_level:
+          type: integer
+      xml:
+        name: newUser
+    User:
+      required:
+      - username
+      type: object
+      properties:
+        username:
+          type: integer
+          format: int64
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email_address:
+          type: string
+        security_level:
+          type: integer
+        date_created:
+          type: string
+          format: date-time
+        date_last_login:
+          type: string
+          format: date-time
+        date_last_password_change:
+          type: string
+          format: date-time
+      xml:
+        name: User
+    Vehicle:
+      required:
+      - ID
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+        vehID:
+          type: string
+        EntryTime:
+          type: string
+          format: date-time
+        ExitTime:
+          type: string
+          format: date-time
+        TravelDirection:
+          type: string
+          enum:
+          - Straight
+          - Right
+          - Left
+        ApproachDirection:
+          type: string
+          enum:
+          - Northbound
+          - Westbound
+          - Eastbound
+          - Southbound
+        Day:
+          type: integer
+          format: int32
+        SignalID:
+          type: string
+        Stops:
+          type: boolean
+        Uturn:
+          type: boolean
+        Delay:
+          type: number
+          format: float
+        RedArrival:
+          type: boolean
+        ETT:
+          type: number
+          format: float
+        TravelTime:
+          type: number
+          format: float
+        ExitStatus:
+          type: boolean
+      xml:
+        name: Vehicle
+  responses:
+    "400Error":
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    "200Success":
+      description: Successful response no body
+    "200SuccessVehicle":
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Vehicle'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Vehicle'
+    "201Created":
+      description: Created
+    "204NoContent":
+      description: No content
+    "200User":
+      description: Retrieve user information
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/User'
+    "400BadRequest":
+      description: Bad Request
+  parameters:
+    ID:
+      name: id
+      in: query
+      description: id of object
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int64
+    Username:
+      name: username
+      in: query
+      description: username
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+  requestBodies:
+    newUser:
+      description: new user information in user creation
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/newUser'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/newUser'
+      required: true
+    Vehicle:
+      description: Vehicle object in a request body
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Vehicle'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Vehicle'
+      required: true
