@@ -31,14 +31,15 @@ USE `tts_portal`;
 --
 
 DROP TABLE IF EXISTS `users`;
+
 CREATE TABLE `users` (
   `user_id` int(10) UNSIGNED NOT NULL,
   `first_name` varchar(60) NOT NULL,
   `last_name` varchar(60) NOT NULL,
   `email_address` varchar(100) NOT NULL,
-  `password` varchar(250) NOT NULL,
-  `security_level` int(2) NOT NULL,
-  `date_created` datetime NOT NULL,
+  `password` varchar(500) NOT NULL,
+  `security_level` int(2) NOT NULL DEFAULT 0,
+  `date_created` datetime NOT NULL DEFAULT current_timestamp(),
   `date_last_login` datetime DEFAULT NULL,
   `date_last_password_change` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -47,7 +48,15 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `first_name`, `last_name`, `email_address`, `password`, `security_level`, `date_created`, `date_last_login`, `date_last_password_change`) VALUES(1, 'Admin', '', 'admin@example.com', '1241e31dde1d9dba781038f7dcb1a869', 1, '2021-11-18 11:39:37', NULL, NULL);
+INSERT INTO `users` (`user_id`, `first_name`, `last_name`, `email_address`, `password`, `security_level`, `date_created`, `date_last_login`, `date_last_password_change`) VALUES
+(1, 'Admin', '', 'admin@example.com', '1241e31dde1d9dba781038f7dcb1a869', 1, '2021-11-18 11:39:37', NULL, NULL),
+(2, 'Eric', 'Hoang', 'hoanger@oregonstate.edu', 'Password1', 1, '2022-01-18 00:24:25', NULL, NULL),
+(3, 'cire', 'goanh', 'egoanh@gmail.com', 'Password1', 0, '2022-01-18 00:24:25', NULL, NULL),
+(4, 'dummy1', 'boop', 'dummy1boop@oregonstate.edu', 'Password1', 1, '2022-01-18 00:24:25', NULL, NULL),
+(5, 'dummy2', 'boop', 'dummy2boop@oregonstate.edu', 'Password1', 2, '2022-01-18 00:24:25', NULL, NULL),
+(6, 'dummy3', 'boop', 'dummy3boop@oregonstate.edu', 'Password1', 2, '2022-01-18 00:24:25', NULL, NULL),
+(7, 'dummy4', 'boop', 'dummy4boop@oregonstate.edu', 'Password1', 2, '2022-01-18 00:24:25', NULL, NULL),
+(8, 'dummy5', 'boop', 'dummy5boop@oregonstate.edu', 'Password1', 3, '2022-01-18 00:24:25', NULL, NULL);
 
 --
 -- Indexes for dumped tables

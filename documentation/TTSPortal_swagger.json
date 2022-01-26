@@ -1,0 +1,167 @@
+swagger: "2.0"
+info:
+  description: "TTS Portal"
+  version: "1.0.0"
+  title: "TTS Portal"
+  contact:
+    email: "apiteam@swagger.io"
+host: "ttsportal.local"
+basePath: "/"
+tags:
+- name: "auth"
+  description: "Everything related to auth"
+schemes:
+- "https"
+paths:
+  /login:
+    get:
+      tags:
+      - "auth"
+      summary: "Display login form"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+    post:
+      tags:
+      - "auth"
+      summary: "Attempt to log a user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "The user name for login"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "The password for login in clear text"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+        "400":
+          description: "Invalid username/password supplied"
+  /logout:
+    get:
+      tags:
+      - "auth"
+      summary: "Log out current logged in user"
+      description: ""
+      operationId: "logoutUser"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        default:
+          description: "successful operation"
+
+  /forgot-password:
+    get:
+      tags:
+      - "auth"
+      summary: "Display forgot password form"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+    post:
+      tags:
+      - "auth"
+      summary: "Send a forgot password e-mail"
+      description: ""
+      operationId: "forgotPasswordRequest"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "The user name"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+        "400":
+          description: "Invalid username/password supplied"
+
+  /recover-password:
+    get:
+      tags:
+      - "auth"
+      summary: "Display recover password form"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+    post:
+      tags:
+      - "auth"
+      summary: "Set a new password"
+      description: ""
+      operationId: "recoverPasswordRequest"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "The new password"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+        "400":
+          description: "Invalid username/password supplied"
+
+definitions:
+  User:
+    type: "object"
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+      first_name:
+        type: "string"
+      last_name:
+        type: "string"
+      email_address:
+        type: "string"
+      password:
+        type: "string"
+      security_level:
+        type: "integer"
+      date_created:
+        type: "string"
+        format: "datetime"
+      date_last_login:
+        type: "string"
+        format: "datetime"
+      date_last_password_change:
+        type: "string"
+        format: "datetime"
+    xml:
+      name: "User"
+  Tag:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+    xml:
+      name: "Tag"

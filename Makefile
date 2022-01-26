@@ -1,6 +1,10 @@
+# Helper file to quickly run docker compose commands
+
 up:
-	docker-compose up -d
-	watchman-make -p 'docroot/**/*.py' 'docroot/templates/**' -s 1 --run 'touch docroot/uwsgi-reload'
+	docker-compose up
+
+watch:
+	watchman-make -p 'docroot/**/*.py' 'docroot/**/*.html' 'docroot/**/*.css' 'docroot/**/*.js' -s 1 --run 'touch docroot/uwsgi.ini'
 
 down:
 	docker-compose down

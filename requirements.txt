@@ -1,2 +1,8 @@
 Flask>=2.0.2
-mysql-connector-python==8.0.27
+mysql-connector
+mysqlclient
+pyjwt>=2.0.0
+datetime
+Flask-SQLAlchemy
+flask-login
+werkzeug>=2.0

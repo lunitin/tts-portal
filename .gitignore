@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 docroot/supervisor.pid
+.DS_Store
