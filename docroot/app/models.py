@@ -4,11 +4,8 @@ Python objects for the SQLAlchemy database models
 
 """
 
-from turtle import delay
 from flask_login import UserMixin
-from sqlalchemy_utils import JSONType
 from . import db
-
 
 access = db.table('access',
                   db.Column('user_id', db.Integer, db.ForeignKey('users.user_id'), primary_key=True),
@@ -30,18 +27,21 @@ class User(UserMixin, db.Model):
 
     def get_id(self):
         return (self.user_id)
+    
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Vehicle(db.Model):
     __tablename__ = "vehicles"
     # primary keys are required by SQLAlchemy
     vehicle_data_id = db.Column(db.Integer, primary_key=True)
-    coverage_id = db.Column(db.Integer)
     veh_id = db.Column(db.String(length=64))
     delay = db.Column(db.Float(precision=3))
     red_arrival = db.Column(db.Boolean)
     split_failure = db.Column(db.Boolean)
-    signal_id = db.Column(db.Integer)
+    signal_id = db.Column(db.Integer, db.ForeignKey('signals.signal_id'), nullable=True)
+    coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.coverage_id'), nullable=True)
     approach_direction = db.Column(db.String(length=10))
     ett = db.Column(db.Float(precision=3))
     travel_time = db.Column(db.Float(precision=3))
@@ -55,6 +55,22 @@ class Vehicle(db.Model):
     def get_id(self):
         return (self.veh_id)   
     
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+
+class Signal(db.Model):
+    __tablename__ = 'signals'
+    signal_id = db.Column(db.Integer, primary_key=True)
+    coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.coverage_id'), nullable=True)
+    vehicles = db.relationship('Vehicle', backref='signal', lazy=True)
+    
+    def get_id(self):
+        return(self.signal_id)
+    
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
     
 class Coverage(db.Model):
     __tablename__ = 'coverages'
@@ -64,13 +80,6 @@ class Coverage(db.Model):
     
     def get_id(self):
         return(self.coverage_id)
-
-
-class Signal(db.Model):
-    __tablename__ = 'signals'
-    signal_id = db.Column(db.Integer, primary_key=True)
-    coverage_id = db.Column(db.Integer, db.ForeignKey('coverage.coverage_id'), nullable=True)
-    vehicles = db.relationship('Vehicle', backref='signal', lazy=True)
     
-    def get_id(self):
-        return(self.signal_id)
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

@@ -19,6 +19,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:beastm0de@db/tts_portal'
 app.config['SQLALCHEMY_TRACK_MODIFICATION'] = False;
 
 db.init_app(app)
+from .models import Vehicle, Signal, Coverage, access
+app.app_context().push()
+db.create_all()
 
 login_manager = LoginManager()
 login_manager.login_view = 'anon.login'
