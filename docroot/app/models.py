@@ -10,6 +10,11 @@ from sqlalchemy_utils import JSONType
 from . import db
 
 
+access = db.table('access',
+                  db.Column('user_id', db.Integer, db.ForeignKey('users.user_id'), primary_key=True),
+                  db.Column('coverage_id', db.Integer, db.ForeignKey('coverages.coverage_id'), primary_key=True)
+                )
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     # primary keys are required by SQLAlchemy
@@ -27,7 +32,6 @@ class User(UserMixin, db.Model):
         return (self.user_id)
 
 
-# Still needs foreign keys
 class Vehicle(db.Model):
     __tablename__ = "vehicles"
     # primary keys are required by SQLAlchemy
@@ -49,35 +53,24 @@ class Vehicle(db.Model):
     exit_time = db.Column(db.DateTime)
 
     def get_id(self):
-        return (self.veh_id)
+        return (self.veh_id)   
     
     
-# Still needs foreign keys
 class Coverage(db.Model):
     __tablename__ = 'coverages'
     coverage_id = db.Column(db.Integer, primary_key=True)
     coverage_name = db.Column(db.String(length=24))
-    signals = db.Column(JSONType)
+    signals = db.relationship('Signal', backref='coverage', lazy=True)
     
     def get_id(self):
         return(self.coverage_id)
 
 
-# Still needs foreign keys
 class Signal(db.Model):
     __tablename__ = 'signals'
     signal_id = db.Column(db.Integer, primary_key=True)
-    coverages = db.Colummn(JSONType)
+    coverage_id = db.Column(db.Integer, db.ForeignKey('coverage.coverage_id'), nullable=True)
+    vehicles = db.relationship('Vehicle', backref='signal', lazy=True)
     
     def get_id(self):
         return(self.signal_id)
-
-# Still needs foreign keys
-class Access(db.Model):
-    __tablename__ = 'access'
-    access_id = db.Column(db.Integer, primary_key=True)
-    user_ids = db.Column(JSONType)
-    coverage_ids = db.Column(JSONType)
-    
-    def get_access(self):
-        return(self.access_id)
