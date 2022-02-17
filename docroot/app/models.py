@@ -26,6 +26,8 @@ class User(UserMixin, db.Model):
     def get_id(self):
         return (self.user_id)
 
+
+# Still needs foreign keys
 class Vehicle(db.Model):
     __tablename__ = "vehicles"
     # primary keys are required by SQLAlchemy
@@ -49,6 +51,8 @@ class Vehicle(db.Model):
     def get_id(self):
         return (self.veh_id)
     
+    
+# Still needs foreign keys
 class Coverage(db.Model):
     __tablename__ = 'coverages'
     coverage_id = db.Column(db.Integer, primary_key=True)
@@ -58,6 +62,8 @@ class Coverage(db.Model):
     def get_id(self):
         return(self.coverage_id)
 
+
+# Still needs foreign keys
 class Signal(db.Model):
     __tablename__ = 'signals'
     signal_id = db.Column(db.Integer, primary_key=True)
@@ -66,7 +72,7 @@ class Signal(db.Model):
     def get_id(self):
         return(self.signal_id)
 
-
+# Still needs foreign keys
 class Access(db.Model):
     __tablename__ = 'access'
     access_id = db.Column(db.Integer, primary_key=True)
