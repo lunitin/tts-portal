@@ -106,7 +106,7 @@ req:
 response:
 error:
 """
-@auth.route('/signals/<id>')
+@auth.route('/signals/<id>', methods = ['DELETE', 'GET', 'PUT'])
 @login_required
 def DELETE_GET_PUT_signal_id(id):
     
@@ -118,7 +118,7 @@ req:
 response:
 error:
 """
-@auth.route('/vehicles/region/<id>')
+@auth.route('/vehicles/region/<id>', methods = ['GET'])
 @login_required
 def GET_vehicles_from_region(id):
     
@@ -131,7 +131,7 @@ req:
 response:
 error:
 """
-@auth.route('/vehicles/signal/<id>')
+@auth.route('/vehicles/signal/<id>', methods = ['GET'])
 @login_required
 def GET_vehicles_from_signal(id):
     
@@ -143,7 +143,7 @@ req:
 response:
 error:
 """
-@auth.route('/user/<username>')
+@auth.route('/user/<username>', methods = ['DELETE', 'GET', 'PUT'])
 @login_required
 def GET_vehicles_from_signal(username):
     
@@ -155,7 +155,7 @@ req:
 response:
 error:
 """
-@auth.route('/user)
+@auth.route('/user', methods = ['GET', 'POST'])
 @login_required
 def POST_GET_user():
     
