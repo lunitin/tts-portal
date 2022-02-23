@@ -7,9 +7,11 @@ Flask application initilizaton and configuration variables
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_marshmallow import Marshmallow
 
 # Prepare for SQL Alchemy
 db = SQLAlchemy()
+ma = Marshmallow()
 
 app = Flask(__name__)
 
@@ -22,6 +24,8 @@ db.init_app(app)
 from .models import Vehicle, Signal, Coverage, access
 app.app_context().push()
 db.create_all()
+
+ma.init_app(app)
 
 login_manager = LoginManager()
 login_manager.login_view = 'anon.login'

@@ -30,6 +30,14 @@ class User(UserMixin, db.Model):
     
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
 
 
 class Vehicle(db.Model):
@@ -40,8 +48,6 @@ class Vehicle(db.Model):
     delay = db.Column(db.Float(precision=3))
     red_arrival = db.Column(db.Boolean)
     split_failure = db.Column(db.Boolean)
-    signal_id = db.Column(db.Integer, db.ForeignKey('signals.signal_id'), nullable=True)
-    coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.coverage_id'), nullable=True)
     approach_direction = db.Column(db.String(length=10))
     ett = db.Column(db.Float(precision=3))
     travel_time = db.Column(db.Float(precision=3))
@@ -52,11 +58,22 @@ class Vehicle(db.Model):
     entry_time = db.Column(db.DateTime)
     exit_time = db.Column(db.DateTime)
 
+    signal_id = db.Column(db.Integer, db.ForeignKey('signals.signal_id'), nullable=True)
+    coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.coverage_id'), nullable=True)
+
     def get_id(self):
         return (self.veh_id)   
     
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
     
 
 class Signal(db.Model):
@@ -71,11 +88,20 @@ class Signal(db.Model):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
+    
     
 class Coverage(db.Model):
     __tablename__ = 'coverages'
     coverage_id = db.Column(db.Integer, primary_key=True)
-    coverage_name = db.Column(db.String(length=24))
+    coverage_name = db.Column(db.String(length=24), nullable=False)
+    
     signals = db.relationship('Signal', backref='coverage', lazy=True)
     
     def get_id(self):
@@ -83,3 +109,11 @@ class Coverage(db.Model):
     
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
