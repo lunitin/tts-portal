@@ -23,3 +23,6 @@ class User(UserMixin, db.Model):
 
     def get_id(self):
         return (self.user_id)
+
+    def get_email_address(self):
+        return (self.email_address)
