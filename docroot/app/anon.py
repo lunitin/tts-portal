@@ -58,6 +58,7 @@ def login_post():
     flash(strings.MSG_LOGIN_WELCOME_BACK, 'success')
 
     login_user(user, remember=remember)
+
     return redirect(url_for('auth.dashboard'))
 
 
@@ -189,7 +190,7 @@ def recover_password_post():
     # If user is found, try to reset password
     if user:
         try:
-            user.password = generate_password_hash(password, method='pbkdf2:sha256:310000', salt_length=128),
+            user.password = generate_password_hash(password1, method='pbkdf2:sha256:310000', salt_length=128),
             db.session.commit()
             flash(strings.MSG_PASSWORD_RESET, 'success')
         except BaseException:
@@ -249,7 +250,7 @@ def create_account():
     # https://en.wikipedia.org/wiki/PBKDF2
     new_user = User(email_address=email_address, first_name=first_name,
             last_name=last_name,
-            security_level=1,
+            security_level=0,
             password=generate_password_hash(password, method='pbkdf2:sha256:310000', salt_length=128),
             date_created=datetime.now(),
             date_last_password_change=datetime.now()
@@ -262,7 +263,7 @@ def create_account():
     # Create an admin user
     new_user = User(email_address=admin_email_address, first_name='admin',
             last_name='admin',
-            security_level=2,
+            security_level=1,
             password=generate_password_hash(password, method='pbkdf2:sha256:310000', salt_length=128),
             date_created=datetime.now(),
             date_last_password_change=datetime.now()

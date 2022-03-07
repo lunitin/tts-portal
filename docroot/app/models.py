@@ -8,9 +8,13 @@ from flask_login import UserMixin
 from . import db
 
 
+"""
+Model for Users
+"""
 class User(UserMixin, db.Model):
     __tablename__ = "users"
-    # primary keys are required by SQLAlchemy
+
+    # Primary keys are required by SQLAlchemy
     user_id = db.Column(db.Integer, primary_key=True)
     email_address = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(256))
@@ -21,8 +25,9 @@ class User(UserMixin, db.Model):
     date_last_login = db.Column(db.DateTime)
     date_last_password_change = db.Column(db.DateTime)
 
+    # Override get_id() - Flask-Login expects a different column name
     def get_id(self):
         return (self.user_id)
 
-    def get_email_address(self):
-        return (self.email_address)
+    def is_admin(self):
+        return (self.security_level)

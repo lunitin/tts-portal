@@ -4,8 +4,9 @@ Error and message strings and templates
 
 """
 
-# Errors
+WEBSITE_HTML_TITLE_TRAILER = ": Traffic Technology Services"
 
+# Errors
 ERROR_USER_NOT_FOUND_INVALID_PASS = "Please check your login details and try again."
 ERROR_TOKEN_GENERATION = "Error generating token, contact your administrator."
 ERROR_TOKEN_SIGNATURE = "Token signature is invalid, please try again."
@@ -13,8 +14,9 @@ ERROR_TOKEN_EXPIRED = "Token expired, please try again."
 ERROR_SMTP_FAILURE = "Could not send email message, contact your administrator."
 ERROR_PASSWORD_MISMATCH = "Passwords do not match."
 ERROR_PASSWORD_RESET = "Your password could not be reset, contact your administrator."
+ERROR_PAGE_PERMISSION_DENIED = "You do not have permission to view that page"
 
-# @TODO This should match MSG_PASSWORD_RECOVERY_EMAIL_SENT to prevent username disclosure
+# @TODO Ideally this should match MSG_PASSWORD_RECOVERY_EMAIL_SENT to prevent username disclosure
 #ERROR_FORGOT_PASSWORD_USER_NOT_FOUND = 'A recovery message has been sent to your email address'
 ERROR_FORGOT_PASSWORD_USER_NOT_FOUND = 'E-mail address not found'
 
