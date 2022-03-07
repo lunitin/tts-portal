@@ -130,3 +130,7 @@ dmypy.json
 
 docroot/supervisor.pid
 .DS_Store
+docroot/supervisord.pid
+
+# Configuration secrets
+config.py

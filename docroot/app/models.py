@@ -12,9 +12,13 @@ access = db.table('access',
                   db.Column('coverage_id', db.Integer, db.ForeignKey('coverages.coverage_id'), primary_key=True)
                 )
 
+"""
+Model for Users
+"""
 class User(UserMixin, db.Model):
     __tablename__ = "users"
-    # primary keys are required by SQLAlchemy
+
+    # Primary keys are required by SQLAlchemy
     user_id = db.Column(db.Integer, primary_key=True)
     email_address = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(256))
@@ -25,8 +29,12 @@ class User(UserMixin, db.Model):
     date_last_login = db.Column(db.DateTime)
     date_last_password_change = db.Column(db.DateTime)
 
+    # Override get_id() - Flask-Login expects a different column name
     def get_id(self):
         return (self.user_id)
+      
+    def is_admin(self):
+        return (self.security_level)
     
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
