@@ -13,7 +13,7 @@ auth = Blueprint('auth', __name__)
 """
 Authenticated Dashboard
 """
-@auth.route('/dashboard')
+@auth.route('/dashboard-test')
 @login_required
 def dashboard():
     print(current_user, flush=True)

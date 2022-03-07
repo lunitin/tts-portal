@@ -9,6 +9,7 @@ werkzeug>=2.0
 flask-mail
 itsdangerous>=2.0
 versioneer
+statsmodels
 dash
 pandas
 plotly

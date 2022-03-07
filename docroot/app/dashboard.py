@@ -8,10 +8,9 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
-from . import app
 
 def init_dashboard(server):
-    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix='/dashboard/',external_stylesheets=[dbc.themes.BOOTSTRAP],suppress_callback_exceptions=True)
+    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix='/dashboard/',external_stylesheets=[dbc.themes.BOOTSTRAP])
     # This defines the app layout
     dash_app.layout = html.Div([
         dcc.Location(id="url"),
@@ -385,7 +384,7 @@ def scatterPlot(light, df, day, approach, tdirection):
 
 def init_callbacks(dash_app):
     # Callback for 3084 charts
-    @app.callback(
+    @dash_app.callback(
         [Output(component_id='arrival-chart-3084', component_property='figure'),
         Output(component_id='split-fail-3084', component_property='figure'),
         Output(component_id='green-Arrival-Rate-3084', component_property='children'),
@@ -412,13 +411,13 @@ def init_callbacks(dash_app):
         return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, movement
 
     # This callback uses the above function to return what belongs on the page
-    @app.callback(
+    @dash_app.callback(
         Output("page-content", "children"),
         [Input("url", "pathname")]
     )
     def page_content(pathname):
         # Different page content depending on which page we are pn
-        if pathname == "/":
+        if pathname == "/dashboard/":
             return pageContent(3084, vehiclesDf3084)
 
 
