@@ -8,10 +8,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail, Message
+from flask_marshmallow import Marshmallow
 from . import config
+
 
 # SQL Alchemy Initialization
 db = SQLAlchemy()
+ma = Marshmallow()
 
 # Flask App Initialization
 app = Flask(__name__)
@@ -31,6 +34,11 @@ app.config['MAIL_DEFAULT_SENDER'] = config.MAIL_DEFAULT_SENDER
 
 # DB Initialization
 db.init_app(app)
+from .models import Vehicle, Signal, Coverage, access
+app.app_context().push()
+db.create_all()
+
+ma.init_app(app)
 
 # Flask-Mail Initialization
 mail = Mail(app)
