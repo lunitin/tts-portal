@@ -8,6 +8,7 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from flask_login import current_user
+from app import strings
 
 base_url = "/dash/app/"
 
@@ -421,12 +422,10 @@ def init_callbacks(dash_app):
         [Input("url", "pathname")]
     )
     def page_content(pathname):
-        print("page_content: current_user ")
-        print(current_user.is_authenticated)
 
         # Ensure we're an authenticated user before rendering any content
         if not current_user or not current_user.is_authenticated:
-            return html.Div('Access Denied')
+            return html.Div(strings.ERROR_PAGE_PERMISSION_DENIED)
 
         # Check here to ensure that we have access to the requested coverage area
 

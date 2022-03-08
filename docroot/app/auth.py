@@ -18,8 +18,6 @@ Authenticated Dashboard
 @auth.route('/dashboard/')
 @login_required
 def dashboard():
-    print("Auth.py: ")
-    print(current_user)
     return render_template('dashboard.html', dash_url = dash_url)
 
 """
