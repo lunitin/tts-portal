@@ -7,19 +7,23 @@ import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
+from flask_login import current_user
+
+base_url = "/dash/app/"
 
 
 def init_dashboard(server):
-    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix='/dashboard/',external_stylesheets=[dbc.themes.BOOTSTRAP])
+    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=[dbc.themes.BOOTSTRAP])
+
     # This defines the app layout
     dash_app.layout = html.Div([
         dcc.Location(id="url"),
         content
     ])
+
     init_callbacks(dash_app)
     return dash_app.server
 
-#app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],  suppress_callback_exceptions=True)
 
 ###############
 # Import Data #
@@ -64,8 +68,8 @@ def addHour(df):
     return tempList
 
 # Read all csv files in
-vehiclesDf3084 = pd.read_csv("./app/Broward 3084 Vehicles.csv", delimiter=",")
-journeyDf3084 = pd.read_csv("./app/Broward 3084 Journeys.csv")
+vehiclesDf3084 = pd.read_csv("./app/Dashboard/data/Broward 3084 Vehicles.csv", delimiter=",")
+journeyDf3084 = pd.read_csv("./app/Dashboard/data/Broward 3084 Journeys.csv")
 
 #Merge the journey and vehicle files
 vehiclesDf3084 = pd.merge(vehiclesDf3084, journeyDf3084)
@@ -97,6 +101,7 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 
 # Defines the page content for any given light
 def pageContent(light, df):
+
     return [
         # Create Title And Dropdown
         html.H1("Broward " + str(light) + " Light", style={"text-align": 'center'}),
@@ -416,16 +421,15 @@ def init_callbacks(dash_app):
         [Input("url", "pathname")]
     )
     def page_content(pathname):
+        print("page_content: current_user ")
+        print(current_user.is_authenticated)
+
+        # Ensure we're an authenticated user before rendering any content
+        if not current_user or not current_user.is_authenticated:
+            return html.Div('Access Denied')
+
+        # Check here to ensure that we have access to the requested coverage area
+
         # Different page content depending on which page we are pn
-        if pathname == "/dashboard/":
-            return pageContent(3084, vehiclesDf3084)
-
-
-
-
-#######
-# Run #
-#######
-
-#if __name__ == '__main__':
-#    app.run_server(debug=True, port=8300)
+        #if pathname == "/dashboard/":
+        return pageContent(3084, vehiclesDf3084)
