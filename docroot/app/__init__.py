@@ -4,17 +4,15 @@ Flask application initilizaton
 
 """
 
-from flask import Flask
+from flask import Flask, json
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail, Message
-from flask_marshmallow import Marshmallow
 from . import config
 
 
 # SQL Alchemy Initialization
 db = SQLAlchemy()
-ma = Marshmallow()
 
 # Flask App Initialization
 app = Flask(__name__)
@@ -31,14 +29,22 @@ app.config['MAIL_USE_SSL'] = config.MAIL_USE_SSL
 app.config['MAIL_USERNAME'] = config.MAIL_USERNAME
 app.config['MAIL_PASSWORD'] = config.MAIL_PASSWORD
 app.config['MAIL_DEFAULT_SENDER'] = config.MAIL_DEFAULT_SENDER
+app.config['RESTX_VALIDATE'] = True
+app.config['PROPOGATE_EXCEPTIONS'] = True
 
 # DB Initialization
 db.init_app(app)
-from .models import Vehicle, Signal, Coverage, access
-app.app_context().push()
-db.create_all()
 
-ma.init_app(app)
+# Model Initialization (Must be after db init)
+from .models import User
+
+@app.before_first_request
+def create_tables():
+    db.drop_all()
+    db.create_all()
+
+from .resources import api_blueprint
+app.register_blueprint(api_blueprint)
 
 # Flask-Mail Initialization
 mail = Mail(app)
@@ -47,9 +53,6 @@ mail = Mail(app)
 login_manager = LoginManager()
 login_manager.login_view = 'anon.login'
 login_manager.init_app(app)
-
-# Model Initialization (Must be after db init)
-from .models import User
 
 # Connect LoginManager with User Model
 @login_manager.user_loader
