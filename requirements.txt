@@ -6,3 +6,6 @@ datetime
 Flask-SQLAlchemy
 flask-login
 werkzeug>=2.0
+flask-mail
+flask-principal
+itsdangerous>=2.0

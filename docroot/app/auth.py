@@ -7,6 +7,9 @@ Flask routes that require authentication
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user, logout_user
 from . import db
+from .models import *
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
@@ -19,6 +22,7 @@ def dashboard():
     print(current_user, flush=True)
     return render_template('dashboard.html')
 
+
 """
 Display information about my account
 """
@@ -28,6 +32,7 @@ def my_account():
     print(current_user, flush=True)
     return render_template('myaccount.html')
 
+
 """
 Log out of the current session
 """
@@ -36,3 +41,4 @@ Log out of the current session
 def logout():
     logout_user()
     return redirect(url_for('anon.index'))
+
