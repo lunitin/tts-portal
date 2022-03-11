@@ -102,6 +102,7 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 #############
 # Callbacks #
 #############
+
 '''
                 options=[
                     {'label': 'Northbound', 'value': 'Northbound'},
@@ -111,8 +112,10 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
                     {'label': 'ALL', 'value': 'ALL'},
                 ],
                 '''
+
 # Defines the page content for any given light
 def pageContent(light, df):
+
 
     return [
         # Create Title And Dropdown
@@ -128,7 +131,9 @@ def pageContent(light, df):
             )
         ],
         style={"width": "5%"}),
+
         # options=get_coverages(1) # replace with list to get user '1's coverages
+
         # Create Dropdown for Approach
         html.Div([
             html.H2("Approach"),
@@ -421,6 +426,7 @@ def init_callbacks(dash_app):
         Input(component_id='tdirection', component_property='value')]
     )
     def generate_chart(day, approach, tdirection):
+
         arrivalRates = arrivalPieChart('3084', vehiclesDf3084, day, approach, tdirection)
         splitFailure = splitPieChart('3084', vehiclesDf3084, day, approach, tdirection)
         totalDelay = totalDelayChart('3084', vehiclesDf3084 , day, approach, tdirection)
