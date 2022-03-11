@@ -1,5 +1,6 @@
 from shutil import move
 import dash
+#import requests, json
 import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
@@ -9,6 +10,8 @@ from dash import html
 from dash.dependencies import Input, Output
 from flask_login import current_user
 from app import strings
+
+from .server_calls import get_coverages
 
 base_url = "/dash/app/"
 
@@ -99,7 +102,15 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 #############
 # Callbacks #
 #############
-
+'''
+                options=[
+                    {'label': 'Northbound', 'value': 'Northbound'},
+                    {'label': 'Eastbound', 'value': 'Eastbound'},
+                    {'label': 'Southbound', 'value': 'Southbound'},
+                    {'label': 'Westbound', 'value': 'Westbound'},
+                    {'label': 'ALL', 'value': 'ALL'},
+                ],
+                '''
 # Defines the page content for any given light
 def pageContent(light, df):
 
@@ -117,7 +128,7 @@ def pageContent(light, df):
             )
         ],
         style={"width": "5%"}),
-
+        # options=get_coverages(1) # replace with list to get user '1's coverages
         # Create Dropdown for Approach
         html.Div([
             html.H2("Approach"),
@@ -183,6 +194,7 @@ def pageContent(light, df):
             dcc.Graph(id='delayScatter-'+str(light)),
         ])
     ]
+
 
 def movementBarChart(light, df, approachD, day):
     dff = df.copy()
