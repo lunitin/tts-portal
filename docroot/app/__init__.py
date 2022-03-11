@@ -58,8 +58,9 @@ def load_user(user_id):
 
 # Inititialize Dash
 # Import Dash application
-#from .dashboard import init_dashboard
-#app = init_dashboard(app)
+from .Dashboard.dashboard import init_dashboard
+app = init_dashboard(app)
+
 
 # Anonymous route blueprints
 from .anon import anon as anon_blueprint
