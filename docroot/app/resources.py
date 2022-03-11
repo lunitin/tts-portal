@@ -81,6 +81,10 @@ coverage = coverages_ns.model('Coverage', {
     'signals': fields.List(fields.Integer, default=None)
 })
 
+
+
+
+
 @user_ns.route('/users/<int:id>')
 class User(Resource):
     #@user_ns.marshal_with(user)
@@ -117,7 +121,7 @@ class User(Resource):
         else:
             return make_response(NOT_FOUND.format('coverage ', id), 404)
 
-        
+
 @user_ns.route('/users/<int:id>/coverages')
 class User_Coverages(Resource):
     @user_ns.doc("Get all User Coverages")
@@ -158,6 +162,7 @@ class User_Coverages(Resource):
                 return user.save_to_db()
         else:
             return make_response(NOT_FOUND.format('user_id', id), 404)
+
 
 
 
