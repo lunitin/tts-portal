@@ -1,64 +1,116 @@
 {% with messages = get_flashed_messages(category_filter=["danger"]) %} {% if
 messages %}
-<div class="alert alert-danger" role="alert">
+<div class="alert alert-danger d-flex justify-content-end w-100" role="alert">
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
     {%endfor %}
   </ul>
+  <div class="me-auto"></div>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["warning"]) %} {% if messages %}
-<div class="alert alert-warning" role="alert">
+<div class="alert alert-warning d-flex justify-content-end w-100" role="alert">
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
     {%endfor %}
   </ul>
+  <div class="me-auto"></div>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["secondary"]) %} {% if messages %}
-<div class="alert alert-secondary" role="alert">
+<div
+  class="alert alert-secondary d-flex justify-content-end w-100"
+  role="alert"
+>
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
     {%endfor %}
   </ul>
+  <div class="me-auto"></div>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["success"]) %} {% if messages %}
-<div class="alert alert-success" role="alert">
+<div class="alert alert-success d-flex justify-content-end w-100" role="alert">
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
     {%endfor %}
   </ul>
+  <div class="me-auto"></div>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
 </div>
 {% endif %} {% endwith %}{% with messages =
 get_flashed_messages(category_filter=["info"]) %} {% if messages %}
-<div class="alert alert-info" role="alert">
+<div class="alert alert-info d-flex justify-content-end w-100" role="alert">
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
     {%endfor %}
   </ul>
+  <div class="me-auto"></div>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["light"]) %} {% if messages %}
-<div class="alert alert-light" role="alert">
+<div class="alert alert-light d-flex justify-content-end w-100" role="alert">
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
     {%endfor %}
   </ul>
+  <div class="me-auto"></div>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["dark"]) %} {% if messages %}
-<div class="alert alert-dark" role="alert">
+<div class="alert alert-dark d-flex justify-content-end w-100" role="alert">
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
     {%endfor %}
   </ul>
+  <div class="me-auto"></div>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
 </div>
 {% endif %} {% endwith %}

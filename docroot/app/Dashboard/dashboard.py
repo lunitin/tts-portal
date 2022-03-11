@@ -68,6 +68,7 @@ def addHour(df):
 
     return tempList
 
+print("----- is this run every time?")
 # Read all csv files in
 vehiclesDf3084 = pd.read_csv("./app/Dashboard/data/Broward 3084 Vehicles.csv", delimiter=",")
 journeyDf3084 = pd.read_csv("./app/Dashboard/data/Broward 3084 Journeys.csv")
@@ -102,6 +103,8 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 
 # Defines the page content for any given light
 def pageContent(light, df):
+
+    print("------- pageContent: is this run every time?")
 
     return [
         # Create Title And Dropdown
@@ -185,6 +188,8 @@ def pageContent(light, df):
     ]
 
 def movementBarChart(light, df, approachD, day):
+
+    print("------- movementBarChart: is this run every time?")
     dff = df.copy()
     dff = dff[dff["Day"] == day]
     dff = dff[dff["ApproachDirection"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
@@ -203,6 +208,9 @@ def movementBarChart(light, df, approachD, day):
 
 # Makes a pie chart for any given light
 def arrivalPieChart(light, df, day, approach, tdirection):
+
+    print("------- arrivalPieChart: is this run every time?")
+
     # Set up df according to days
     dff = df.copy()
     dff = dff[dff["Day"] == day]
@@ -367,6 +375,8 @@ def scatterPlot(light, df, day, approach, tdirection):
     dff = df.copy()
     dff = dff[dff["Day"] == day]
 
+    print("------- scatterPlot: is this run every time?")
+
     # Set up df according to approach
     if (approach != "ALL"):
         dff = dff[dff["ApproachDirection"] == approach]
@@ -389,6 +399,8 @@ def scatterPlot(light, df, day, approach, tdirection):
     return peakScatter
 
 def init_callbacks(dash_app):
+
+    print("------- init_callbacks: is this run every time?")
     # Callback for 3084 charts
     @dash_app.callback(
         [Output(component_id='arrival-chart-3084', component_property='figure'),
@@ -409,6 +421,7 @@ def init_callbacks(dash_app):
         Input(component_id='tdirection', component_property='value')]
     )
     def generate_chart(day, approach, tdirection):
+        print("------- generate_chart: is this run every time?")
         arrivalRates = arrivalPieChart('3084', vehiclesDf3084, day, approach, tdirection)
         splitFailure = splitPieChart('3084', vehiclesDf3084, day, approach, tdirection)
         totalDelay = totalDelayChart('3084', vehiclesDf3084 , day, approach, tdirection)
@@ -426,6 +439,8 @@ def init_callbacks(dash_app):
         # Ensure we're an authenticated user before rendering any content
         if not current_user or not current_user.is_authenticated:
             return html.Div(strings.ERROR_PAGE_PERMISSION_DENIED)
+
+            print("------- page_content: is this run every time?")
 
         # Check here to ensure that we have access to the requested coverage area
 
