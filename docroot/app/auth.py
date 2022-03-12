@@ -13,18 +13,19 @@ from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
+
 """
 Authenticated Dashboard
 """
 @auth.route('/dashboard')
+@auth.route('/dashboard/')
 @login_required
 def dashboard():
-    print(current_user, flush=True)
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', dash_url = dash_url)
 
 
 """
-Display information about my account
+Display information about the account
 """
 @auth.route('/my-account')
 @login_required
@@ -41,4 +42,3 @@ Log out of the current session
 def logout():
     logout_user()
     return redirect(url_for('anon.index'))
-

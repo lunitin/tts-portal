@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user, logout_user
 from functools import wraps
 from . import db, strings
-from .models import User, Access, Coverage, Signal, Region 
+from .models import User, Access, Coverage, Signal, Region
 from sqlalchemy import func, distinct
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -51,7 +51,7 @@ def users():
 
 
 """
-Create new user. 
+Create new user.
 """
 @admin.route('/create-user', methods=['POST'])
 @login_required
@@ -89,7 +89,7 @@ def create_user():
                         date_created = datetime.now(),
                         date_last_password_change = datetime.now()
                         )
-        
+
         #Add to db
         db.session.add(new_user)
         db.session.commit()
@@ -101,7 +101,7 @@ def create_user():
         return redirect(url_for('admin.users'))
 
 """
-Update user. 
+Update user.
 """
 @admin.route('/update/<int:user_id>',  methods = ['POST'])
 @login_required
@@ -116,7 +116,7 @@ def update(user_id):
 
     flash("User " + user_update.first_name + ", " + user_update.last_name + " Updated Successfully!", 'success')
     return redirect(url_for('admin.users'))
- 
+
 
 @admin.route('/delete/<int:user_id>',  methods = ['POST'])
 @login_required
@@ -139,11 +139,11 @@ Authenticated Coverage Management Page
 def coverages():
     users = User.query.all()
 
-    #Coverage query results with number of signals associated with them. 
+    #Coverage query results with number of signals associated with them.
     coverages = Coverage.query.all()
     #Coverage.query.join(Signal, Coverage.coverage_id == Signal.coverage_id, isouter = True).with_entities(Coverage.coverage_id, Coverage.coverage_name, func.count(distinct(Signal.signal_number)).label("numSignals")).all()
-    
-    #Regions 
+
+    #Regions
     regions = Region.query.all()
     return render_template('coverageMgmt.html', userdata = users, coveragedata = coverages, regionData = regions)
 
@@ -155,13 +155,13 @@ Authenticated Coverage Details Page
 @login_required
 @admin_required
 def coverage(coverage_id):
-    #Grab coverage based on id. 
+    #Grab coverage based on id.
     coverage = Coverage.query.filter(Coverage.coverage_id == coverage_id)
 
     #Get signals associated with coverage
     regions = Region.query.filter(Region.coverage_id == coverage_id)
 
-    #Get all users that have access to coverage area. 
+    #Get all users that have access to coverage area.
     accesses = User.query.join(Access).where(Access.coverage_id == coverage_id).all()
     return render_template('coverage.html', coveragedata = coverage, accessdata = accesses, regionData = regions)
 
@@ -172,7 +172,7 @@ Authenticated Coverage Details Page
 @login_required
 @admin_required
 def region(coverage_id,region_id):
-    #Grab coverage based on id. 
+    #Grab coverage based on id.
     regions = Region.query.filter(Region.region_id == region_id)
 
     #Get signals associated with coverage
@@ -182,7 +182,7 @@ def region(coverage_id,region_id):
 
 
 """
-Add User(s) to Coverage. 
+Add User(s) to Coverage.
 """
 @admin.route('/coverage-add', methods=['POST'])
 @login_required

@@ -1,8 +1,10 @@
 """ __init__.py
+
 Flask application initilizaton
+
 """
 
-from flask import Flask
+from flask import Flask, json
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail, Message
@@ -28,6 +30,7 @@ app.config['MAIL_USERNAME'] = config.MAIL_USERNAME
 app.config['MAIL_PASSWORD'] = config.MAIL_PASSWORD
 app.config['MAIL_DEFAULT_SENDER'] = config.MAIL_DEFAULT_SENDER
 
+# DB Initialization
 db.init_app(app)
 
 # Flask-Mail Initialization
@@ -48,8 +51,9 @@ def load_user(user_id):
 
 # Inititialize Dash
 # Import Dash application
-#from .dashboard import init_dashboard
-#app = init_dashboard(app)
+from .Dashboard.dashboard import init_dashboard
+app = init_dashboard(app)
+
 
 # Anonymous route blueprints
 from .anon import anon as anon_blueprint
