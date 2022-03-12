@@ -1,6 +1,6 @@
 from shutil import move
 import dash
-#import requests, json
+import requests, json
 import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
@@ -11,7 +11,7 @@ from dash.dependencies import Input, Output
 from flask_login import current_user
 from app import strings
 
-#from .server_calls import get_coverages
+from .server_calls import get_coverages
 
 base_url = "/dash/app/"
 
