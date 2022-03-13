@@ -11,7 +11,7 @@ from dash.dependencies import Input, Output
 from flask_login import current_user
 from app import strings
 
-from .server_calls import get_coverages
+from .server_calls import get_coverages, get_arrivalPieChart
 
 base_url = "/dash/app/"
 
@@ -216,6 +216,7 @@ def movementBarChart(light, df, approachD, day):
 # Makes a pie chart for any given light
 def arrivalPieChart(light, df, day, approach, tdirection):
     # Set up df according to days
+    '''
     dff = df.copy()
     dff = dff[dff["Day"] == day]
     dff = dff[dff["RedArrival"].isin(["Yes", "No"])]
@@ -235,12 +236,10 @@ def arrivalPieChart(light, df, day, approach, tdirection):
 
     # Calculate number of green crossings
     tempDf = dff[dff["RedArrival"].isin(["No"])]
-
     greenArrivalRate = int((tempDf.size / dff.size)*100)
-
+    
     # Make strings
-    greenArrivalRateStr = "Green Arrival Rate: {}%".format(greenArrivalRate)
-
+    print(df.columns)
     arrivalRates=px.pie(
         data_frame=dff,
         names="RedArrival",
@@ -249,7 +248,10 @@ def arrivalPieChart(light, df, day, approach, tdirection):
         title="Broward " + light + " Arrival Rates",
         color_discrete_map={'Yes':'Red', 'No':'#90ee90'}
     )
-
+    '''
+    arrivalRates, greenArrivalRate, arrivalCrossings = get_arrivalPieChart(light, day, approach, tdirection)
+    greenArrivalRateStr = "Green Arrival Rate: {}%".format(greenArrivalRate)
+    arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
     return arrivalRates, greenArrivalRateStr, arrivalCrossingsStr
 
 # Makes a split failure pie chart for any given light

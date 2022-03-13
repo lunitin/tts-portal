@@ -1,11 +1,14 @@
 
 from flask import request, make_response, Blueprint, jsonify
-from flask_restx import Resource, fields, Namespace
+from flask_restx import Resource, fields, Namespace, reqparse
 from .models import User as db_User
 from .models import Vehicle as db_Vehicle
 from .models import Signal as db_Signal
 from .models import Coverage as db_Coverage
 from flask_restx import Api
+import pandas as pd
+import plotly.express as px
+import plotly
 NOT_FOUND = "{}: {} not found."
 
 
@@ -26,6 +29,7 @@ signal_ns = Namespace('signal', description="Signal related operations", path='/
 signals_ns = Namespace('signals', description='Signals related operations', path='/api')
 coverage_ns = Namespace('coverage', description="Coverage related operations", path='/api')
 coverages_ns = Namespace('coverages', description='Coverages related operations', path='/api')
+dashboard_ns = Namespace('dashboard', description='Dashboard fetching operations', path='/api')
 
 api.add_namespace(user_ns)
 api.add_namespace(users_ns)
@@ -35,6 +39,7 @@ api.add_namespace(signal_ns)
 api.add_namespace(signals_ns)
 api.add_namespace(coverage_ns)
 api.add_namespace(coverages_ns)
+api.add_namespace(dashboard_ns)
 
 user = users_ns.model('User', {
     'id': fields.Integer(required=False),
@@ -82,7 +87,47 @@ coverage = coverages_ns.model('Coverage', {
 })
 
 
+@dashboard_ns.route('/dashboard/arrivalPieChart')
+class PieChart(Resource):
+    @dashboard_ns.doc('Get arrivalPieChart information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+        df.rename(columns = {'red_arrival': 'RedArrival'}, inplace = True)
+        df.filter(['RedArrival'])
+        df = df[df.RedArrival.isin([True, False])]
 
+        arrivalCrossings = df.shape[0]
+
+        #tempDf = df[df.RedArrival == 'No']
+        #if tempDf.empty: lengthNo = 0
+        #else: lengthNo = tempDf.size
+        #if df.empty: lengthtotal = 1
+        #else: lengthtotal = tempDf.size
+        #greenArrivalRate = int((lengthNo / lengthtotal)*100)
+    
+        arrivalRates=px.pie(
+            data_frame=df,
+            names="RedArrival",
+            color="RedArrival",
+            hole=.5,
+            title="Broward " + str(args['signal']) + " Arrival Rates",
+            color_discrete_map={'True':'Red', 'False':'#90ee90'}
+        )
+
+        return plotly.io.to_json(arrivalRates)
+        
 
 
 @user_ns.route('/users/<int:id>')
@@ -131,6 +176,7 @@ class User_Coverages(Resource):
             return make_response(user.fetch_coverages(), 200)
         else:
             return make_response(NOT_FOUND.format('user_id', id), 404)
+        
 
 
     @user_ns.doc("Add list of Coverages to User")
@@ -257,7 +303,7 @@ class Vehicle(Resource):
         return vehicle.save_to_db()
         
 @vehicles_ns.route('/vehicles')
-class VehicleList(Resource):
+class Vehicle(Resource):
     @vehicles_ns.doc('Retrieve all vehicles that meet criteria')
     #@vehicles_ns.marshal_with(vehicle, as_list=True)
     def get(self):
