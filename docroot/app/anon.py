@@ -1,7 +1,5 @@
 """ anon.py
-
 Flask routes that do not require authentication
-
 """
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash
@@ -106,7 +104,7 @@ def forgot_password_post():
             # Recipients must be an array
             msg = Message(strings.TPL_EMAIL_FORGOT_PASSWORD_SUBJECT, recipients=[user.email_address])
 
-            link = config.WEBSITE_BASE_URL + "/recover-password?token=" + str(token);
+            link = config.WEBSITE_BASE_URL + "/recover-password?token=" + str(token)
             msg.body = strings.TPL_EMAIL_FORGOT_PASSWORD_BODY.replace("{{LINK}}", link)
 
             mail.send(msg)
@@ -234,7 +232,7 @@ def create_account():
     first_name = 'Static Test'
     last_name = 'Last'
     password = 'test123'
-    security_level = 1;
+    security_level = 1
 
 
     # if this returns a user, then the email already exists in database

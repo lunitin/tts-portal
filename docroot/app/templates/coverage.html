@@ -17,7 +17,11 @@
               </thead>    
               <tbody>
                 {% for region in regionData %} 
+<<<<<<< HEAD
                 <tr class="clickable" type="submit" name="action" onclick="window.location='/coverage-management/{{coverage.id}}/region/{{region.id}}'">
+=======
+                <tr class="clickable" type="submit" name="action" onclick="window.location='/coverage-management/{{coverage.coverage_id}}/region/{{region.region_id}}'">
+>>>>>>> cca6a6e5edfe929fd98b16ac2f9c76fabc86a6cf
                   <td>{{region.region_name}}</td>
                 </tr>
                 {% endfor %}
