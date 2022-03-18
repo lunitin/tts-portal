@@ -10,6 +10,7 @@ from . import db
 from .models import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from .Dashboard.dashboard import base_url as dash_url
 
 auth = Blueprint('auth', __name__)
 

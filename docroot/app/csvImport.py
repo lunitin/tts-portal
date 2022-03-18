@@ -60,22 +60,22 @@ if __name__ == "__main__":
     cursor = connection.cursor()
     
     sql3 = "INSERT INTO coverages (id, coverage_name) VALUES (%s, %s)"
-    cursor.execute(sql3, [None, "District 1"])
-    cursor.execute(sql3, [None, "District 2"])
-    cursor.execute(sql3, [None, "District 3"])
-    cursor.execute(sql3, [None, "District 4"])
-    cursor.execute(sql3, [None, "District 5"])
-    cursor.execute(sql3, [None, "District 6"])
-    cursor.execute(sql3, [None, "District 7"])
+    cursor.execute(sql3, [1, "District 1"])
+    cursor.execute(sql3, [2, "District 2"])
+    cursor.execute(sql3, [3, "District 3"])
+    cursor.execute(sql3, [4, "District 4"])
+    cursor.execute(sql3, [5, "District 5"])
+    cursor.execute(sql3, [6, "District 6"])
+    cursor.execute(sql3, [7, "District 7"])
 
     sql4 = "INSERT INTO region (id, region_name, coverage_id) VALUES (%s, %s, %s)"
-    cursor.execute(sql4, [None, "Indian River", 5])
-    cursor.execute(sql4, [None, "St Lucie", 5])
-    cursor.execute(sql4, [None, "Martin", 5])
-    cursor.execute(sql4, [None, "Palm Beach", 5])
-    cursor.execute(sql4, [None, "Broward", 5])
-    cursor.execute(sql4, [None, "Monroe", None])
-    cursor.execute(sql4, [None, "Miami-Dade", None])
+    cursor.execute(sql4, [1, "Indian River", 5])
+    cursor.execute(sql4, [2, "St Lucie", 5])
+    cursor.execute(sql4, [3, "Martin", 5])
+    cursor.execute(sql4, [4, "Palm Beach", 5])
+    cursor.execute(sql4, [5, "Broward", 5])
+    cursor.execute(sql4, [6, "Monroe", None])
+    cursor.execute(sql4, [7, "Miami-Dade", None])
 
     sql2 = "INSERT INTO signals (id, region_id) VALUES (%s, %s)"
     cursor.execute(sql2, [1037, 5])

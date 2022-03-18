@@ -41,8 +41,8 @@ def create_tables():
     # db.drop_all()
     db.create_all()
 
-from .resources import api_blueprint
-app.register_blueprint(api_blueprint)
+# from .resources import api_blueprint
+# app.register_blueprint(api_blueprint)
 
 # Flask-Mail Initialization
 mail = Mail(app)
