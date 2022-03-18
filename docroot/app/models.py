@@ -91,6 +91,9 @@ class User(UserMixin, BaseModel):
     date_last_password_change = db.Column(db.DateTime, nullable=True)
     coverages = db.relationship('Coverage', secondary=access_table, backref='users', lazy='subquery')
 
+    def is_admin(self):
+        return (self.security_level)
+
     def fetch_coverages(self):
         return json.dumps([c.as_dict() for c in self.coverages])
 
@@ -131,22 +134,22 @@ class Vehicle(BaseModel):
     delay = db.Column(db.Float(precision=3),nullable=True)
     red_arrival = db.Column(db.Boolean,nullable=True)
     split_failure = db.Column(db.Boolean,nullable=True)
+    signal_id = db.Column(db.Integer, db.ForeignKey('signals.id'), nullable=True)
+    approach_direction = db.Column(db.String(length=10), nullable=True)
+    travel_direction = db.Column(db.String(length=10), nullable=True)
     ett = db.Column(db.Float(precision=3),nullable=True)
     travel_time = db.Column(db.Float(precision=3),nullable=True)
-    exit_status = db.Column(db.Boolean,nullable=True)
+    exit_status = db.Column(db.String(length=6),nullable=True)
     day = db.Column(db.Integer,nullable=True)
-    stops = db.Column(db.Boolean,nullable=True)
-    uturn = db.Column(db.Boolean,nullable=True)
     entry_time = db.Column(db.DateTime, nullable=True)
     exit_time = db.Column(db.DateTime, nullable=True)
+    stops = db.Column(db.Integer,nullable=True)
+    uturn = db.Column(db.Boolean,nullable=True)
     #travel_direction = db.Column(Enum(TravelDirection), nullable=True) # Not JSON Serializable
     #approach_direction = db.Column(Enum(ApproachDirection), nullable=True) # Not JSON Serializable
 
-    travel_direction = db.Column(db.String(length=10), nullable=True)
-    approach_direction = db.Column(db.String(length=10), nullable=True)
 
-    signal_id = db.Column(db.Integer, db.ForeignKey('signals.id'), nullable=True)
-    coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.id'), nullable=True)
+    # coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.id'), nullable=True)
 
     @classmethod
     def search_by(cls, EntryTime=None, ExitTime=None, TravelDirection=None, ApproachDirection=None,
@@ -180,7 +183,7 @@ class Vehicle(BaseModel):
 
 class Signal(BaseModel):
     __tablename__ = 'signals'
-    coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.id'), nullable=True)
+    region_id = db.Column(db.Integer, db.ForeignKey('region.id'), nullable=True)
     vehicles = db.relationship('Vehicle', backref='signal', lazy='subquery')
     
     def add_vehicles(self, vehicles, delete_old):
@@ -197,23 +200,33 @@ class Signal(BaseModel):
     #def remove_vehicles(self, vehicles)
 
 
+class Region(BaseModel):
+    __tablename__ = "region"
+    region_name = db.Column(db.String(24))
+    coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.id'), nullable=True)
+    signals = db.relationship('Signal', backref='Region', lazy='subquery')
+
+    def get_id(self):
+        return (self.region_id)
+
+
 class Coverage(BaseModel):
     __tablename__ = 'coverages'
     coverage_name = db.Column(db.String(length=24), nullable=False)
-    signals = db.relationship('Signal', backref='coverage', lazy='subquery')
+    regions = db.relationship('Region', backref='coverage', lazy='subquery')
 
-    def add_signals(self, signals, delete_old):
-        if delete_old == True:
-            self.signals = []
-        if signals:
-            for signal_id in signals:
-                signal = Signal.find_by_id(signal_id)
-                if signal:
-                    self.signals.append(signal)
-                else:
-                    return(signal_id)
-        else:
-            self.signals = []
-        return 0 # All were added good
+    # def add_signals(self, signals, delete_old):
+    #     if delete_old == True:
+    #         self.signals = []
+    #     if signals:
+    #         for signal_id in signals:
+    #             signal = Signal.find_by_id(signal_id)
+    #             if signal:
+    #                 self.signals.append(signal)
+    #             else:
+    #                 return(signal_id)
+    #     else:
+    #         self.signals = []
+    #     return 0 # All were added good
     
     #def remove_signals(self, signals) # For a later time :)
