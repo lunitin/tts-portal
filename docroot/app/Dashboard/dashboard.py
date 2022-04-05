@@ -10,6 +10,7 @@ from dash import html
 from dash.dependencies import Input, Output
 from flask_login import current_user
 from app import strings
+import time
 
 from .server_calls import get_coverages, get_arrivalPieChart
 
@@ -219,41 +220,7 @@ def movementBarChart(light, df, approachD, day):
     return moveM
 
 # Makes a pie chart for any given light
-def arrivalPieChart(light, df, day, approach, tdirection):
-    # Set up df according to days
-    '''
-    dff = df.copy()
-    dff = dff[dff["Day"] == day]
-    dff = dff[dff["RedArrival"].isin(["Yes", "No"])]
-
-    # Set up df according to approach
-    if (approach != "ALL"):
-        dff = dff[dff["ApproachDirection"] == approach]
-
-    # Set up df according to travel direction
-    if (tdirection != "ALL"):
-        dff = dff[dff["TravelDirection"] == tdirection]
-
-
-    # Calculate Arrival Crossings
-    arrivalCrossings = dff.shape[0]
-    arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
-
-    # Calculate number of green crossings
-    tempDf = dff[dff["RedArrival"].isin(["No"])]
-    greenArrivalRate = int((tempDf.size / dff.size)*100)
-    
-    # Make strings
-    print(df.columns)
-    arrivalRates=px.pie(
-        data_frame=dff,
-        names="RedArrival",
-        color="RedArrival",
-        hole=.5,
-        title="Broward " + light + " Arrival Rates",
-        color_discrete_map={'Yes':'Red', 'No':'#90ee90'}
-    )
-    '''
+def arrivalPieChart(light, day, approach, tdirection):
     arrivalRates, greenArrivalRate, arrivalCrossings = get_arrivalPieChart(light, day, approach, tdirection)
     greenArrivalRateStr = "Green Arrival Rate: {}%".format(greenArrivalRate)
     arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
@@ -429,7 +396,7 @@ def init_callbacks(dash_app):
     )
     def generate_chart(day, approach, tdirection):
 
-        arrivalRates = arrivalPieChart('3084', vehiclesDf3084, day, approach, tdirection)
+        arrivalRates = arrivalPieChart('3084', day, approach, tdirection)
         splitFailure = splitPieChart('3084', vehiclesDf3084, day, approach, tdirection)
         totalDelay = totalDelayChart('3084', vehiclesDf3084 , day, approach, tdirection)
         peakScatter = scatterPlot('3084', vehiclesDf3084, day, approach, tdirection)

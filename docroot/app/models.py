@@ -139,6 +139,8 @@ class Vehicle(BaseModel):
     uturn = db.Column(db.Boolean,nullable=True)
     entry_time = db.Column(db.DateTime, nullable=True)
     exit_time = db.Column(db.DateTime, nullable=True)
+    Hour = db.Column(db.Integer, nullable=True)
+    Peak = db.Column(db.String(length=64), nullable=True)
     #travel_direction = db.Column(Enum(TravelDirection), nullable=True) # Not JSON Serializable
     #approach_direction = db.Column(Enum(ApproachDirection), nullable=True) # Not JSON Serializable
 
@@ -152,10 +154,11 @@ class Vehicle(BaseModel):
     def search_by(cls, EntryTime=None, ExitTime=None, TravelDirection=None, ApproachDirection=None,
             Day=None, SignalID=None, Stops=None, Uturn=None, DelayMinimum=None,
             DelayMaximum=None, RedArrival=None, ETTMinimum=None, ETTMaximum=None,
-            TravelTimeMinimum=None, TravelTimeMaximum=None, ExitStatus=None, CoverageID=None):
+            TravelTimeMinimum=None, TravelTimeMaximum=None, ExitStatus=None, CoverageID=None,
+            Peak=None, Hour=None):
 
         query = db.session.query(Vehicle)
-
+        #print('Day: {}, SignalID: {}, TravelDirection: {}, ApproachDirection: {}'.format(Day, SignalID, TravelDirection, ApproachDirection))
         if EntryTime is not None: query = query.filter(Vehicle.entry_time>=EntryTime)
         if ExitTime is not None: query = query.filter(Vehicle.exit_time<=ExitTime)
         if TravelDirection is not None: query = query.filter(Vehicle.travel_direction==TravelDirection)
@@ -173,6 +176,8 @@ class Vehicle(BaseModel):
         if TravelTimeMinimum is not None: query = query.filter(Vehicle.travel_time >= TravelTimeMinimum)
         if TravelTimeMaximum is not None: query = query.filter(Vehicle.travel_time <= TravelTimeMaximum)
         if ExitStatus is not None: query = query.filter(Vehicle.exit_status == ExitStatus)
+        if Peak is not None: query = query.filter(Vehicle.Peak == Peak)
+        if Hour is not None: query = query.filter(Vehicle.Hour.in_(Hour))
 
         result = query.all()
         return [c.as_dict() for c in result], 200

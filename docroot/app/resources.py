@@ -1,5 +1,5 @@
 
-from flask import request, make_response, Blueprint, jsonify
+from flask import request, make_response, Blueprint
 from flask_restx import Resource, fields, Namespace, reqparse
 from .models import User as db_User
 from .models import Vehicle as db_Vehicle
@@ -106,17 +106,10 @@ class PieChart(Resource):
         df = pd.DataFrame.from_dict(vehicles)
         df.rename(columns = {'red_arrival': 'RedArrival'}, inplace = True)
         df.filter(['RedArrival'])
-        df = df[df.RedArrival.isin([True, False])]
-
+        df = df[df['RedArrival'].isin([True, False])]
         arrivalCrossings = df.shape[0]
+        greenArrivalRate = (sum(df['RedArrival'] == False) / arrivalCrossings) * 100
 
-        #tempDf = df[df.RedArrival == 'No']
-        #if tempDf.empty: lengthNo = 0
-        #else: lengthNo = tempDf.size
-        #if df.empty: lengthtotal = 1
-        #else: lengthtotal = tempDf.size
-        #greenArrivalRate = int((lengthNo / lengthtotal)*100)
-    
         arrivalRates=px.pie(
             data_frame=df,
             names="RedArrival",
@@ -126,8 +119,10 @@ class PieChart(Resource):
             color_discrete_map={'True':'Red', 'False':'#90ee90'}
         )
 
-        return plotly.io.to_json(arrivalRates)
-        
+        return {'plot': plotly.io.to_json(arrivalRates),
+                'greenArrivalRate': greenArrivalRate,
+                'arrivalCrossings': arrivalCrossings
+                }
 
 
 @user_ns.route('/users/<int:id>')
@@ -342,7 +337,8 @@ class Vehicle(Resource):
         new_vehicle.travel_direction    = data.get('travel_direction', None)
         new_vehicle.coverage_id         = data.get('coverage_id', None)
         new_vehicle.signal_id           = data.get('signal_id', None)
-
+        new_vehicle.Peak                = data.get('Peak', None)
+        new_vehicle.Hour                = data.get('Hour', None)
         '''
         coverage = db_Coverage.find_by_id(data.get('coverage_id', None))
         if coverage:
