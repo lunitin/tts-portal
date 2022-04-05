@@ -1,4 +1,4 @@
-#import json, requests
+import json, requests
 from ..resources import User_Coverages
 import plotly
 BASE_URL = 'http://localhost:80/api/'
@@ -28,3 +28,52 @@ def get_arrivalPieChart(signal, day, approach, tdirection):
         }).json()
     p = plotly.io.from_json(data['plot'])
     return p, data['greenArrivalRate'], data['arrivalCrossings']
+
+def get_peakScatterPlot(signal, day, approach, tdirection):
+    data = requests.get(
+        url=BASE_URL+'/dashboard/peakScatterPlot',
+        params={
+            'day': str(day),
+            'approach': str(approach),
+            'signal': str(signal),
+            'tdirection': str(tdirection)
+        }).json()
+    p = plotly.io.from_json(data['plot'])
+    return p
+
+def get_totalDelayChart(signal, day, approach, tdirection):
+    data = requests.get(
+        url=BASE_URL+'/dashboard/totalDelayChart',
+        params={
+            'day': str(day),
+            'approach': str(approach),
+            'signal': str(signal),
+            'tdirection': str(tdirection)
+        }).json()
+    p = plotly.io.from_json(data['plot'])
+    return p, data['delayCrossingsStr'], data['avgDelayStr'], data['totalDelayStr']
+
+def get_splitPieChart(signal, day, approach, tdirection):
+    data = requests.get(
+        url=BASE_URL+'/dashboard/splitPieChart',
+        params={
+            'day': str(day),
+            'approach': str(approach),
+            'signal': str(signal),
+            'tdirection': str(tdirection)
+        }).json()
+    p = plotly.io.from_json(data['plot'])
+    return p, data['splitCrossingsStr'], data['totalSplitFailureStr'], data['SplitRateStr']
+
+def get_movementBarChart(signal, day, approach, tdirection):
+    data = requests.get(
+        url=BASE_URL+'/dashboard/movementBarChart',
+        params={
+            'day': str(day),
+            'approach': str(approach),
+            'signal': str(signal),
+            'tdirection': str(tdirection)
+        }).json()
+    p = plotly.io.from_json(data['plot'])
+    return p
+
