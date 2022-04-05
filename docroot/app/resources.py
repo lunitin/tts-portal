@@ -13,7 +13,7 @@ NOT_FOUND = "{}: {} not found."
 
 
 api_blueprint = Blueprint('api', __name__)
-api = Api(api_blueprint, version='1.0', title='TTS-Portal Application API', validate=True)
+api = Api(api_blueprint, version='1.0', title='TTS-Portal Application API', validate=True, doc='/documentation')
 
 #@api.errorhandler
 #def sql_error(message, error):
@@ -86,6 +86,106 @@ coverage = coverages_ns.model('Coverage', {
     'signals': fields.List(fields.Integer, default=None)
 })
 
+@dashboard_ns.route('/dashboard/peakScatterPlot')
+class PeakScatterPlot(Resource):
+    @dashboard_ns.doc('Get PeakScatterPlot information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+        ''' CODE TO GO FROM DF TO PLOT AND RETURN AS PLOTLY JSON
+        
+        return {
+            'plot': plotly.io.to_json(graph)
+        }
+        '''
+
+@dashboard_ns.route('/dashboard/totalDelayChart')
+class TotalDelayChart(Resource):
+    @dashboard_ns.doc('Get totalDelayChart information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+        ''' CODE TO GO FROM DF TO PLOT AND RETURN AS PLOTLY JSON
+        
+        return {
+            'plot': plotly.io.to_json(graph),
+            'delayCrossingsStr: ,
+            'avgDelayStr': ,
+            'totalDelayStr': 
+        }
+        '''
+@dashboard_ns.route('/dashboard/splitPieChart')
+class SplitPieChart(Resource):
+    @dashboard_ns.doc('Get splitFailurePieChart information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+        ''' CODE TO GO FROM DF TO PLOT AND RETURN AS PLOTLY JSON
+        
+        return {
+            'plot': plotly.io.to_json(graph),
+            'splitCrossingsStr: ,
+            'totalSplitFailureStr: ,
+            'SplitRateStr: 
+        }
+        '''
+
+@dashboard_ns.route('/dashboard/movementBarChart')
+class MovementBarChart(Resource):
+    @dashboard_ns.doc('Get movementBarChart information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+        ''' CODE TO GO FROM DF TO PLOT AND RETURN AS PLOTLY JSON
+        
+        return {
+            'plot': plotly.io.to_json(graph)
+        }
+        '''
 
 @dashboard_ns.route('/dashboard/arrivalPieChart')
 class PieChart(Resource):
