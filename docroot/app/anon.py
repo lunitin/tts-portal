@@ -223,7 +223,7 @@ def recover_password_post():
 
 """
 Temporary account creation route to test hash generation
-"""
+
 @anon.route('/create-account')
 def create_account():
     # code to validate and add user to database goes here
@@ -273,3 +273,5 @@ def create_account():
 
     flash("Test accounts " + email_address + " and admin@example.org created")
     return redirect(url_for('anon.login'))
+
+    """
