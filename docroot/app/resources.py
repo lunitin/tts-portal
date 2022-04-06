@@ -10,7 +10,7 @@ NOT_FOUND = "{}: {} not found."
 
 
 api_blueprint = Blueprint('api', __name__)
-api = Api(api_blueprint, version='1.0', title='TTS-Portal Application API', validate=True)
+api = Api(api_blueprint, version='1.0', doc="/apidocs", title='TTS-Portal Application API', validate=True)
 
 #@api.errorhandler
 #def sql_error(message, error):
@@ -96,7 +96,7 @@ class User(Resource):
         else:
             return make_response(NOT_FOUND.format('user_id', id), 404)
 
-    
+
     @user_ns.doc('Delete single user by id')
     def delete(self, id):
         user = db_User.find_by_id(id)
@@ -104,7 +104,7 @@ class User(Resource):
             return user.delete_from_db()
         return make_response(NOT_FOUND.format('coverage ', id), 404)
 
-        
+
     @user_ns.doc('Patch a single user by id')
     #@user_ns.marshal_with(user)
     def patch(self, id):
@@ -147,7 +147,7 @@ class User_Coverages(Resource):
         else:
             return make_response(NOT_FOUND.format('user_id', id), 404)
 
-        
+
     @user_ns.doc("Remove list of Coverages to User")
     def delete(self, id):
         user = db_User.find_by_id(id)
@@ -172,7 +172,7 @@ class UserList(Resource):
     #@users_ns.marshal_with(user, as_list=True)
     def get(self):
         return db_User.find_all()
-    
+
     #@users_ns.marshal_with(user)
     @users_ns.expect(user)
     @users_ns.doc('Create a user')
@@ -196,7 +196,7 @@ class UserList(Resource):
         return new_user.save_to_db()
 
 
-@vehicle_ns.route('/vehicles/<int:id>')    
+@vehicle_ns.route('/vehicles/<int:id>')
 class Vehicle(Resource):
     #@vehicle_ns.marshal_with(vehicle)
     @vehicle_ns.doc('Get a single vehicle from id')
@@ -206,7 +206,7 @@ class Vehicle(Resource):
             return make_response(vehicle.as_dict(), 200)
         else:
             return make_response(NOT_FOUND.format('vehicle_id', id), 404)
-    
+
     @vehicle_ns.doc('delete a single vehicle by id')
     def delete(self, id):
         vehicle = db_Vehicle.find_by_id(id)
@@ -214,7 +214,7 @@ class Vehicle(Resource):
             return vehicle.delete_from_db()
         return make_response(NOT_FOUND.format('vehicle_id', id), 404)
 
-    
+
     @vehicle_ns.doc('patch a single vehicle by id')
     #@vehicle_ns.marshal_with(vehicle)
     def patch(self, id):
@@ -236,14 +236,14 @@ class Vehicle(Resource):
             vehicle.entry_time          = data.get('entry_time', vehicle.id)
             vehicle.exit_time           = data.get('exit_time', vehicle.id)
             vehicle.travel_direction    = data.get('travel_direction', vehicle.id)
-            
+
             vehicle.coverage_id         = data.get('coverage_id', None)
             vehicle.signal_id           = data.get('signal_id', None)
             '''
             coverage = db_Coverage.find_by_id(data.get('coverage_id', None))
             if coverage:
                 vehicle.coverage_id = coverage.id
-            else: 
+            else:
                 return make_response(NOT_FOUND.format("coverage_id", data.get('coverage_id', None)), 404)
 
 
@@ -255,7 +255,7 @@ class Vehicle(Resource):
             '''
 
         return vehicle.save_to_db()
-        
+
 @vehicles_ns.route('/vehicles')
 class VehicleList(Resource):
     @vehicles_ns.doc('Retrieve all vehicles that meet criteria')
@@ -270,9 +270,9 @@ class VehicleList(Resource):
                 data.get('DelayMaximum',None), data.get('RedArrival',None), data.get('ETTMinimum',None), data.get('ETTMaximum',None),
                 data.get('TravelTimeMinimum',None), data.get('TravelTimeMaximum',None), data.get('ExitStatus',None)
                 )
-        
+
         return vehicles
-    
+
     #@vehicles_ns.marshal_with(vehicle)
     @vehicles_ns.expect(vehicle)
     @vehicles_ns.doc('Create a vehicle instance')
@@ -301,7 +301,7 @@ class VehicleList(Resource):
         coverage = db_Coverage.find_by_id(data.get('coverage_id', None))
         if coverage:
             new_vehicle.coverage_id = coverage.id
-        else: 
+        else:
             return make_response(NOT_FOUND.format("coverage_id", data.get('coverage_id', None)), 404)
 
 
@@ -349,7 +349,7 @@ class Signal(Resource):
         else:
             return make_response(NOT_FOUND.format('signal_id ', id), 404)
 
-    
+
     @signal_ns.doc('delete a single signal with id')
     def delete(self, id):
         signal = db_Signal.find_by_id(id)
@@ -358,7 +358,7 @@ class Signal(Resource):
         else:
             return make_response(NOT_FOUND.format('signal_id ', id), 404)
 
-        
+
     @signal_ns.doc('patch a single signal')
     #@signal_ns.marshal_with(coverage,)
     def patch(self, id):
@@ -375,14 +375,14 @@ class Signal(Resource):
             return make_response(NOT_FOUND.format('signal_id', id), 404)
 
         return signal.save_to_db()
-        
+
 @signals_ns.route('/signals')
 class SignalList(Resource):
     @signals_ns.doc('Get all Signals')
     #@signals_ns.marshal_with(signal, as_list=True)
     def get(self):
         return db_Signal.find_all()
-    
+
     #@signals_ns.marshal_with(signal)
     @signals_ns.expect(signal)
     @signals_ns.doc('Create a signal')
@@ -394,7 +394,7 @@ class SignalList(Resource):
             coverage = db_Coverage.find_by_id(data.get('coverage_id', None))
             if coverage:
                 new_signal.coverage_id = coverage.id
-            else: 
+            else:
                 return(make_response(NOT_FOUND.format("coverage_id", data.get('coverage_id', None)), 404))
         if 'vehicles' in data:
             for veh_id in data['vehicles']:
@@ -405,7 +405,7 @@ class SignalList(Resource):
                     return(make_response(NOT_FOUND.format("vehicle_id", veh_id), 404))
 
         return new_signal.save_to_db()
-    
+
 @coverage_ns.route('/coverages/<int:id>')
 class Coverage(Resource):
     #@coverage_ns.marshal_with(coverage)
@@ -417,7 +417,7 @@ class Coverage(Resource):
         else:
             return make_response(NOT_FOUND.format('coverage_id',id), 404)
 
-    
+
     @coverage_ns.doc('Delete a single coverage with id')
     def delete(self, id):
         coverage = db_Coverage.find_by_id(id)
@@ -425,7 +425,7 @@ class Coverage(Resource):
             return coverage.delete_from_db()
         return make_response(NOT_FOUND.format('coverage_id', id), 404)
 
-        
+
     #@coverage_ns.marshal_with(coverage)
     @coverage_ns.doc("Patch a single coverage with id")
     def patch(self, id):
@@ -449,7 +449,7 @@ class CoverageList(Resource):
     #@coverages_ns.marshal_with(coverage, as_list=True)
     def get(self):
         return db_Coverage.find_all()
-    
+
     #@coverages_ns.marshal_with(coverage)
     @coverages_ns.expect(coverage)
     @coverages_ns.doc('Create a Coverage')
@@ -462,4 +462,4 @@ class CoverageList(Resource):
         if bad_signal_id != 0:
                 return(make_response(NOT_FOUND.format("signal_id", bad_signal_id), 404))
 
-        return new_coverage.save_to_db() 
+        return new_coverage.save_to_db()
