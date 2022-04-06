@@ -133,4 +133,4 @@ docroot/supervisor.pid
 docroot/supervisord.pid
 
 # Configuration secrets
-config.py
+docroot/app/config.py
