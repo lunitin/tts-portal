@@ -1,5 +1,6 @@
 
 from flask import request, make_response, Blueprint
+from sympy import arg
 from flask_restx import Resource, fields, Namespace, reqparse
 from .models import User as db_User
 from .models import Vehicle as db_Vehicle
@@ -103,12 +104,22 @@ class PeakScatterPlot(Resource):
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
-        ''' CODE TO GO FROM DF TO PLOT AND RETURN AS PLOTLY JSON
-        
+    
+        peakScatter=px.scatter(
+            data_frame=df,
+            x= 'Hour',
+            y= 'Delay',
+            title= " Broward "+ str(args['signal']) + " Delay by Hour",
+            opacity= 0.1,
+            trendline="lowess",
+            trendline_options=dict(frac=0.09),
+            trendline_color_override="red"
+        )
+
         return {
-            'plot': plotly.io.to_json(graph)
+            'plot': plotly.io.to_json(peakScatter)
         }
-        '''
+
 
 @dashboard_ns.route('/dashboard/totalDelayChart')
 class TotalDelayChart(Resource):
@@ -127,15 +138,52 @@ class TotalDelayChart(Resource):
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
-        ''' CODE TO GO FROM DF TO PLOT AND RETURN AS PLOTLY JSON
         
+        df.rename(columns = {'delay': 'Delay'}, inplace = True)
+
+        # Get total crossings
+        delayCrossingsStr = "Total Crossings: {}".format(df.shape[0])
+
+        # Get average delay
+        avgDelayStr = "Average Delay: {} (sec/veh)".format(int(df['Delay'].mean()))
+
+        # Get total delay in hours (3600 seconds per hour)
+        totalDelay = int(df['Delay'].sum()/3600)
+        totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
+
+        morningDf = df[df['Peak'] == 'Morning']
+        middayDf = df[df['Peak'] == 'Midday']
+        eveningDf = df[df['Peak'] == 'Evening']
+        otherDf = df[df['Peak'] == 'Other']     
+
+        # Have to delay in hours
+        morningDelay = int(morningDf['Delay'].sum()/3600)
+        middayDelay = int(middayDf['Delay'].sum()/3600)
+        eveningDelay = int(eveningDf['Delay'].sum()/3600)
+        otherDelay = int(otherDf['Delay'].sum()/3600)
+
+        # Now combine all into a new dataframe
+        d = {'Delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'Peak': ['Morning', 'Midday', 'Evening', 'Other']}
+        newDf = pd.DataFrame(data=d)
+
+        # Create delay pie chart
+        fig=px.pie(
+            data_frame=newDf,
+            values='Delay',
+            names="Peak",
+            color="Peak",
+            hole=.5,
+            title="Broward " + str(args['signal']) + " Total Delay (hours) By Peak",
+            color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
+        )
+            
         return {
-            'plot': plotly.io.to_json(graph),
-            'delayCrossingsStr: ,
-            'avgDelayStr': ,
-            'totalDelayStr': 
+            'plot': plotly.io.to_json(fig),
+            'delayCrossingsStr': delayCrossingsStr,
+            'avgDelayStr': avgDelayStr,
+            'totalDelayStr': totalDelayStr 
         }
-        '''
+
 @dashboard_ns.route('/dashboard/splitPieChart')
 class SplitPieChart(Resource):
     @dashboard_ns.doc('Get splitFailurePieChart information')
@@ -153,15 +201,33 @@ class SplitPieChart(Resource):
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
-        ''' CODE TO GO FROM DF TO PLOT AND RETURN AS PLOTLY JSON
+
+        # code here
+        df.rename(columns = {'split_failure': 'SplitFailure'}, inplace = True)
+        df.filter(['SplitFailure'])
+        df = df[df['SplitFailure'].isin([True, False])]
+
+        splitCrossings = df.shape[0]
+
+        tempDf = df[df["SplitFailure"].isin(["Yes"])]
+        totalSplitFailure = tempDf.shape[0]
+        SplitRate = int((totalSplitFailure/df.shape[0])*100)
+
+        splitFailure=px.pie(
+            data_frame=df,
+            names="Peak",
+            color="Peak",
+            hole=.5,
+            title="Broward " + str(args['signal']) + " Split Failure By Peak",
+            color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
+        )
         
         return {
-            'plot': plotly.io.to_json(graph),
-            'splitCrossingsStr: ,
-            'totalSplitFailureStr: ,
-            'SplitRateStr: 
+            'plot': plotly.io.to_json(splitFailure),
+            'splitCrossings': splitCrossings,
+            'totalSplitFailure': totalSplitFailure,
+            'SplitRate': SplitRate
         }
-        '''
 
 @dashboard_ns.route('/dashboard/movementBarChart')
 class MovementBarChart(Resource):
@@ -180,12 +246,19 @@ class MovementBarChart(Resource):
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
-        ''' CODE TO GO FROM DF TO PLOT AND RETURN AS PLOTLY JSON
+        df = df[df["ApproachDirection"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
+        moveM=px.histogram(
+            data_frame=df,
+            x= 'ApproachDirection',
+            y= 'Delay',
+            title= "Broward " + str[args['signal']] + " Delay by Movement",
+            facet_col="TravelDirection",
+            color="Peak",
+        )
         
         return {
-            'plot': plotly.io.to_json(graph)
+            'plot': plotly.io.to_json(moveM)
         }
-        '''
 
 @dashboard_ns.route('/dashboard/arrivalPieChart')
 class PieChart(Resource):
