@@ -76,4 +76,3 @@ def get_movementBarChart(signal, day, approach, tdirection):
         }).json()
     p = plotly.io.from_json(data['plot'])
     return p
-
