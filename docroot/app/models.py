@@ -14,7 +14,7 @@ from typing import List
 from sqlalchemy.exc import SQLAlchemyError
 import enum
 from sqlalchemy import Enum
-        
+
 
 class BaseModel(db.Model):
     __abstract__ = True
@@ -28,7 +28,7 @@ class BaseModel(db.Model):
             return make_response(jsonify(str(e)), 400)
         else:
             return [c.as_dict() for c in all_in_table], 200
-    
+
     @classmethod
     def find_by_id(cls, id):
         entity_by_id = cls.query.filter_by(id=id).first()
@@ -41,7 +41,7 @@ class BaseModel(db.Model):
             return make_response(jsonify(str(e)), 400)
         else:
             return entity_id, 200
-    
+
     def as_dict(self):
         my_dict = {}
         for c in self.__table__.columns:
@@ -51,8 +51,8 @@ class BaseModel(db.Model):
                 my_dict[c.name] = getattr(self, c.name)
         #my_dict = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         return my_dict
-       
-        
+
+
     def save_to_db(self):
         try:
             db.session.add(self)
@@ -110,7 +110,7 @@ class User(UserMixin, BaseModel):
         for coverage_id in coverages:
             coverage = Coverage.find_by_id(coverage_id)
             if coverage:
-                self.coverages.remove(coverage) 
+                self.coverages.remove(coverage)
             else:
                 return(coverage_id)
         return 0
@@ -223,7 +223,7 @@ class Coverage(BaseModel):
     #             signal = Signal.find_by_id(signal_id)
     #             if signal:
     #                 self.signals.append(signal)
-    #             else:
+    #             else:    id = Column(Integer, primary_key=True)
     #                 return(signal_id)
     #     else:
     #         self.signals = []

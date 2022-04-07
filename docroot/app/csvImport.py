@@ -87,7 +87,7 @@ if __name__ == "__main__":
     sql = "INSERT INTO vehicles (id,veh_id,delay,red_arrival,split_failure,signal_id,approach_direction,travel_direction,ett,travel_time,exit_status,day,entry_time,exit_time,stops,uturn) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
     for row in csv_data:
         row = nullify(row)
-        #print(row)
+        # print(row)
         cursor.execute(sql, row)
 
     connection.commit()
