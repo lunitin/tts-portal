@@ -14,7 +14,7 @@ from typing import List
 from sqlalchemy.exc import SQLAlchemyError
 import enum
 from sqlalchemy import Enum
-        
+
 
 class BaseModel(db.Model):
     __abstract__ = True
@@ -28,7 +28,7 @@ class BaseModel(db.Model):
             return make_response(jsonify(str(e)), 400)
         else:
             return [c.as_dict() for c in all_in_table], 200
-    
+
     @classmethod
     def find_by_id(cls, id):
         entity_by_id = cls.query.filter_by(id=id).first()
@@ -41,7 +41,7 @@ class BaseModel(db.Model):
             return make_response(jsonify(str(e)), 400)
         else:
             return entity_id, 200
-    
+
     def as_dict(self):
         my_dict = {}
         for c in self.__table__.columns:
@@ -51,8 +51,8 @@ class BaseModel(db.Model):
                 my_dict[c.name] = getattr(self, c.name)
         #my_dict = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         return my_dict
-       
-        
+
+
     def save_to_db(self):
         try:
             db.session.add(self)
@@ -110,7 +110,7 @@ class User(UserMixin, BaseModel):
         for coverage_id in coverages:
             coverage = Coverage.find_by_id(coverage_id)
             if coverage:
-                self.coverages.remove(coverage) 
+                self.coverages.remove(coverage)
             else:
                 return(coverage_id)
         return 0
@@ -143,10 +143,10 @@ class Vehicle(BaseModel):
     day = db.Column(db.Integer,nullable=True)
     entry_time = db.Column(db.DateTime, nullable=True)
     exit_time = db.Column(db.DateTime, nullable=True)
-    #Hour = db.Column(db.Integer, nullable=True)
-    #Peak = db.Column(db.String(length=64), nullable=True)
     stops = db.Column(db.Integer,nullable=True)
     uturn = db.Column(db.Boolean,nullable=True)
+    hour = db.Column(db.Integer, nullable=True)
+    peak = db.Column(db.String(length=64), nullable=True)
     #travel_direction = db.Column(Enum(TravelDirection), nullable=True) # Not JSON Serializable
     #approach_direction = db.Column(Enum(ApproachDirection), nullable=True) # Not JSON Serializable
 
@@ -184,13 +184,13 @@ class Vehicle(BaseModel):
 
         result = query.all()
         return [c.as_dict() for c in result], 200
-    
+
 
 class Signal(BaseModel):
     __tablename__ = 'signals'
     region_id = db.Column(db.Integer, db.ForeignKey('region.id'), nullable=True)
     vehicles = db.relationship('Vehicle', backref='signal', lazy='subquery')
-    
+
     def add_vehicles(self, vehicles, delete_old):
         if delete_old == True:
             self.vehicles = []
@@ -201,7 +201,7 @@ class Signal(BaseModel):
             else:
                 return(veh_id)
         return 0 # All were added good
-    
+
     #def remove_vehicles(self, vehicles)
 
 
@@ -233,5 +233,5 @@ class Coverage(BaseModel):
     #     else:
     #         self.signals = []
     #     return 0 # All were added good
-    
+
     #def remove_signals(self, signals) # For a later time :)
