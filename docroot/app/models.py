@@ -143,8 +143,8 @@ class Vehicle(BaseModel):
     day = db.Column(db.Integer,nullable=True)
     entry_time = db.Column(db.DateTime, nullable=True)
     exit_time = db.Column(db.DateTime, nullable=True)
-    #Hour = db.Column(db.Integer, nullable=True)
-    #Peak = db.Column(db.String(length=64), nullable=True)
+    hour = db.Column(db.Integer, nullable=True)
+    peak = db.Column(db.String(length=64), nullable=True)
     stops = db.Column(db.Integer,nullable=True)
     uturn = db.Column(db.Boolean,nullable=True)
     #travel_direction = db.Column(Enum(TravelDirection), nullable=True) # Not JSON Serializable

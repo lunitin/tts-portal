@@ -1,6 +1,5 @@
 
 from flask import request, make_response, Blueprint
-from sympy import arg
 from flask_restx import Resource, fields, Namespace, reqparse
 from .models import User as db_User
 from .models import Vehicle as db_Vehicle
@@ -216,7 +215,7 @@ class SplitPieChart(Resource):
 
         splitFailure=px.pie(
             data_frame=df,
-            names="Peak",
+            names="peak",
             color="Peak",
             hole=.5,
             title="Broward " + str(args['signal']) + " Split Failure By Peak",

@@ -307,7 +307,7 @@ def totalDelayChart(light, day, approach, tdirection):
 #hour and delay in a scatter, by movement
 #stacked bar chart with different movements in each bar for approach direction
 #hours, minutes, seconds columns? for df
-def movementBarChart(light, df, day, approach, tdirection):
+def movementBarChart(light, day, approach, tdirection):
     moveM = get_movementBarChart(light, day, approach, tdirection)
     # dff = df.copy()
     # dff = dff[dff["Day"] == day]
@@ -336,7 +336,7 @@ def movementBarChart(light, df, day, approach, tdirection):
 
     return moveM
 
-def scatterPlot(light, df, day, approach, tdirection):
+def scatterPlot(light, day, approach, tdirection):
     peakScatter = get_peakScatterPlot
     # dff = df.copy()
     # dff = dff[dff["Day"] == day]
@@ -385,10 +385,10 @@ def init_callbacks(dash_app):
     def generate_chart(day, approach, tdirection):
 
         arrivalRates = arrivalPieChart('3084', day, approach, tdirection)
-        splitFailure = splitPieChart('3084', vehiclesDf3084, day, approach, tdirection)
-        totalDelay = totalDelayChart('3084', vehiclesDf3084 , day, approach, tdirection)
-        peakScatter = scatterPlot('3084', vehiclesDf3084, day, approach, tdirection)
-        movement = movementBarChart('3084', vehiclesDf3084, day, approach, tdirection)
+        splitFailure = splitPieChart('3084', day, approach, tdirection)
+        totalDelay = totalDelayChart('3084', day, approach, tdirection)
+        peakScatter = scatterPlot('3084', day, approach, tdirection)
+        movement = movementBarChart('3084', day, approach, tdirection)
         return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, movement
 
     # This callback uses the above function to return what belongs on the page
