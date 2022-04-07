@@ -10,8 +10,9 @@ from dash import html
 from dash.dependencies import Input, Output
 from flask_login import current_user
 from app import strings
+import time
 
-from .server_calls import get_coverages
+from .server_calls import get_coverages, get_arrivalPieChart, get_movementBarChart, get_peakScatterPlot, get_splitPieChart, get_totalDelayChart
 
 base_url = "/dash/app/"
 
@@ -201,150 +202,104 @@ def pageContent(light, df):
     ]
 
 
-def movementBarChart(light, df, approachD, day):
-    dff = df.copy()
-    dff = dff[dff["Day"] == day]
-    dff = dff[dff["ApproachDirection"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
-    #dff = dff[dff["TravelDirection"].isin(["Straight", "Right", "Left"])]
-
-    moveM=px.histogram(
-        data_frame=dff,
-        x= 'ApproachDirection',
-        y= 'Delay',
-        title= "Day " + str(day) + " Broward "+ light + " Delay by Movement",
-        facet_col="TravelDirection",
-        color="Peak",
-    )
-
-    return moveM
-
 # Makes a pie chart for any given light
-def arrivalPieChart(light, df, day, approach, tdirection):
-    # Set up df according to days
-    dff = df.copy()
-    dff = dff[dff["Day"] == day]
-    dff = dff[dff["RedArrival"].isin(["Yes", "No"])]
-
-    # Set up df according to approach
-    if (approach != "ALL"):
-        dff = dff[dff["ApproachDirection"] == approach]
-
-    # Set up df according to travel direction
-    if (tdirection != "ALL"):
-        dff = dff[dff["TravelDirection"] == tdirection]
-
-
-    # Calculate Arrival Crossings
-    arrivalCrossings = dff.shape[0]
-    arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
-
-    # Calculate number of green crossings
-    tempDf = dff[dff["RedArrival"].isin(["No"])]
-
-    greenArrivalRate = int((tempDf.size / dff.size)*100)
-
-    # Make strings
+def arrivalPieChart(light, day, approach, tdirection):
+    arrivalRates, greenArrivalRate, arrivalCrossings = get_arrivalPieChart(light, day, approach, tdirection)
     greenArrivalRateStr = "Green Arrival Rate: {}%".format(greenArrivalRate)
-
-    arrivalRates=px.pie(
-        data_frame=dff,
-        names="RedArrival",
-        color="RedArrival",
-        hole=.5,
-        title="Broward " + light + " Arrival Rates",
-        color_discrete_map={'Yes':'Red', 'No':'#90ee90'}
-    )
-
+    arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
     return arrivalRates, greenArrivalRateStr, arrivalCrossingsStr
 
 # Makes a split failure pie chart for any given light
-def splitPieChart(light, df, day, approach, tdirection):
-    # Get dataframe with only values we care about
-    dff = df.copy()
-    dff = dff[dff["Day"] == day]
-    dff = dff[dff["SplitFailure"].isin(["Yes", "No"])]
+def splitPieChart(light, day, approach, tdirection):
+    splitFailure, splitCrossing, totalSplitFailure, SplitRate = get_splitPieChart(light, day, approach, tdirection)
+    # # Get dataframe with only values we care about
+    # dff = df.copy()
+    # dff = dff[dff["Day"] == day]
+    # dff = dff[dff["SplitFailure"].isin(["Yes", "No"])]
 
-    # Set up df according to approach
-    if (approach != "ALL"):
-        dff = dff[dff["ApproachDirection"] == approach]
+    # # Set up df according to approach
+    # if (approach != "ALL"):
+    #     dff = dff[dff["ApproachDirection"] == approach]
 
-    # Set up df according to travel direction
-    if (tdirection != "ALL"):
-        dff = dff[dff["TravelDirection"] == tdirection]
+    # # Set up df according to travel direction
+    # if (tdirection != "ALL"):
+    #     dff = dff[dff["TravelDirection"] == tdirection]
 
     # Calculate Split Failure Rate, Total Split Failures, And Crossings
-    splitCrossings = dff.shape[0]
-    splitCrossingStr = "Split Failure Crossings: {}".format(splitCrossings)
+    #splitCrossings = dff.shape[0]
+    splitCrossingStr = "Split Failure Crossings: {}".format(splitCrossing)
 
-    tempDf = dff[dff["SplitFailure"].isin(["Yes"])]
-    totalSplitFailure = tempDf.shape[0]
-    SplitRate = int((totalSplitFailure/dff.shape[0])*100)
+    #tempDf = dff[dff["SplitFailure"].isin(["Yes"])]
+    #totalSplitFailure = tempDf.shape[0]
+    #SplitRate = int((totalSplitFailure/dff.shape[0])*100)
 
     totalSplitFailureStr = "Total Split Failures: {}".format(totalSplitFailure)
     SplitRateStr = "Split Failure Rate: {}%".format(SplitRate)
 
-    # Create pie chart for light
-    splitFailure=px.pie(
-        data_frame=dff,
-        names="Peak",
-        color="Peak",
-        hole=.5,
-        title="Broward " + light + " Split Failure By Peak",
-        color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
-    )
+    # # Create pie chart for light
+    # splitFailure=px.pie(
+    #     data_frame=dff,
+    #     names="Peak",
+    #     color="Peak",
+    #     hole=.5,
+    #     title="Broward " + light + " Split Failure By Peak",
+    #     color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
+    # )
 
     return splitFailure, splitCrossingStr, totalSplitFailureStr, SplitRateStr
 
-def totalDelayChart(light, df, day, approach, tdirection):
-    # Get dataframe with only values we care about
-    dff = df.copy()
-    dff = dff[dff["Day"] == day]
+def totalDelayChart(light, day, approach, tdirection):
+    fig, delayCrossingsStr, avgDelayStr, totalDelayStr = get_totalDelayChart(light, day, approach, tdirection)
 
-    # Set up df according to approach
-    if (approach != "ALL"):
-        dff = dff[dff["ApproachDirection"] == approach]
+    # # Get dataframe with only values we care about
+    # dff = df.copy()
+    # dff = dff[dff["Day"] == day]
 
-    # Set up df according to travel direction
-    if (tdirection != "ALL"):
-        dff = dff[dff["TravelDirection"] == tdirection]
+    # # Set up df according to approach
+    # if (approach != "ALL"):
+    #     dff = dff[dff["ApproachDirection"] == approach]
+
+    # # Set up df according to travel direction
+    # if (tdirection != "ALL"):
+    #     dff = dff[dff["TravelDirection"] == tdirection]
 
     # Get total crossings
-    delayCrossingsStr = "Total Crossings: {}".format(dff.shape[0])
+    # delayCrossingsStr = "Total Crossings: {}".format(dff.shape[0])
 
-    # Get average delay
-    avgDelayStr = "Average Delay: {} (sec/veh)".format(int(dff['Delay'].mean()))
+    # # Get average delay
+    # avgDelayStr = "Average Delay: {} (sec/veh)".format(int(dff['Delay'].mean()))
 
-    # Get total delay in hours (3600 seconds per hour)
-    totalDelay = int(dff['Delay'].sum()/3600)
-    totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
+    # # Get total delay in hours (3600 seconds per hour)
+    # totalDelay = int(dff['Delay'].sum()/3600)
+    # totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
 
-    # Make pie chart for total delay (in hours) by peak
-    # Going to combine delay times by peak and convert them to hours into a new df
-    morningDf = dff[dff['Peak'] == 'Morning']
-    middayDf = dff[dff['Peak'] == 'Midday']
-    eveningDf = dff[dff['Peak'] == 'Evening']
-    otherDf = dff[dff['Peak'] == 'Other']
+    # # Make pie chart for total delay (in hours) by peak
+    # # Going to combine delay times by peak and convert them to hours into a new df
+    # morningDf = dff[dff['Peak'] == 'Morning']
+    # middayDf = dff[dff['Peak'] == 'Midday']
+    # eveningDf = dff[dff['Peak'] == 'Evening']
+    # otherDf = dff[dff['Peak'] == 'Other']
 
-    # Have to delay in hours
-    morningDelay = int(morningDf['Delay'].sum()/3600)
-    middayDelay = int(middayDf['Delay'].sum()/3600)
-    eveningDelay = int(eveningDf['Delay'].sum()/3600)
-    otherDelay = int(otherDf['Delay'].sum()/3600)
+    # # Have to delay in hours
+    # morningDelay = int(morningDf['Delay'].sum()/3600)
+    # middayDelay = int(middayDf['Delay'].sum()/3600)
+    # eveningDelay = int(eveningDf['Delay'].sum()/3600)
+    # otherDelay = int(otherDf['Delay'].sum()/3600)
 
-    # Now combine all into a new dataframe
-    d = {'Delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'Peak': ['Morning', 'Midday', 'Evening', 'Other']}
-    newDf = pd.DataFrame(data=d)
+    # # Now combine all into a new dataframe
+    # d = {'Delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'Peak': ['Morning', 'Midday', 'Evening', 'Other']}
+    # newDf = pd.DataFrame(data=d)
 
-    # Create delay pie chart
-    fig=px.pie(
-        data_frame=newDf,
-        values='Delay',
-        names="Peak",
-        color="Peak",
-        hole=.5,
-        title="Broward " + light + " Total Delay (hours) By Peak",
-        color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
-    )
+    # # Create delay pie chart
+    # fig=px.pie(
+    #     data_frame=newDf,
+    #     values='Delay',
+    #     names="Peak",
+    #     color="Peak",
+    #     hole=.5,
+    #     title="Broward " + light + " Total Delay (hours) By Peak",
+    #     color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
+    # )
     return fig, delayCrossingsStr, avgDelayStr, totalDelayStr
 
 #subplots scatterPlot? with histogram
@@ -353,55 +308,57 @@ def totalDelayChart(light, df, day, approach, tdirection):
 #stacked bar chart with different movements in each bar for approach direction
 #hours, minutes, seconds columns? for df
 def movementBarChart(light, df, day, approach, tdirection):
-    dff = df.copy()
-    dff = dff[dff["Day"] == day]
+    moveM = get_movementBarChart(light, day, approach, tdirection)
+    # dff = df.copy()
+    # dff = dff[dff["Day"] == day]
 
-    # Set up df according to approach
-    if (approach != "ALL"):
-        dff = dff[dff["ApproachDirection"] == approach]
+    # # Set up df according to approach
+    # if (approach != "ALL"):
+    #     dff = dff[dff["ApproachDirection"] == approach]
 
-    # Set up df according to travel direction
-    if (tdirection != "ALL"):
-        dff = dff[dff["TravelDirection"] == tdirection]
+    # # Set up df according to travel direction
+    # if (tdirection != "ALL"):
+    #     dff = dff[dff["TravelDirection"] == tdirection]
 
-    moveM=px.histogram(
-        data_frame=dff,
-        x= 'ApproachDirection',
-        y= 'Delay',
-        title= "Day " + str(day) + " Broward "+ light + " Delay by Movement",
-        facet_col="TravelDirection",
-        color="Peak",
-        labels={
-            "Peak": "Time of Day",
-            "ApproachDirection": "Approach Direction",
-            #"Delay": "Total Delay"
-        }
-    )
+    # moveM=px.histogram(
+    #     data_frame=dff,
+    #     x= 'ApproachDirection',
+    #     y= 'Delay',
+    #     title= "Day " + str(day) + " Broward "+ light + " Delay by Movement",
+    #     facet_col="TravelDirection",
+    #     color="Peak",
+    #     labels={
+    #         "Peak": "Time of Day",
+    #         "ApproachDirection": "Approach Direction",
+    #         #"Delay": "Total Delay"
+    #     }
+    # )
 
     return moveM
 
 def scatterPlot(light, df, day, approach, tdirection):
-    dff = df.copy()
-    dff = dff[dff["Day"] == day]
+    peakScatter = get_peakScatterPlot
+    # dff = df.copy()
+    # dff = dff[dff["Day"] == day]
 
-    # Set up df according to approach
-    if (approach != "ALL"):
-        dff = dff[dff["ApproachDirection"] == approach]
+    # # Set up df according to approach
+    # if (approach != "ALL"):
+    #     dff = dff[dff["ApproachDirection"] == approach]
 
-    # Set up df according to travel direction
-    if (tdirection != "ALL"):
-        dff = dff[dff["TravelDirection"] == tdirection]
+    # # Set up df according to travel direction
+    # if (tdirection != "ALL"):
+    #     dff = dff[dff["TravelDirection"] == tdirection]
 
-    peakScatter=px.scatter(
-        data_frame=dff,
-        x= 'Hour',
-        y= 'Delay',
-        title= "Day " + str(day) + " Broward "+ light + " Delay by Hour",
-        opacity= 0.1,
-        trendline="lowess",
-        trendline_options=dict(frac=0.09),
-        trendline_color_override="red"
-    )
+    # peakScatter=px.scatter(
+    #     data_frame=dff,
+    #     x= 'Hour',
+    #     y= 'Delay',
+    #     title= "Day " + str(day) + " Broward "+ light + " Delay by Hour",
+    #     opacity= 0.1,
+    #     trendline="lowess",
+    #     trendline_options=dict(frac=0.09),
+    #     trendline_color_override="red"
+    # )
 
     return peakScatter
 
@@ -427,7 +384,7 @@ def init_callbacks(dash_app):
     )
     def generate_chart(day, approach, tdirection):
 
-        arrivalRates = arrivalPieChart('3084', vehiclesDf3084, day, approach, tdirection)
+        arrivalRates = arrivalPieChart('3084', day, approach, tdirection)
         splitFailure = splitPieChart('3084', vehiclesDf3084, day, approach, tdirection)
         totalDelay = totalDelayChart('3084', vehiclesDf3084 , day, approach, tdirection)
         peakScatter = scatterPlot('3084', vehiclesDf3084, day, approach, tdirection)

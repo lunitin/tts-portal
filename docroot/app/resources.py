@@ -1,16 +1,21 @@
 
-from flask import request, make_response, Blueprint, jsonify
-from flask_restx import Resource, fields, Namespace
+from flask import request, make_response, Blueprint
+from sympy import arg
+from flask_restx import Resource, fields, Namespace, reqparse
 from .models import User as db_User
 from .models import Vehicle as db_Vehicle
 from .models import Signal as db_Signal
 from .models import Coverage as db_Coverage
 from flask_restx import Api
+import pandas as pd
+import plotly.express as px
+import plotly
 NOT_FOUND = "{}: {} not found."
 
 
 api_blueprint = Blueprint('api', __name__)
 api = Api(api_blueprint, version='1.0', doc="/apidocs", title='TTS-Portal Application API', validate=True)
+
 
 #@api.errorhandler
 #def sql_error(message, error):
@@ -26,6 +31,7 @@ signal_ns = Namespace('signal', description="Signal related operations", path='/
 signals_ns = Namespace('signals', description='Signals related operations', path='/api')
 coverage_ns = Namespace('coverage', description="Coverage related operations", path='/api')
 coverages_ns = Namespace('coverages', description='Coverages related operations', path='/api')
+dashboard_ns = Namespace('dashboard', description='Dashboard fetching operations', path='/api')
 
 api.add_namespace(user_ns)
 api.add_namespace(users_ns)
@@ -35,6 +41,7 @@ api.add_namespace(signal_ns)
 api.add_namespace(signals_ns)
 api.add_namespace(coverage_ns)
 api.add_namespace(coverages_ns)
+api.add_namespace(dashboard_ns)
 
 user = users_ns.model('User', {
     'id': fields.Integer(required=False),
@@ -81,8 +88,215 @@ coverage = coverages_ns.model('Coverage', {
     'signals': fields.List(fields.Integer, default=None)
 })
 
+@dashboard_ns.route('/dashboard/peakScatterPlot')
+class PeakScatterPlot(Resource):
+    @dashboard_ns.doc('Get PeakScatterPlot information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+    
+        peakScatter=px.scatter(
+            data_frame=df,
+            x= 'Hour',
+            y= 'Delay',
+            title= " Broward "+ str(args['signal']) + " Delay by Hour",
+            opacity= 0.1,
+            trendline="lowess",
+            trendline_options=dict(frac=0.09),
+            trendline_color_override="red"
+        )
+
+        return {
+            'plot': plotly.io.to_json(peakScatter)
+        }
 
 
+@dashboard_ns.route('/dashboard/totalDelayChart')
+class TotalDelayChart(Resource):
+    @dashboard_ns.doc('Get totalDelayChart information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+        
+        df.rename(columns = {'delay': 'Delay'}, inplace = True)
+
+        # Get total crossings
+        delayCrossingsStr = "Total Crossings: {}".format(df.shape[0])
+
+        # Get average delay
+        avgDelayStr = "Average Delay: {} (sec/veh)".format(int(df['Delay'].mean()))
+
+        # Get total delay in hours (3600 seconds per hour)
+        totalDelay = int(df['Delay'].sum()/3600)
+        totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
+
+        morningDf = df[df['Peak'] == 'Morning']
+        middayDf = df[df['Peak'] == 'Midday']
+        eveningDf = df[df['Peak'] == 'Evening']
+        otherDf = df[df['Peak'] == 'Other']     
+
+        # Have to delay in hours
+        morningDelay = int(morningDf['Delay'].sum()/3600)
+        middayDelay = int(middayDf['Delay'].sum()/3600)
+        eveningDelay = int(eveningDf['Delay'].sum()/3600)
+        otherDelay = int(otherDf['Delay'].sum()/3600)
+
+        # Now combine all into a new dataframe
+        d = {'Delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'Peak': ['Morning', 'Midday', 'Evening', 'Other']}
+        newDf = pd.DataFrame(data=d)
+
+        # Create delay pie chart
+        fig=px.pie(
+            data_frame=newDf,
+            values='Delay',
+            names="Peak",
+            color="Peak",
+            hole=.5,
+            title="Broward " + str(args['signal']) + " Total Delay (hours) By Peak",
+            color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
+        )
+            
+        return {
+            'plot': plotly.io.to_json(fig),
+            'delayCrossingsStr': delayCrossingsStr,
+            'avgDelayStr': avgDelayStr,
+            'totalDelayStr': totalDelayStr 
+        }
+
+@dashboard_ns.route('/dashboard/splitPieChart')
+class SplitPieChart(Resource):
+    @dashboard_ns.doc('Get splitFailurePieChart information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+
+        # code here
+        df.rename(columns = {'split_failure': 'SplitFailure'}, inplace = True)
+        df.filter(['SplitFailure'])
+        df = df[df['SplitFailure'].isin([True, False])]
+
+        splitCrossings = df.shape[0]
+
+        tempDf = df[df["SplitFailure"].isin(["Yes"])]
+        totalSplitFailure = tempDf.shape[0]
+        SplitRate = int((totalSplitFailure/df.shape[0])*100)
+
+        splitFailure=px.pie(
+            data_frame=df,
+            names="Peak",
+            color="Peak",
+            hole=.5,
+            title="Broward " + str(args['signal']) + " Split Failure By Peak",
+            color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
+        )
+        
+        return {
+            'plot': plotly.io.to_json(splitFailure),
+            'splitCrossings': splitCrossings,
+            'totalSplitFailure': totalSplitFailure,
+            'SplitRate': SplitRate
+        }
+
+@dashboard_ns.route('/dashboard/movementBarChart')
+class MovementBarChart(Resource):
+    @dashboard_ns.doc('Get movementBarChart information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+        df = df[df["ApproachDirection"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
+        moveM=px.histogram(
+            data_frame=df,
+            x= 'ApproachDirection',
+            y= 'Delay',
+            title= "Broward " + str[args['signal']] + " Delay by Movement",
+            facet_col="TravelDirection",
+            color="Peak",
+        )
+        
+        return {
+            'plot': plotly.io.to_json(moveM)
+        }
+
+@dashboard_ns.route('/dashboard/arrivalPieChart')
+class PieChart(Resource):
+    @dashboard_ns.doc('Get arrivalPieChart information')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('signal', type=int)
+        parser.add_argument('day', type=int)
+        parser.add_argument('approach', type=str)
+        parser.add_argument('tdirection', type=str)
+        args = parser.parse_args()
+        if args['approach'] == 'ALL': args['approach'] = None
+        if args['tdirection'] == "ALL": args['tdirection'] = None
+        vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
+                                        TravelDirection=args['tdirection'],
+                                        ApproachDirection=args['approach'],
+                                        Day=[args['day']])
+        df = pd.DataFrame.from_dict(vehicles)
+        df.rename(columns = {'red_arrival': 'RedArrival'}, inplace = True)
+        df.filter(['RedArrival'])
+        df = df[df['RedArrival'].isin([True, False])]
+        arrivalCrossings = df.shape[0]
+        greenArrivalRate = (sum(df['RedArrival'] == False) / arrivalCrossings) * 100
+
+        arrivalRates=px.pie(
+            data_frame=df,
+            names="RedArrival",
+            color="RedArrival",
+            hole=.5,
+            title="Broward " + str(args['signal']) + " Arrival Rates",
+            color_discrete_map={'True':'Red', 'False':'#90ee90'}
+        )
+
+        return {'plot': plotly.io.to_json(arrivalRates),
+                'greenArrivalRate': greenArrivalRate,
+                'arrivalCrossings': arrivalCrossings
+                }
 
 
 @user_ns.route('/users/<int:id>')
@@ -131,6 +345,7 @@ class User_Coverages(Resource):
             return make_response(user.fetch_coverages(), 200)
         else:
             return make_response(NOT_FOUND.format('user_id', id), 404)
+        
 
 
     @user_ns.doc("Add list of Coverages to User")
@@ -257,7 +472,7 @@ class Vehicle(Resource):
         return vehicle.save_to_db()
 
 @vehicles_ns.route('/vehicles')
-class VehicleList(Resource):
+class Vehicle(Resource):
     @vehicles_ns.doc('Retrieve all vehicles that meet criteria')
     #@vehicles_ns.marshal_with(vehicle, as_list=True)
     def get(self):
@@ -296,7 +511,8 @@ class VehicleList(Resource):
         new_vehicle.travel_direction    = data.get('travel_direction', None)
         new_vehicle.coverage_id         = data.get('coverage_id', None)
         new_vehicle.signal_id           = data.get('signal_id', None)
-
+        new_vehicle.Peak                = data.get('Peak', None)
+        new_vehicle.Hour                = data.get('Hour', None)
         '''
         coverage = db_Coverage.find_by_id(data.get('coverage_id', None))
         if coverage:
