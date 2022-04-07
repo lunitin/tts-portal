@@ -385,8 +385,8 @@ def init_callbacks(dash_app):
     def generate_chart(day, approach, tdirection):
 
         arrivalRates = arrivalPieChart('3084', day, approach, tdirection)
-        splitFailure = splitPieChart('3084', vehiclesDf3084, day, approach, tdirection)
-        totalDelay = totalDelayChart('3084', vehiclesDf3084 , day, approach, tdirection)
+        splitFailure = splitPieChart('3084', day, approach, tdirection)
+        totalDelay = totalDelayChart('3084', day, approach, tdirection)
         peakScatter = scatterPlot('3084', vehiclesDf3084, day, approach, tdirection)
         movement = movementBarChart('3084', vehiclesDf3084, day, approach, tdirection)
         return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, movement
