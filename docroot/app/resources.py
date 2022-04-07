@@ -227,7 +227,7 @@ class SplitPieChart(Resource):
             'plot': plotly.io.to_json(splitFailure),
             'splitCrossings': splitCrossings,
             'totalSplitFailure': totalSplitFailure,
-            'SplitRate': SplitRate
+            'splitRate': SplitRate
         }
 
 @dashboard_ns.route('/dashboard/movementBarChart')
