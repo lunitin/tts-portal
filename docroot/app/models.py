@@ -147,8 +147,6 @@ class Vehicle(BaseModel):
     peak = db.Column(db.String(length=64), nullable=True)
     stops = db.Column(db.Integer,nullable=True)
     uturn = db.Column(db.Boolean,nullable=True)
-    hour = db.Column(db.Integer, nullable=True)
-    peak = db.Column(db.String(length=64), nullable=True)
     #travel_direction = db.Column(Enum(TravelDirection), nullable=True) # Not JSON Serializable
     #approach_direction = db.Column(Enum(ApproachDirection), nullable=True) # Not JSON Serializable
 
@@ -181,8 +179,8 @@ class Vehicle(BaseModel):
         if TravelTimeMinimum is not None: query = query.filter(Vehicle.travel_time >= TravelTimeMinimum)
         if TravelTimeMaximum is not None: query = query.filter(Vehicle.travel_time <= TravelTimeMaximum)
         if ExitStatus is not None: query = query.filter(Vehicle.exit_status == ExitStatus)
-        if Peak is not None: query = query.filter(Vehicle.Peak == Peak)
-        if Hour is not None: query = query.filter(Vehicle.Hour.in_(Hour))
+        if Peak is not None: query = query.filter(Vehicle.peak == Peak)
+        if Hour is not None: query = query.filter(Vehicle.hour.in_(Hour))
 
         result = query.all()
         return [c.as_dict() for c in result], 200

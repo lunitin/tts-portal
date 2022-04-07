@@ -108,7 +108,7 @@ class peakScatterPlot(Resource):
         peakScatter=px.scatter(
             data_frame=df,
             x= 'hour',
-            y= 'Delay',
+            y= 'delay',
             title= " Broward "+ str(args['signal']) + " Delay by Hour",
             opacity= 0.1,
             trendline="lowess",
@@ -139,16 +139,16 @@ class TotalDelayChart(Resource):
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
 
-        df.rename(columns = {'delay': 'Delay'}, inplace = True)
+        #df.rename(columns = {'delay': 'Delay'}, inplace = True)
 
         # Get total crossings
         delayCrossingsStr = "Total Crossings: {}".format(df.shape[0])
 
         # Get average delay
-        avgDelayStr = "Average Delay: {} (sec/veh)".format(int(df['Delay'].mean()))
+        avgDelayStr = "Average Delay: {} (sec/veh)".format(int(df['delay'].mean()))
 
         # Get total delay in hours (3600 seconds per hour)
-        totalDelay = int(df['Delay'].sum()/3600)
+        totalDelay = int(df['delay'].sum()/3600)
         totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
 
         morningDf = df[df['peak'] == 'Morning']
@@ -157,19 +157,19 @@ class TotalDelayChart(Resource):
         otherDf = df[df['peak'] == 'Other']
 
         # Have to delay in hours
-        morningDelay = int(morningDf['Delay'].sum()/3600)
-        middayDelay = int(middayDf['Delay'].sum()/3600)
-        eveningDelay = int(eveningDf['Delay'].sum()/3600)
-        otherDelay = int(otherDf['Delay'].sum()/3600)
+        morningDelay = int(morningDf['delay'].sum()/3600)
+        middayDelay = int(middayDf['delay'].sum()/3600)
+        eveningDelay = int(eveningDf['delay'].sum()/3600)
+        otherDelay = int(otherDf['delay'].sum()/3600)
 
         # Now combine all into a new dataframe
-        d = {'Delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'peak': ['Morning', 'Midday', 'Evening', 'Other']}
+        d = {'delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'peak': ['Morning', 'Midday', 'Evening', 'Other']}
         newDf = pd.DataFrame(data=d)
 
         # Create delay pie chart
-        fig=px.pie(
+        fig_delay=px.pie(
             data_frame=newDf,
-            values='Delay',
+            values='delay',
             names="peak",
             color="peak",
             hole=.5,
@@ -178,7 +178,7 @@ class TotalDelayChart(Resource):
         )
 
         return {
-            'plot': plotly.io.to_json(fig),
+            'plot': plotly.io.to_json(fig_delay),
             'delayCrossingsStr': delayCrossingsStr,
             'avgDelayStr': avgDelayStr,
             'totalDelayStr': totalDelayStr
@@ -216,7 +216,7 @@ class SplitPieChart(Resource):
         splitFailure=px.pie(
             data_frame=df,
             names="peak",
-            color="Peak",
+            color="peak",
             hole=.5,
             title="Broward " + str(args['signal']) + " Split Failure By Peak",
             color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
@@ -246,14 +246,16 @@ class MovementBarChart(Resource):
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
-        df = df[df["ApproachDirection"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
+        df = df[df["approach_direction"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
+        df = df[df['travel_direction'].isin(['Right'])]
+        print(df['travel_direction'])
         moveM=px.histogram(
             data_frame=df,
-            x= 'ApproachDirection',
-            y= 'Delay',
-            title= "Broward " + str[args['signal']] + " Delay by Movement",
-            facet_col="TravelDirection",
-            color="peak",
+            x= 'approach_direction',
+            y= 'delay',
+            title= "Broward " + str(args['signal']) + " Delay by Movement",
+            facet_col="travel_direction",
+            color="peak"
         )
 
         return {
