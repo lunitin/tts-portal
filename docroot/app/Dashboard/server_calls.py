@@ -63,7 +63,7 @@ def get_splitPieChart(signal, day, approach, tdirection):
             'tdirection': str(tdirection)
         }).json()
     p = plotly.io.from_json(data['plot'])
-    return p, data['splitCrossingsStr'], data['totalSplitFailureStr'], data['SplitRateStr']
+    return p, data['splitCrossings'], data['totalSplitFailure'], data['splitRate']
 
 def get_movementBarChart(signal, day, approach, tdirection):
     data = requests.get(

@@ -88,8 +88,8 @@ coverage = coverages_ns.model('Coverage', {
 })
 
 @dashboard_ns.route('/dashboard/peakScatterPlot')
-class PeakScatterPlot(Resource):
-    @dashboard_ns.doc('Get PeakScatterPlot information')
+class peakScatterPlot(Resource):
+    @dashboard_ns.doc('Get peakScatterPlot information')
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('signal', type=int)
@@ -104,10 +104,10 @@ class PeakScatterPlot(Resource):
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
-    
+
         peakScatter=px.scatter(
             data_frame=df,
-            x= 'Hour',
+            x= 'hour',
             y= 'Delay',
             title= " Broward "+ str(args['signal']) + " Delay by Hour",
             opacity= 0.1,
@@ -138,7 +138,7 @@ class TotalDelayChart(Resource):
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
-        
+
         df.rename(columns = {'delay': 'Delay'}, inplace = True)
 
         # Get total crossings
@@ -151,10 +151,10 @@ class TotalDelayChart(Resource):
         totalDelay = int(df['Delay'].sum()/3600)
         totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
 
-        morningDf = df[df['Peak'] == 'Morning']
-        middayDf = df[df['Peak'] == 'Midday']
-        eveningDf = df[df['Peak'] == 'Evening']
-        otherDf = df[df['Peak'] == 'Other']     
+        morningDf = df[df['peak'] == 'Morning']
+        middayDf = df[df['peak'] == 'Midday']
+        eveningDf = df[df['peak'] == 'Evening']
+        otherDf = df[df['peak'] == 'Other']
 
         # Have to delay in hours
         morningDelay = int(morningDf['Delay'].sum()/3600)
@@ -163,25 +163,25 @@ class TotalDelayChart(Resource):
         otherDelay = int(otherDf['Delay'].sum()/3600)
 
         # Now combine all into a new dataframe
-        d = {'Delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'Peak': ['Morning', 'Midday', 'Evening', 'Other']}
+        d = {'Delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'peak': ['Morning', 'Midday', 'Evening', 'Other']}
         newDf = pd.DataFrame(data=d)
 
         # Create delay pie chart
         fig=px.pie(
             data_frame=newDf,
             values='Delay',
-            names="Peak",
-            color="Peak",
+            names="peak",
+            color="peak",
             hole=.5,
-            title="Broward " + str(args['signal']) + " Total Delay (hours) By Peak",
+            title="Broward " + str(args['signal']) + " Total Delay (Hours) By Peak",
             color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
         )
-            
+
         return {
             'plot': plotly.io.to_json(fig),
             'delayCrossingsStr': delayCrossingsStr,
             'avgDelayStr': avgDelayStr,
-            'totalDelayStr': totalDelayStr 
+            'totalDelayStr': totalDelayStr
         }
 
 @dashboard_ns.route('/dashboard/splitPieChart')
@@ -221,12 +221,12 @@ class SplitPieChart(Resource):
             title="Broward " + str(args['signal']) + " Split Failure By Peak",
             color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
         )
-        
+
         return {
             'plot': plotly.io.to_json(splitFailure),
             'splitCrossings': splitCrossings,
             'totalSplitFailure': totalSplitFailure,
-            'SplitRate': SplitRate
+            'splitRate': SplitRate
         }
 
 @dashboard_ns.route('/dashboard/movementBarChart')
@@ -253,9 +253,9 @@ class MovementBarChart(Resource):
             y= 'Delay',
             title= "Broward " + str[args['signal']] + " Delay by Movement",
             facet_col="TravelDirection",
-            color="Peak",
+            color="peak",
         )
-        
+
         return {
             'plot': plotly.io.to_json(moveM)
         }
@@ -344,7 +344,7 @@ class User_Coverages(Resource):
             return make_response(user.fetch_coverages(), 200)
         else:
             return make_response(NOT_FOUND.format('user_id', id), 404)
-        
+
 
 
     @user_ns.doc("Add list of Coverages to User")
@@ -510,8 +510,8 @@ class Vehicle(Resource):
         new_vehicle.travel_direction    = data.get('travel_direction', None)
         new_vehicle.coverage_id         = data.get('coverage_id', None)
         new_vehicle.signal_id           = data.get('signal_id', None)
-        new_vehicle.Peak                = data.get('Peak', None)
-        new_vehicle.Hour                = data.get('Hour', None)
+        new_vehicle.peak                = data.get('peak', None)
+        new_vehicle.hour                = data.get('hour', None)
         '''
         coverage = db_Coverage.find_by_id(data.get('coverage_id', None))
         if coverage:
