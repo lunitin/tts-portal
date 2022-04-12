@@ -337,7 +337,7 @@ def movementBarChart(light, day, approach, tdirection):
     return moveM
 
 def scatterPlot(light, day, approach, tdirection):
-    peakScatter = get_peakScatterPlot
+    peakScatter = get_peakScatterPlot(light, day, approach, tdirection)
     # dff = df.copy()
     # dff = dff[dff["Day"] == day]
 
@@ -389,8 +389,7 @@ def init_callbacks(dash_app):
         totalDelay = totalDelayChart('3084', day, approach, tdirection)
         peakScatter = scatterPlot('3084', day, approach, tdirection)
         #movement = movementBarChart('3084', day, approach, tdirection)
-        #return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, movement
-        return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, peakScatter
+        return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, arrivalRates[0]
         #movement commented out in return
 
     # This callback uses the above function to return what belongs on the page
