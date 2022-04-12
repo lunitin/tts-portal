@@ -209,7 +209,7 @@ class SplitPieChart(Resource):
 
         splitCrossings = df.shape[0]
 
-        tempDf = df[df["SplitFailure"].isin(["Yes"])]
+        tempDf = df[df["SplitFailure"].isin([True])]
         totalSplitFailure = tempDf.shape[0]
         SplitRate = int((totalSplitFailure/df.shape[0])*100)
 
