@@ -166,9 +166,11 @@ class TotalDelayChart(Resource):
         d = {'delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'peak': ['Morning', 'Midday', 'Evening', 'Other']}
         newDf = pd.DataFrame(data=d)
 
+        print(df)
+
         # Create delay pie chart
         fig_delay=px.pie(
-            data_frame=newDf,
+            data_frame=df,
             values='delay',
             names="peak",
             color="peak",
