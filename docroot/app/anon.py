@@ -21,12 +21,12 @@ anon = Blueprint('anon', __name__)
 
 """
 Default home page route
-"""
+
 @anon.route('/')
 def index():
-    print(current_user, flush=True)
-    return render_template('index.html')
 
+    return render_template('index.html')
+"""
 
 """
 Display the login form
