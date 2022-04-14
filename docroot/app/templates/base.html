@@ -8,11 +8,21 @@
     <!-- Required JavaScript -->
 
     <!-- Bootstrap CSS -->
+    <!--
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
       integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
       crossorigin="anonymous"
+    /> -->
+    <link
+      href="{{ url_for('static', filename='css/bootstrap.css') }}"
+      rel="stylesheet"
+    />
+    <!-- Local CSS -->
+    <link
+      href="{{ url_for('static', filename='css/core.css') }}"
+      rel="stylesheet"
     />
 
     <title>
@@ -20,20 +30,29 @@
     </title>
   </head>
   <body>
-    <div class="container-fluid p-0 mb-3">
+    <div class="container-fluid p-0">
       {% include 'topnav.html' %}
     </div>
-    <div class="container-fluid">
-      {% include 'alerts.html' %}
-    </div>
-    <div class="container-fluid">
-      {% block content %} {% endblock %}
-    </div>
-    <!-- Lazy Load JavaScript -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
-      crossorigin="anonymous"
-    ></script>
+    <main {% block attr_main %} {% endblock %}>
+      <div class="main-page_title container-fluid mb-3">
+        <div class="row">
+          <div class="col">
+            <h1 class="p-4">{% block page_title %} {% endblock %}</h1>
+          </div>
+        </div>
+      </div>
+      <div class="container-fluid">
+        {% include 'alerts.html' %}
+      </div>
+      <div class="container-fluid">
+        {% block content %} {% endblock %}
+      </div>
+      <!-- Lazy Load JavaScript -->
+      <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+        crossorigin="anonymous"
+      ></script>
+    </main>
   </body>
 </html>
