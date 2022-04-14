@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user, logout_user
 from functools import wraps
 from . import db, strings
-from .models import User, Coverage, Signal, Region 
+from .models import User, Coverage, Signal, Region, access_table
 from sqlalchemy import func, distinct
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -137,14 +137,14 @@ Authenticated Coverage Management Page
 @login_required
 @admin_required
 def coverages():
-    users = User.query.all()
+    users = User.query.filter(User.security_level == 0).all()
 
     #Coverage query results with number of signals associated with them. 
     coverages = Coverage.query.all()
     #Coverage.query.join(Signal, Coverage.coverage_id == Signal.coverage_id, isouter = True).with_entities(Coverage.coverage_id, Coverage.coverage_name, func.count(distinct(Signal.signal_number)).label("numSignals")).all()
     
     #Regions 
-    regions = Region.query.all()
+    regions = Region.query.filter(Region.coverage_id == None)
     return render_template('coverageMgmt.html', userdata = users, coveragedata = coverages, regionData = regions)
 
 
@@ -162,8 +162,9 @@ def coverage(coverage_id):
     regions = Region.query.filter(Region.coverage_id == coverage_id)
 
     #Get all users that have access to coverage area. 
-    # accesses = User.query.join(Access).where(Access.id == id).all() accessdata = accesses,
-    return render_template('coverage.html', coveragedata = coverage, regionData = regions)
+    users = User.query.filter(User.coverages.any(id = coverage_id))
+
+    return render_template('coverage.html', coveragedata = coverage, regionData = regions, accessdata = users)
 
 """
 Authenticated Coverage Region Page
@@ -188,24 +189,42 @@ Add User(s) to Coverage.
 @login_required
 @admin_required
 def add_coverage():
+    #Selected users to add to coverage
     multi_select = request.form.getlist('selectUserList')
-    coverage_select_id = request.form.get('selectCoverageId')
-    error = None
+    #selected coverage to add users to
+    coverage_select_id = request.form.getlist('selectCoverageId')
 
-    coverage = Coverage.query.get(coverage_select_id)
+    coverage = Coverage.query.get(coverage_select_id[0])
 
+    #loop to add each user to coverage. 
     for selected_user in multi_select:
         user = User.query.get(selected_user)
-        new_access = user.coverages.append(coverage)
-        if (new_access):
-            flash("Users were successfully added to " + coverage.coverage_name, 'success')
-            return redirect(url_for('admin.coverages'))
+        new_access = User.add_coverages(user,coverage_select_id)
+        if (new_access == 0):
+            flash("User(s) were successfully added to " + coverage.coverage_name, 'success')
+            db.session.commit()
         else:
-            flash("Users were not added to " + coverage.coverage_name, 'danger')
-            return redirect(url_for('admin.coverages'))
+            flash(selected_user + " was not added to " + coverage.coverage_name, 'danger')
+            
+    return redirect(url_for('admin.coverages'))
 
-
-    
+"""
+Delete User From Coverage. 
+"""
+@admin.route('/delete-access/<int:coverage_id>/<int:user_id>')
+@login_required
+@admin_required
+def delete_access(coverage_id, user_id):
+    #Selected user to remove from coverage
+    selected_user = User.query.get(user_id)
+    coverage = Coverage.query.get(coverage_id)
+    result = User.remove_coverages(selected_user, [str(coverage_id)])
+    if(result == 0):
+        flash(selected_user.first_name + "'s access was removed from" + coverage.coverage_name, 'success')        
+        db.session.commit()
+    else :
+        flash(selected_user.first_name + "'s access was not removed from" + coverage.coverage_name, 'danger')        
+    return redirect(url_for('admin.coverage', coverage_id=coverage_id))
 
 """
 Add New Coverage. 
@@ -214,21 +233,117 @@ Add New Coverage.
 @login_required
 @admin_required
 def create_coverage():
-    multi_select_signals = request.form.getlist('add_signal')
-    coverage_select_name = request.form.get('create_coverage_name')
+    create_coverage_name = request.form.get('create_coverage_name')
+    multi_select_region = request.form.getlist('add_region')
     error = None
 
-    # valid_coverage = Coverage.query.filter(Coverage.coverage_name = coverage_select_name)
-
-    new_coverage = Coverage(coverage_id = None, coverage_name = coverage_select_name)
+    new_coverage = Coverage(id = None, coverage_name = create_coverage_name)
     db.session.add(new_coverage)
+    db.session.commit()  
 
-    # for id in multi_select:
-    #     user = User.query.get(id)
-    #     new_access = Access(access_id = None, id = user.id, coverage_id = coverage.coverage_id)
-    #     db.session.add(new_access)
+    for selected_region in multi_select_region:
+        region = Region.query.get(selected_region)
+        #set region coverage id.  
+        region.coverage_id = new_coverage.id
+        db.session.commit()  
 
+    flash(create_coverage_name + " was successfully added!", 'success')
+    return redirect(url_for('admin.coverages'))
+
+
+"""
+Delete Coverage. 
+"""
+@admin.route('/coverage-delete/<int:coverage_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_coverage(coverage_id):
+    coverage_delete = Coverage.query.get(coverage_id)
+    #Null regions with coverage_id that is being deleted. 
+    Region.query.filter(Region.coverage_id == coverage_delete.id).update({Region.coverage_id: None})
+    db.session.delete(coverage_delete)
     db.session.commit()
 
-    flash(coverage_select_name + " was successfully added!", 'success')
+    flash("Coverage deleted Successfully", 'success')
     return redirect(url_for('admin.coverages'))
+
+
+"""
+Remove Region From Coverage. 
+"""
+@admin.route('/region-remove/<int:region_id>/<int:coverage_id>')
+@login_required
+@admin_required
+def remove_region(region_id, coverage_id):
+    remove_region = Region.query.get(region_id)
+    #Null regions with coverage_id that is being deleted. 
+    remove_region.coverage_id = None
+    db.session.commit()
+
+    flash("Region removed Successfully", 'success')
+    return redirect(url_for('admin.coverage', coverage_id=coverage_id))
+
+"""
+Add Region to Coverage. 
+"""
+@admin.route('/coverage-add-region', methods=['POST'])
+@login_required
+@admin_required
+def add_region():
+    #Query Coverage and Region to add. 
+    multi_select_region = request.form.getlist('selectRegionAdd')
+    coverage_select_id = request.form.get('selectCoverageRegionAdd')
+    coverage = Coverage.query.get(coverage_select_id)
+    
+    if coverage:
+        for region_id in multi_select_region:
+            region = Region.query.get(region_id)
+            #Set region coverage id to add.  
+            region.coverage_id = coverage.id
+            db.session.commit()
+            flash("Region Added to " + coverage.coverage_name + " Successfully", 'success')
+    else:
+        flash("Error adding region to " + coverage.coverage_name, 'danger')
+    
+    return redirect(url_for('admin.coverages'))
+
+"""
+Add Region
+"""
+@admin.route('/region-add', methods=['POST'])
+@login_required
+@admin_required
+def create_region(region_id):
+    create_region_name = request.form.get('region_name')
+
+    new_region = Region(id = None,
+                        region_name = create_region_name,
+                        coverage_id = None)
+    db.session.add(new_region)
+    db.session.commit()
+
+    flash("Region created Successfully", 'success')
+    return redirect(url_for('admin.coverages'))
+
+"""
+Remove Region
+"""
+@admin.route('/region-delete/<int:region_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_region(region_id):
+    delete_region = Region.query.get(region_id)
+    db.session.delete(delete_region)
+    db.session.commit()
+
+    flash("Region deleted Successfully", 'success')
+    return redirect(url_for('admin.coverages'))
+
+# """
+# Add Signal to Region
+# """
+# @admin.route('/signal-add/<int:region_id>', methods=['POST'])
+# @login_required
+# @admin_required
+# def add_region_signal(region_id):
+#     

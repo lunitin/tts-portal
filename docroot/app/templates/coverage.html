@@ -19,6 +19,11 @@
                 {% for region in regionData %} 
                 <tr class="clickable" type="submit" name="action" onclick="window.location='/coverage-management/{{coverage.id}}/region/{{region.id}}'">
                   <td>{{region.region_name}}</td>
+                  <td>
+                    <div class="col-xs-6">
+                      <a href="/region-remove/{{region.id}}/{{coverage.id}}" method="POST">Remove</a>
+                    </div>
+                  </td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -40,6 +45,11 @@
                 <td>{{user.first_name}}, {{user.last_name}}</td>
                 <td>{{user.email_address}}</td>
                 <td>{{user.security_level}}</td>
+                <td>
+                  <div class="col-xs-6">
+                    <a href="/delete-access/{{coverage.id}}/{{user.id}}" method="POST">Delete</a>
+                  </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

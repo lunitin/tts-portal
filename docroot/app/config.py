@@ -9,7 +9,7 @@ This file should have all of the same parameters as in config.py but sanitized.
 """
 
 # Web Application URL - no trailing slash
-WEBSITE_BASE_URL = "http://localhost:8000"
+WEBSITE_BASE_URL = "http://localhost:8080"
 
 # Flask-Session Configuration
 SESSION_KEY = "w057tweifvsk;erbg1[935fzsdknvbqo;34]"
