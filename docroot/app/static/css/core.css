@@ -1,0 +1,26 @@
+.navbar-brand img {
+  height: 60px;
+  margin: 10px;
+}
+
+.nav-link {
+  font-size: 1.3em;
+}
+
+.main-login {
+  background: url("/images/login_splash.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+/* No H1 on the login page */
+.main-login .main-page_title {
+  display: none;
+}
+
+.main-page_title {
+  background: #1e2330;
+  color: white;
+  font-size: 2em;
+}
