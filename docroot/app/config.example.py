@@ -30,4 +30,6 @@ MAIL_DEBUG = False
 # itsdangerous Configuration
 # Multiple keys will be used in order and can be rotated out over time
 # See https://itsdangerous.palletsprojects.com/en/2.1.x/concepts/#key-rotation
-SECRET_KEYS = ["ffcd9d345f4dc8e"]
+IDS_SECRET_KEYS = ["secret.code.here"]
+
+IDS_FORGOT_PASSWORD_VALIDITY_TIMER = 1800 # seconds
