@@ -213,12 +213,18 @@ class Region(BaseModel):
 
     def get_id(self):
         return (self.region_id)
+    
+    def get_signals_from_region(self):
+        return json.dumps([c.as_dict() for c in self.signals])
 
 
 class Coverage(BaseModel):
     __tablename__ = 'coverages'
     coverage_name = db.Column(db.String(length=24), nullable=False)
     regions = db.relationship('Region', backref='coverage', lazy='subquery')
+
+    def get_regions_from_coverage(self):
+        return json.dumps([c.as_dict() for c in self.regions])
 
     # def add_signals(self, signals, delete_old):
     #     if delete_old == True:

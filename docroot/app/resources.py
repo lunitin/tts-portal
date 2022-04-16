@@ -5,6 +5,7 @@ from .models import User as db_User
 from .models import Vehicle as db_Vehicle
 from .models import Signal as db_Signal
 from .models import Coverage as db_Coverage
+from .models import Region as db_Region
 from flask_restx import Api
 import pandas as pd
 import plotly.express as px
@@ -30,6 +31,8 @@ signal_ns = Namespace('signal', description="Signal related operations", path='/
 signals_ns = Namespace('signals', description='Signals related operations', path='/api')
 coverage_ns = Namespace('coverage', description="Coverage related operations", path='/api')
 coverages_ns = Namespace('coverages', description='Coverages related operations', path='/api')
+region_ns = Namespace('region', description="Region related operations", path='/api')
+regions_ns = Namespace('regions', description='Regions related operations', path='/api')
 dashboard_ns = Namespace('dashboard', description='Dashboard fetching operations', path='/api')
 
 api.add_namespace(user_ns)
@@ -40,6 +43,8 @@ api.add_namespace(signal_ns)
 api.add_namespace(signals_ns)
 api.add_namespace(coverage_ns)
 api.add_namespace(coverages_ns)
+api.add_namespace(region_ns)
+api.add_namespace(regions_ns)
 api.add_namespace(dashboard_ns)
 
 user = users_ns.model('User', {
@@ -84,6 +89,12 @@ signal = signals_ns.model('Signal', {
 coverage = coverages_ns.model('Coverage', {
     'id': fields.Integer(required=False),
     'coverage_name': fields.String(default="this"),
+    'regions': fields.List(fields.Integer, default=None)
+})
+
+region = regions_ns.model('Region', {
+    'id': fields.Integer(required=False),
+    'region_name': fields.String(default="this"),
     'signals': fields.List(fields.Integer, default=None)
 })
 
@@ -151,22 +162,6 @@ class TotalDelayChart(Resource):
         totalDelay = int(df['delay'].sum()/3600)
         totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
 
-        morningDf = df[df['peak'] == 'Morning']
-        middayDf = df[df['peak'] == 'Midday']
-        eveningDf = df[df['peak'] == 'Evening']
-        otherDf = df[df['peak'] == 'Other']
-
-        # Have to delay in hours
-        morningDelay = int(morningDf['delay'].sum()/3600)
-        middayDelay = int(middayDf['delay'].sum()/3600)
-        eveningDelay = int(eveningDf['delay'].sum()/3600)
-        otherDelay = int(otherDf['delay'].sum()/3600)
-
-        # Now combine all into a new dataframe
-        d = {'delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'peak': ['Morning', 'Midday', 'Evening', 'Other']}
-        newDf = pd.DataFrame(data=d)
-
-        print(df)
 
         # Create delay pie chart
         fig_delay=px.pie(
@@ -249,8 +244,6 @@ class MovementBarChart(Resource):
                                         Day=[args['day']])
         df = pd.DataFrame.from_dict(vehicles)
         df = df[df["approach_direction"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
-        df = df[df['travel_direction'].isin(['Right'])]
-        print(df['travel_direction'])
         moveM=px.histogram(
             data_frame=df,
             x= 'approach_direction',
@@ -339,11 +332,17 @@ class User(Resource):
             return make_response(NOT_FOUND.format('coverage ', id), 404)
 
 
-@user_ns.route('/users/<int:id>/coverages')
+
+# THIS FUNCTION NEEDS WRAPPER
+# only user user.id can access this endpoint and admins
+@user_ns.route('/users/coverages')
 class User_Coverages(Resource):
     @user_ns.doc("Get all User Coverages")
-    def get(self, id):
-        user = db_User.find_by_id(id)
+    def get(self):
+        #print("cookies: {}".format(request.cookies))
+        api_key = request.headers.get('Authorization')
+        print("api key: {}".format(api_key))
+        user = db_User.find_by_id(1)
         if user:
             return make_response(user.fetch_coverages(), 200)
         else:
@@ -594,6 +593,28 @@ class Signal(Resource):
             return make_response(NOT_FOUND.format('signal_id', id), 404)
 
         return signal.save_to_db()
+
+
+
+@regions_ns.route('/coverages/regions/<int:id>')
+class Regions_from_Coverage(Resource):
+    @regions_ns.doc('Fetch all regions from coverage id')
+    def get(self, id):
+        coverage = db_Coverage.find_by_id(id)
+        if coverage:
+            return(coverage.get_regions_from_coverage())
+        else:
+            return make_response(NOT_FOUND.format('coverage_id', id, 404))
+    
+@signals_ns.route('/regions/signals/<int:id>')
+class Signals_from_Region(Resource):
+    @signals_ns.doc('Fetch all signals from region id')
+    def get(self, id):
+        region = db_Region.find_by_id(id)
+        if region:
+            return(region.get_signals_from_region())
+        else:
+            return make_response(NOT_FOUND.format('region_id', id, 404))
 
 @signals_ns.route('/signals')
 class SignalList(Resource):
