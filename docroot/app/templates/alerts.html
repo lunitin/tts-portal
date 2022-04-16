@@ -1,6 +1,9 @@
 {% with messages = get_flashed_messages(category_filter=["danger"]) %} {% if
 messages %}
-<div class="alert alert-danger d-flex justify-content-end w-100" role="alert">
+<div
+  class="alert alert-danger alert-dismissible d-flex justify-content-end w-100"
+  role="alert"
+>
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
@@ -16,7 +19,10 @@ messages %}
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["warning"]) %} {% if messages %}
-<div class="alert alert-warning d-flex justify-content-end w-100" role="alert">
+<div
+  class="alert alert-warning alert-dismissible d-flex justify-content-end w-100"
+  role="alert"
+>
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
@@ -33,7 +39,7 @@ get_flashed_messages(category_filter=["warning"]) %} {% if messages %}
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["secondary"]) %} {% if messages %}
 <div
-  class="alert alert-secondary d-flex justify-content-end w-100"
+  class="alert alert-secondary alert-dismissible d-flex justify-content-end w-100"
   role="alert"
 >
   <ul class="m-0">
@@ -51,7 +57,10 @@ get_flashed_messages(category_filter=["secondary"]) %} {% if messages %}
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["success"]) %} {% if messages %}
-<div class="alert alert-success d-flex justify-content-end w-100" role="alert">
+<div
+  class="alert alert-success alert-dismissible d-flex justify-content-end w-100"
+  role="alert"
+>
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
@@ -67,7 +76,10 @@ get_flashed_messages(category_filter=["success"]) %} {% if messages %}
 </div>
 {% endif %} {% endwith %}{% with messages =
 get_flashed_messages(category_filter=["info"]) %} {% if messages %}
-<div class="alert alert-info d-flex justify-content-end w-100" role="alert">
+<div
+  class="alert alert-info alert-dismissible d-flex justify-content-end w-100"
+  role="alert"
+>
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
@@ -83,7 +95,10 @@ get_flashed_messages(category_filter=["info"]) %} {% if messages %}
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["light"]) %} {% if messages %}
-<div class="alert alert-light d-flex justify-content-end w-100" role="alert">
+<div
+  class="alert alert-light alert-dismissible d-flex justify-content-end w-100"
+  role="alert"
+>
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
@@ -99,7 +114,10 @@ get_flashed_messages(category_filter=["light"]) %} {% if messages %}
 </div>
 {% endif %} {% endwith %} {% with messages =
 get_flashed_messages(category_filter=["dark"]) %} {% if messages %}
-<div class="alert alert-dark d-flex justify-content-end w-100" role="alert">
+<div
+  class="alert alert-dark alert-dismissible d-flex justify-content-end w-100"
+  role="alert"
+>
   <ul class="m-0">
     {% for message in messages %}
     <li>{{message}}</li>
