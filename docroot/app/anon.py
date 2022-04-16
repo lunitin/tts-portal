@@ -12,14 +12,20 @@ from itsdangerous.exc import BadSignature, BadData, SignatureExpired
 import base64
 import smtplib
 import json
+import random
+import os
+import fnmatch
 
 from . import db, config, strings, mail
 from .models import User
 
 anon = Blueprint('anon', __name__)
 
+# Fetch splash screen image list
+splash_images = fnmatch.filter(os.listdir('app/static/images/splash'), '*')
 
 """
+Moved to auth.py /dashboard
 Default home page route
 
 @anon.route('/')
@@ -33,7 +39,8 @@ Display the login form
 """
 @anon.route('/login', methods=['GET'])
 def login():
-    return render_template('login.html')
+
+    return render_template('login.html', image = random.choice(splash_images))
 
 
 """
@@ -65,7 +72,7 @@ Route to request a password change
 """
 @anon.route('/forgot-password', methods=['GET'])
 def forgot_password():
-    return render_template('forgotpassword.html')
+    return render_template('forgotpassword.html', image = random.choice(splash_images))
 
 
 """
@@ -81,7 +88,7 @@ def forgot_password_post():
 
     if not user:
         flash(strings.ERROR_FORGOT_PASSWORD_USER_NOT_FOUND, 'danger')
-        return render_template(template)
+        return render_template(template, image = random.choice(splash_images))
 
     # Generate a magic link
     try:
@@ -94,7 +101,7 @@ def forgot_password_post():
     except BaseException:
         # @TODO Add more robust exception handling
         flash(strings.ERROR_TOKEN_GENERATION, 'danger')
-        return render_template(template)
+        return render_template(template, image = random.choice(splash_images))
 
     # Only send recovery if it is a valid user and token
     if user and token:
@@ -117,7 +124,7 @@ def forgot_password_post():
     else:
         flash(strings.ERROR_FORGOT_PASSWORD_USER_NOT_FOUND, 'danger')
 
-    return render_template(template)
+    return render_template(template, image = random.choice(splash_images))
 
 
 """
@@ -147,7 +154,7 @@ def recover_password():
 
     #print("Verified Payload: ", payload)
 
-    return render_template(template, token=raw_token)
+    return render_template(template, token=raw_token, image = random.choice(splash_images))
 
 
 """
@@ -173,7 +180,6 @@ def recover_password_post():
     # Try to decode and verify the token timestamp
     try:
         payload = s.loads(token)
-        print("Payload: ", payload)
     except SignatureExpired:
         flash(strings.ERROR_TOKEN_EXPIRED, 'danger')
         return redirect(url_for('anon.forgot_password'))
@@ -183,7 +189,7 @@ def recover_password_post():
     ## end
 
     # Load the user found in the token
-    user = User.query.filter_by(user_id=payload['id']).first()
+    user = User.query.filter_by(id=payload['id']).first()
 
     # If user is found, try to reset password
     if user:
