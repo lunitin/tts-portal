@@ -1,6 +1,12 @@
-{% extends "base.html" %} {% block attr_main %} class="main-login" {% endblock
-%} {% block content %}
+{% extends "base.html" %} {% block html_title %} Login {% endblock %} {% block
+attr_main %} class="main-login" {% endblock %} {% block content %}
 
+<style>
+  .main-login {
+    background: url(images/splash/{{image}});
+    background-size: cover;
+  }
+</style>
 <div class="container">
   <div class="row">
     <div class="col-md-4 offset-md-8">

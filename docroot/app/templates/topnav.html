@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="{{ url_for('auth.dashboard') }}">
       <img
-        src="/images/primaryfullcolor-3x.png"
+        src="/images/ttslogo.png"
         alt="Traffic Technology
       Services"
       />
@@ -21,7 +21,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav justify-content-end w-100">
         {% if current_user.is_authenticated %}
-        <!--
+        <!-- Is this necessary?
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('auth.dashboard')}}"
             >Dashboard</a
