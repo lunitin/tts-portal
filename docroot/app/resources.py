@@ -288,14 +288,14 @@ class PieChart(Resource):
         df.filter(['RedArrival'])
         df = df[df['RedArrival'].isin([True, False])]
         arrivalCrossings = df.shape[0]
-        greenArrivalRate = (sum(df['RedArrival'] == False) / (arrivalCrossings + 1)) * 100
+        greenArrivalRate = round((sum(df['RedArrival'] == False) / (arrivalCrossings + 1)) * 100, 2)
 
         arrivalRates=px.pie(
             data_frame=df,
             names="RedArrival",
             color="RedArrival",
             hole=.5,
-            title="Broward " + str(args['signal']) + " Arrival Rates",
+            title="Broward " + str(args['signal']) + "Red Arrival Rates",
             color_discrete_map={'True':'Red', 'False':'#90ee90'}
         )
 

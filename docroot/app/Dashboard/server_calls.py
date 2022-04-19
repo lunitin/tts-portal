@@ -5,10 +5,10 @@ from flask_login import current_user
 BASE_URL = 'http://localhost:80/api/'
 
 def get_coverages_by_user():
-    coverages_by_current_user_id = requests.get(BASE_URL+'users/coverages').json()
-    coverage_list = []
-    for coverage in coverages_by_current_user_id:
-        coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['coverage_name']})
+    # coverages_by_current_user_id = requests.get(BASE_URL+'users/coverages').json()
+    # coverage_list = []
+    # for coverage in coverages_by_current_user_id:
+    #     coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['coverage_name']})
     #return coverage_list
     return [('district 1', 1),('district 2', 2),('district 5', 5)]
 
