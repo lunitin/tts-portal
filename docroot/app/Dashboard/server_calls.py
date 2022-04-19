@@ -9,7 +9,8 @@ def get_coverages_by_user():
     coverage_list = []
     for coverage in coverages_by_current_user_id:
         coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['coverage_name']})
-    return coverage_list
+    #return coverage_list
+    return [('district 1', 1),('district 2', 2),('district 5', 5)]
 
 def get_regions_by_coverage(id):
     regions_by_coverage_id = requests.get(BASE_URL+'coverages/regions'+str(id)).json()
