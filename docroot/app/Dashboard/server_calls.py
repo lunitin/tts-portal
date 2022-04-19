@@ -14,7 +14,7 @@ def get_coverages_by_user():
 def get_regions_by_coverage(id):
     regions_by_coverage_id = requests.get(BASE_URL+'coverages/regions'+str(id)).json()
     regions_list = []
-    for region in regions_by_region_id:
+    for region in regions_by_coverage_id:
         regions_list.append({'label': region[id], 'value': region[id]})
     return regions_list    
 
@@ -34,6 +34,8 @@ def get_arrivalPieChart(signal, day, approach, tdirection):
             'signal': str(signal),
             'tdirection': str(tdirection)
         }).json()
+    if data == 0:
+        return(0,0,0)
     p = plotly.io.from_json(data['plot'])
     return p, data['greenArrivalRate'], data['arrivalCrossings']
 
@@ -46,6 +48,8 @@ def get_peakScatterPlot(signal, day, approach, tdirection):
             'signal': str(signal),
             'tdirection': str(tdirection)
         }).json()
+    if data == 0:
+        return(0)
     p = plotly.io.from_json(data['plot'])
     return p
 
@@ -58,6 +62,8 @@ def get_totalDelayChart(signal, day, approach, tdirection):
             'signal': str(signal),
             'tdirection': str(tdirection)
         }).json()
+    if data == 0:
+        return(0,0,0,0)
     p = plotly.io.from_json(data['plot'])
     return p, data['delayCrossingsStr'], data['avgDelayStr'], data['totalDelayStr']
 
@@ -70,6 +76,8 @@ def get_splitPieChart(signal, day, approach, tdirection):
             'signal': str(signal),
             'tdirection': str(tdirection)
         }).json()
+    if data == 0:
+        return(0,0,0,0)
     p = plotly.io.from_json(data['plot'])
     return p, data['splitCrossings'], data['totalSplitFailure'], data['splitRate']
 
@@ -82,5 +90,7 @@ def get_movementBarChart(signal, day, approach, tdirection):
             'signal': str(signal),
             'tdirection': str(tdirection)
         }).json()
+    if data == 0:
+        return(0)
     p = plotly.io.from_json(data['plot'])
     return p

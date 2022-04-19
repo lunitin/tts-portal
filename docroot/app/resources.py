@@ -114,6 +114,8 @@ class peakScatterPlot(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
 
         peakScatter=px.scatter(
@@ -148,6 +150,8 @@ class TotalDelayChart(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
 
         #df.rename(columns = {'delay': 'Delay'}, inplace = True)
@@ -197,6 +201,8 @@ class SplitPieChart(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
 
         # code here
@@ -208,7 +214,7 @@ class SplitPieChart(Resource):
 
         tempDf = df[df["SplitFailure"].isin([True])]
         totalSplitFailure = tempDf.shape[0]
-        SplitRate = int((totalSplitFailure/df.shape[0])*100)
+        SplitRate = int((totalSplitFailure/(df.shape[0]+1))*100)
 
         splitFailure=px.pie(
             data_frame=df,
@@ -242,6 +248,8 @@ class MovementBarChart(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
         df = df[df["approach_direction"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
         moveM=px.histogram(
@@ -273,12 +281,14 @@ class PieChart(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
         df.rename(columns = {'red_arrival': 'RedArrival'}, inplace = True)
         df.filter(['RedArrival'])
         df = df[df['RedArrival'].isin([True, False])]
         arrivalCrossings = df.shape[0]
-        greenArrivalRate = (sum(df['RedArrival'] == False) / arrivalCrossings) * 100
+        greenArrivalRate = (sum(df['RedArrival'] == False) / (arrivalCrossings + 1)) * 100
 
         arrivalRates=px.pie(
             data_frame=df,
@@ -374,7 +384,6 @@ class User_Coverages(Resource):
             bad_coverage_id = user.remove_coverages(coverages)
             if bad_coverage_id != 0:
                 return make_response(NOT_FOUND.format('coverage_id', bad_coverage_id), 404)
-
             else:
                 return user.save_to_db()
         else:
