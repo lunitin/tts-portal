@@ -1,8 +1,5 @@
-{% extends "base.html" %} {% block html_title %} Dashboard {% endblock %} {%block content %}
-
-<h1 class="title">
-    Coverage Management
-</h1>
+{% extends "base.html" %} {% block html_title %} Dashboard {% endblock %} {%
+block page_title %} Coverage Management {% endblock %} {%block content %}
 
 <div class="container-fluid">
   <div class="row">
@@ -126,12 +123,9 @@
   </div>
 </div>
 
-
-{% endblock %}
-
-{% block scripts %}
-  <script>
-   $(document).ready(function() {
+{% endblock %} {% block scripts %}
+<script>
+  $(document).ready(function() {
     $("#searchUsr").focus(function() {
       setInterval(function() {
         var keyword = document.getElementById("searchUsr").value;
@@ -140,14 +134,19 @@
           for (var i = 0; i < user_select.length; i++) {
             var text = user_select.options[i].text.toLowerCase();
             if (text.includes(keyword.toLowerCase()) && keyword.trim() !== "") {
-              $(user_select.options[i]).removeAttr('disabled').show();
+              $(user_select.options[i])
+                .removeAttr("disabled")
+                .show();
             } else {
-              $(user_select.options[i]).attr('disabled','disabled').hide();
+              $(user_select.options[i])
+                .attr("disabled", "disabled")
+                .hide();
             }
           }
         } else {
           for (var i = 0; i < user_select.length; i++) {
-            $(user_select.options[i]).removeAttr('disabled')
+            $(user_select.options[i])
+              .removeAttr("disabled")
               .show();
           }
         }
@@ -175,5 +174,5 @@
       }, 300);
     });
   });
-  </script>
+</script>
 {% endblock %}

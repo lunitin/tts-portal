@@ -143,6 +143,8 @@ class Vehicle(BaseModel):
     day = db.Column(db.Integer,nullable=True)
     entry_time = db.Column(db.DateTime, nullable=True)
     exit_time = db.Column(db.DateTime, nullable=True)
+    hour = db.Column(db.Integer, nullable=True)
+    peak = db.Column(db.String(length=64), nullable=True)
     stops = db.Column(db.Integer,nullable=True)
     uturn = db.Column(db.Boolean,nullable=True)
     hour = db.Column(db.Integer, nullable=True)
@@ -161,7 +163,7 @@ class Vehicle(BaseModel):
             Peak=None, Hour=None):
 
         query = db.session.query(Vehicle)
-
+        #print('Day: {}, SignalID: {}, TravelDirection: {}, ApproachDirection: {}'.format(Day, SignalID, TravelDirection, ApproachDirection))
         if EntryTime is not None: query = query.filter(Vehicle.entry_time>=EntryTime)
         if ExitTime is not None: query = query.filter(Vehicle.exit_time<=ExitTime)
         if TravelDirection is not None: query = query.filter(Vehicle.travel_direction==TravelDirection)
@@ -179,18 +181,18 @@ class Vehicle(BaseModel):
         if TravelTimeMinimum is not None: query = query.filter(Vehicle.travel_time >= TravelTimeMinimum)
         if TravelTimeMaximum is not None: query = query.filter(Vehicle.travel_time <= TravelTimeMaximum)
         if ExitStatus is not None: query = query.filter(Vehicle.exit_status == ExitStatus)
-        if Peak is not None: query = query.filter(Vehicle.Peak == Peak)
-        if Hour is not None: query = query.filter(Vehicle.Hour.in_(Hour))
+        if Peak is not None: query = query.filter(Vehicle.peak == Peak)
+        if Hour is not None: query = query.filter(Vehicle.hour.in_(Hour))
 
         result = query.all()
         return [c.as_dict() for c in result], 200
-    
+
 
 class Signal(BaseModel):
     __tablename__ = 'signals'
     region_id = db.Column(db.Integer, db.ForeignKey('region.id'), nullable=True)
     vehicles = db.relationship('Vehicle', backref='signal', lazy='subquery')
-    
+
     def add_vehicles(self, vehicles, delete_old):
         if delete_old == True:
             self.vehicles = []
@@ -201,7 +203,7 @@ class Signal(BaseModel):
             else:
                 return(veh_id)
         return 0 # All were added good
-    
+
     #def remove_vehicles(self, vehicles)
 
 
@@ -213,12 +215,18 @@ class Region(BaseModel):
 
     def get_id(self):
         return (self.region_id)
+    
+    def get_signals_from_region(self):
+        return json.dumps([c.as_dict() for c in self.signals])
 
 
 class Coverage(BaseModel):
     __tablename__ = 'coverages'
     coverage_name = db.Column(db.String(length=24), nullable=False)
     regions = db.relationship('Region', backref='coverage', lazy='subquery')
+
+    def get_regions_from_coverage(self):
+        return json.dumps([c.as_dict() for c in self.regions])
 
     # def add_signals(self, signals, delete_old):
     #     if delete_old == True:
@@ -233,5 +241,5 @@ class Coverage(BaseModel):
     #     else:
     #         self.signals = []
     #     return 0 # All were added good
-    
+
     #def remove_signals(self, signals) # For a later time :)

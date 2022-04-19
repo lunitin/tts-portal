@@ -1,11 +1,17 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block html_title %} Login {% endblock %} {% block
+attr_main %} class="main-login" {% endblock %} {% block content %}
 
+<style>
+  .main-login {
+    background: url(images/splash/{{image}});
+    background-size: cover;
+  }
+</style>
 <div class="container">
   <div class="row">
-    <div class="col-md-4 offset-md-4">
-      <div class="login-form bg-light mt-4 p-4">
+    <div class="col-md-4 offset-md-8">
+      <div class="main-login_form login-form bg-light mt-5 p-4 rounded">
         <form action="/login" method="POST" class="row g-3">
-          <h4>Sign In</h4>
           <div class="col-12">
             <label>E-mail Address</label>
             <input
@@ -38,7 +44,9 @@
             <a href="/forgot-password">Forgot Password</a>
           </div>
           <div class="col-12">
-            <button type="submit" class="btn btn-dark float-end">Login</button>
+            <button type="submit" class="btn btn-primary float-end">
+              Login
+            </button>
           </div>
         </form>
       </div>

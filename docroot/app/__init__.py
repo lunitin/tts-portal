@@ -15,7 +15,7 @@ from . import config
 db = SQLAlchemy()
 
 # Flask App Initialization
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="", static_folder="static")
 
 # Import App Configuration Variables from config.py
 app.config['SECRET_KEY'] = config.SESSION_KEY

@@ -1,0 +1,34 @@
+.navbar-brand img {
+  height: 60px;
+  margin: 10px;
+}
+
+.nav-link {
+  font-size: 1.3em;
+}
+
+.main-login {
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+/* No H1 on the login page */
+.main-login .main-page_title {
+  display: none;
+}
+
+.main-login_form {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.9
+  ) !important; /* Important to override bg-light */
+  box-shadow: 3px 2px rgba(0, 0, 0, 0.4);
+}
+
+.main-page_title {
+  background: #1e2330;
+  color: white;
+  font-size: 2em;
+}
