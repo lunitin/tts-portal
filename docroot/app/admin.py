@@ -240,12 +240,13 @@ def create_coverage():
     new_coverage = Coverage(id = None, coverage_name = create_coverage_name)
     db.session.add(new_coverage)
     db.session.commit()  
-
-    for selected_region in multi_select_region:
-        region = Region.query.get(selected_region)
-        #set region coverage id.  
-        region.coverage_id = new_coverage.id
-        db.session.commit()  
+    
+    if (multi_select_region[0] != ""):
+        for selected_region in multi_select_region:
+                region = Region.query.get(selected_region)
+                #set region coverage id.  
+                region.coverage_id = new_coverage.id
+                db.session.commit()  
 
     flash(create_coverage_name + " was successfully added!", 'success')
     return redirect(url_for('admin.coverages'))
