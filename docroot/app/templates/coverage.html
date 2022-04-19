@@ -1,0 +1,68 @@
+{% extends "base.html" %} {% block content %}
+
+{% for coverage in coveragedata%}
+<h1 class="title">
+    {{coverage.coverage_name}}
+</h1>
+
+<div class="container-fluid shadow p-1 mb-2 rounded">
+  <div class="row">
+    <div class="col">
+        <h3>Regions in Coverage Area</h3>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                  <th>Region</th>
+                  </tr>
+              </thead>    
+              <tbody>
+                {% for region in regionData %} 
+                <tr class="clickable" type="submit" name="action" onclick="window.location='/coverage-management/{{coverage.id}}/region/{{region.id}}'">
+                  <td>{{region.region_name}}</td>
+                  <td>
+                    <div class="col-xs-6">
+                      <a href="/region-remove/{{region.id}}/{{coverage.id}}" method="POST">Remove</a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+    </div>
+    <div class="col">
+      <h3>Users with Access</h3>
+      <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Security Level</th>
+            </tr>
+        </thead>    
+        <tbody>
+            {% for user in accessdata %}    
+            <tr>
+                <td>{{user.first_name}}, {{user.last_name}}</td>
+                <td>{{user.email_address}}</td>
+                <td>{{user.security_level}}</td>
+                <td>
+                  <div class="col-xs-6">
+                    <a href="/delete-access/{{coverage.id}}/{{user.id}}" method="POST">Delete</a>
+                  </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block scripts %}
+  <script>
+  
+  </script>
+{% endblock %}

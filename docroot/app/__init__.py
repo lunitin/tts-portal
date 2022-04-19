@@ -38,13 +38,11 @@ db.init_app(app)
 # Model Initialization (Must be after db init)
 from .models import User
 
-@app.before_first_request
-def create_tables():
+# Not needed with a pre-imported SQL schema
+#@app.before_first_request
+#def create_tables():
     #db.drop_all()
-    db.create_all()
-
-from .resources import api_blueprint
-app.register_blueprint(api_blueprint)
+    #db.create_all()
 
 # Flask-Mail Initialization
 mail = Mail(app)
@@ -64,7 +62,6 @@ def load_user(user_id):
 from .Dashboard.dashboard import init_dashboard
 app = init_dashboard(app)
 
-
 # Anonymous route blueprints
 from .anon import anon as anon_blueprint
 app.register_blueprint(anon_blueprint)
@@ -76,3 +73,7 @@ app.register_blueprint(auth_blueprint)
 # Administrative route blueprints
 from .admin import admin as admin_blueprint
 app.register_blueprint(admin_blueprint)
+
+# API route blueprints
+from .resources import api_blueprint
+app.register_blueprint(api_blueprint)
