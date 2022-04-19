@@ -143,10 +143,10 @@ class Vehicle(BaseModel):
     day = db.Column(db.Integer,nullable=True)
     entry_time = db.Column(db.DateTime, nullable=True)
     exit_time = db.Column(db.DateTime, nullable=True)
-    stops = db.Column(db.Integer,nullable=True)
-    uturn = db.Column(db.Boolean,nullable=True)
     hour = db.Column(db.Integer, nullable=True)
     peak = db.Column(db.String(length=64), nullable=True)
+    stops = db.Column(db.Integer,nullable=True)
+    uturn = db.Column(db.Boolean,nullable=True)
     #travel_direction = db.Column(Enum(TravelDirection), nullable=True) # Not JSON Serializable
     #approach_direction = db.Column(Enum(ApproachDirection), nullable=True) # Not JSON Serializable
 
@@ -179,8 +179,8 @@ class Vehicle(BaseModel):
         if TravelTimeMinimum is not None: query = query.filter(Vehicle.travel_time >= TravelTimeMinimum)
         if TravelTimeMaximum is not None: query = query.filter(Vehicle.travel_time <= TravelTimeMaximum)
         if ExitStatus is not None: query = query.filter(Vehicle.exit_status == ExitStatus)
-        if Peak is not None: query = query.filter(Vehicle.Peak == Peak)
-        if Hour is not None: query = query.filter(Vehicle.Hour.in_(Hour))
+        if Peak is not None: query = query.filter(Vehicle.peak == Peak)
+        if Hour is not None: query = query.filter(Vehicle.hour.in_(Hour))
 
         result = query.all()
         return [c.as_dict() for c in result], 200
@@ -213,12 +213,18 @@ class Region(BaseModel):
 
     def get_id(self):
         return (self.region_id)
+    
+    def get_signals_from_region(self):
+        return json.dumps([c.as_dict() for c in self.signals])
 
 
 class Coverage(BaseModel):
     __tablename__ = 'coverages'
     coverage_name = db.Column(db.String(length=24), nullable=False)
     regions = db.relationship('Region', backref='coverage', lazy='subquery')
+
+    def get_regions_from_coverage(self):
+        return json.dumps([c.as_dict() for c in self.regions])
 
     # def add_signals(self, signals, delete_old):
     #     if delete_old == True:

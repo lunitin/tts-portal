@@ -12,7 +12,7 @@ from flask_login import current_user
 from app import strings
 import time
 
-from .server_calls import get_coverages, get_arrivalPieChart, get_movementBarChart, get_peakScatterPlot, get_splitPieChart, get_totalDelayChart
+from .server_calls import get_coverages_by_user, get_signals_by_region, get_regions_by_coverage, get_arrivalPieChart, get_movementBarChart, get_peakScatterPlot, get_splitPieChart, get_totalDelayChart
 
 base_url = "/dash/app/"
 
@@ -207,6 +207,7 @@ def arrivalPieChart(light, day, approach, tdirection):
     arrivalRates, greenArrivalRate, arrivalCrossings = get_arrivalPieChart(light, day, approach, tdirection)
     greenArrivalRateStr = "Green Arrival Rate: {}%".format(greenArrivalRate)
     arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
+    print(get_coverages_by_user())
     return arrivalRates, greenArrivalRateStr, arrivalCrossingsStr
 
 # Makes a split failure pie chart for any given light
@@ -250,7 +251,6 @@ def splitPieChart(light, day, approach, tdirection):
 
 def totalDelayChart(light, day, approach, tdirection):
     fig, delayCrossingsStr, avgDelayStr, totalDelayStr = get_totalDelayChart(light, day, approach, tdirection)
-
     # # Get dataframe with only values we care about
     # dff = df.copy()
     # dff = dff[dff["Day"] == day]
@@ -307,37 +307,12 @@ def totalDelayChart(light, day, approach, tdirection):
 #hour and delay in a scatter, by movement
 #stacked bar chart with different movements in each bar for approach direction
 #hours, minutes, seconds columns? for df
-def movementBarChart(light, df, day, approach, tdirection):
+def movementBarChart(light, day, approach, tdirection):
     moveM = get_movementBarChart(light, day, approach, tdirection)
-    # dff = df.copy()
-    # dff = dff[dff["Day"] == day]
-
-    # # Set up df according to approach
-    # if (approach != "ALL"):
-    #     dff = dff[dff["ApproachDirection"] == approach]
-
-    # # Set up df according to travel direction
-    # if (tdirection != "ALL"):
-    #     dff = dff[dff["TravelDirection"] == tdirection]
-
-    # moveM=px.histogram(
-    #     data_frame=dff,
-    #     x= 'ApproachDirection',
-    #     y= 'Delay',
-    #     title= "Day " + str(day) + " Broward "+ light + " Delay by Movement",
-    #     facet_col="TravelDirection",
-    #     color="Peak",
-    #     labels={
-    #         "Peak": "Time of Day",
-    #         "ApproachDirection": "Approach Direction",
-    #         #"Delay": "Total Delay"
-    #     }
-    # )
-
     return moveM
 
-def scatterPlot(light, df, day, approach, tdirection):
-    peakScatter = get_peakScatterPlot
+def scatterPlot(light, day, approach, tdirection):
+    peakScatter = get_peakScatterPlot(light, day, approach, tdirection)
     # dff = df.copy()
     # dff = dff[dff["Day"] == day]
 
@@ -387,9 +362,10 @@ def init_callbacks(dash_app):
         arrivalRates = arrivalPieChart('3084', day, approach, tdirection)
         splitFailure = splitPieChart('3084', day, approach, tdirection)
         totalDelay = totalDelayChart('3084', day, approach, tdirection)
-        peakScatter = scatterPlot('3084', vehiclesDf3084, day, approach, tdirection)
-        movement = movementBarChart('3084', vehiclesDf3084, day, approach, tdirection)
+        peakScatter = scatterPlot('3084', day, approach, tdirection)
+        movement = movementBarChart('3084', day, approach, tdirection)
         return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, movement
+        #movement commented out in return
 
     # This callback uses the above function to return what belongs on the page
     @dash_app.callback(
