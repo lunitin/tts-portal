@@ -18,6 +18,7 @@ auth = Blueprint('auth', __name__)
 """
 Authenticated Dashboard
 """
+@auth.route('/')
 @auth.route('/dashboard')
 @auth.route('/dashboard/')
 @login_required
@@ -42,4 +43,4 @@ Log out of the current session
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('anon.index'))
+    return redirect(url_for('anon.login', next=url_for('auth.dashboard')))
