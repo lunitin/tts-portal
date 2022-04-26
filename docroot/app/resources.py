@@ -349,9 +349,7 @@ class User(Resource):
 class User_Coverages(Resource):
     @user_ns.doc("Get all User Coverages")
     def get(self):
-        #print("cookies: {}".format(request.cookies))
-        api_key = request.headers.get('Authorization')
-        print("api key: {}".format(api_key))
+        print(request.__dict__)
         user = db_User.find_by_id(1)
         if user:
             return make_response(user.fetch_coverages(), 200)

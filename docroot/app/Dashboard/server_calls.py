@@ -1,11 +1,14 @@
 import json, requests
 from ..resources import User_Coverages
 import plotly
+from flask import jsonify
 from flask_login import current_user
 BASE_URL = 'http://localhost:80/api/'
 
 def get_coverages_by_user():
-    coverages_by_current_user_id = requests.get(BASE_URL+'users/coverages').json()
+    #print(jsonify(current_user))
+    s = requests.Session()
+    coverages_by_current_user_id = s.get(BASE_URL+'users/coverages').json()
     coverage_list = []
     for coverage in coverages_by_current_user_id:
         coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['coverage_name']})
