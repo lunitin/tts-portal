@@ -231,6 +231,7 @@ def arrivalPieChart(light, day, approach, tdirection):
     arrivalRates, greenArrivalRate, arrivalCrossings = get_arrivalPieChart(light, day, approach, tdirection)
     greenArrivalRateStr = "Green Arrival Rate: {}%".format(greenArrivalRate)
     arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
+    print(get_coverages_by_user())
     return arrivalRates, greenArrivalRateStr, arrivalCrossingsStr
 
 # Makes a split failure pie chart for any given light

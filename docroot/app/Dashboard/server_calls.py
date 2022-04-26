@@ -1,6 +1,7 @@
 import json, requests
 from ..resources import User_Coverages
 import plotly
+from flask import jsonify
 from flask_login import current_user
 BASE_URL = 'http://localhost:80/api/'
 
