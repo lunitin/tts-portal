@@ -7,12 +7,11 @@ BASE_URL = 'http://localhost:80/api/'
 
 def get_coverages_by_user():
     #print(jsonify(current_user))
-    s = requests.Session()
-    coverages_by_current_user_id = s.get(BASE_URL+'users/coverages').json()
-    coverage_list = []
-    for coverage in coverages_by_current_user_id:
-        coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['coverage_name']})
-    #return coverage_list
+    #s = requests.Session()
+    #coverages_by_current_user_id = s.get(BASE_URL+'users/coverages').json()
+    #coverage_list = []
+    #for coverage in coverages_by_current_user_id:
+    #    coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['coverage_name']})
     return [('district 1', 1),('district 2', 2),('district 5', 5)]
 
 def get_regions_by_coverage(id):

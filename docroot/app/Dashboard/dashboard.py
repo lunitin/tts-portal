@@ -16,6 +16,8 @@ from .server_calls import get_coverages_by_user, get_signals_by_region, get_regi
 
 base_url = "/dash/app/"
 
+coverageList = get_coverages_by_user()
+
 
 def init_dashboard(server):
     dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -121,17 +123,39 @@ def pageContent(light, df):
     return [
         # Create Title And Dropdown
         html.H1("Broward " + str(light) + " Light", style={"text-align": 'center'}),
+
+        # Create Coverage Dropdown 
         html.Div([
-            html.H2("Day #"),
+            html.H2("Coverage"),
             dcc.Dropdown(
-                id='day',
+                id='coverage',
                 options=[
-                        {'label': x, 'value': x}
-                        for x in df['Day'].unique()],
+                        {'label': x, 'value': y}
+                        for x, y in coverageList
+                ],
                 value=1
             )
         ],
-        style={"width": "5%"}),
+        style={"width": "10%"}),        
+
+        # Create Day Dropdown
+        html.Div([
+            html.H2("Day"),
+            dcc.Dropdown(
+                id='day',
+                options=[
+                        {'label': 'Sunday', 'value': 1},
+                        {'label': 'Monday', 'value': 2},
+                        {'label': 'Tuesday', 'value': 3},
+                        {'label': 'Wednesday', 'value': 4},
+                        {'label': 'Thursday', 'value': 5},
+                        {'label': 'Friday', 'value': 6},
+                        {'label': 'Saturday', 'value': 7},
+                ],
+                value=1
+            )
+        ],
+        style={"width": "10%"}),
 
         # options=get_coverages(1) # replace with list to get user '1's coverages
 
@@ -254,9 +278,10 @@ def init_callbacks(dash_app):
         Output(component_id='movement-3084', component_property='figure')],
         [Input(component_id='day', component_property='value'),
         Input(component_id='approach', component_property='value'),
-        Input(component_id='tdirection', component_property='value')]
+        Input(component_id='tdirection', component_property='value'),
+        Input(component_id='coverage', component_property='value')]
     )
-    def generate_chart(day, approach, tdirection):
+    def generate_chart(day, approach, tdirection, coverage):
 
         arrivalRates = arrivalPieChart('3084', day, approach, tdirection)
         splitFailure = splitPieChart('3084', day, approach, tdirection)
