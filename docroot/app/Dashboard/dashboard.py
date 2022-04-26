@@ -16,8 +16,6 @@ from .server_calls import get_coverages_by_user, get_signals_by_region, get_regi
 
 base_url = "/dash/app/"
 
-coverageList = get_coverages_by_user()
-
 
 def init_dashboard(server):
     dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -129,10 +127,7 @@ def pageContent(light, df):
             html.H2("Coverage"),
             dcc.Dropdown(
                 id='coverage',
-                options=[
-                        {'label': x, 'value': y}
-                        for x, y in coverageList
-                ],
+                options=get_coverages_by_user(),
                 value=1
             )
         ],
@@ -231,7 +226,6 @@ def arrivalPieChart(light, day, approach, tdirection):
     arrivalRates, greenArrivalRate, arrivalCrossings = get_arrivalPieChart(light, day, approach, tdirection)
     greenArrivalRateStr = "Green Arrival Rate: {}%".format(greenArrivalRate)
     arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
-    print(get_coverages_by_user())
     return arrivalRates, greenArrivalRateStr, arrivalCrossingsStr
 
 # Makes a split failure pie chart for any given light

@@ -345,16 +345,15 @@ class User(Resource):
 
 # THIS FUNCTION NEEDS WRAPPER
 # only user user.id can access this endpoint and admins
-@user_ns.route('/users/coverages')
+@user_ns.route('/users/coverages/<int:id>')
 class User_Coverages(Resource):
     @user_ns.doc("Get all User Coverages")
-    def get(self):
-        print(request.__dict__)
-        user = db_User.find_by_id(1)
+    def get(self, id):
+        user = db_User.find_by_id(id)
         if user:
-            return make_response(user.fetch_coverages(), 200)
+            return user.fetch_coverages(), 200
         else:
-            return make_response(NOT_FOUND.format('user_id', id), 404)
+            return NOT_FOUND.format('user_id', id), 404
 
 
 
@@ -598,7 +597,6 @@ class Signal(Resource):
 
         else:
             return make_response(NOT_FOUND.format('signal_id', id), 404)
-
         return signal.save_to_db()
 
 
@@ -609,9 +607,9 @@ class Regions_from_Coverage(Resource):
     def get(self, id):
         coverage = db_Coverage.find_by_id(id)
         if coverage:
-            return(coverage.get_regions_from_coverage())
+            return coverage.get_regions_from_coverage(), 200
         else:
-            return make_response(NOT_FOUND.format('coverage_id', id, 404))
+            return NOT_FOUND.format('coverage_id', id),  404
     
 @signals_ns.route('/regions/signals/<int:id>')
 class Signals_from_Region(Resource):
@@ -619,9 +617,9 @@ class Signals_from_Region(Resource):
     def get(self, id):
         region = db_Region.find_by_id(id)
         if region:
-            return(region.get_signals_from_region())
+            return region.get_signals_from_region(), 200
         else:
-            return make_response(NOT_FOUND.format('region_id', id, 404))
+            return NOT_FOUND.format('region_id', id), 404
 
 @signals_ns.route('/signals')
 class SignalList(Resource):

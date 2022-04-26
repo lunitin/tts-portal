@@ -6,37 +6,35 @@ from flask_login import current_user
 BASE_URL = 'http://localhost:80/api/'
 
 def get_coverages_by_user():
-    #print(jsonify(current_user))
-    #s = requests.Session()
-    #coverages_by_current_user_id = s.get(BASE_URL+'users/coverages').json()
-    #coverage_list = []
-    #for coverage in coverages_by_current_user_id:
-    #    coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['coverage_name']})
-    return [{'label': 'district 1', 'value': 1},
-            {'label': 'district 3', 'value': 3},
-            {'label': 'district 5', 'value': 5}]
+    current_user_id = '1'
+    res = requests.get(BASE_URL+'users/coverages/' + current_user_id)
+    if res.status_code == 200:
+        coverage_list = []
+        for coverage in json.loads(res.json()):
+            coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['id']})
+        return coverage_list
+    else:
+        return 0
 
 def get_regions_by_coverage(id):
-    #regions_by_coverage_id = requests.get(BASE_URL+'coverages/regions'+str(id)).json()
-    #regions_list = []
-    #for region in regions_by_coverage_id:
-    #    regions_list.append({'label': region[id], 'value': region[id]})
-    #return regions_list    
-    return [{'label': 'Indian River', 'value': 1},
-            {'label': 'St Lucie', 'value': 2},
-            {'label': 'Martin', 'value': 3},
-            {'label': 'Palm Beach', 'value': 4},
-            {'label': 'Broward', 'value': 5}]
+    res = requests.get(BASE_URL+'coverages/regions/'+str(id))
+    if res.status_code == 200:
+        regions_list = []
+        for region in json.loads(res.json()):
+            regions_list.append({'label': region['region_name'], 'value': region['id']})
+        return regions_list
+    else:
+        return 0
 
 def get_signals_by_region(id):
-    #signals_by_region_id = requests.get(BASE_URL+'regions/signals/'+str(id)).json()
-    #signal_list = []
-    #for signal in signals_by_region_id:
-    #    signal_list.append({'label': signal[id], 'value': signal[id]})
-    #return signal_list   
-    return [{'label': '1037', 'value': 1037},
-            {'label': '1113', 'value': 1113},
-            {'label': '1113', 'value': 1113}] 
+    res = requests.get(BASE_URL+'regions/signals/'+str(id))
+    if res.status_code == 200:
+        signal_list = []
+        for signal in json.loads(res.json()):
+            signal_list.append({'label': signal['id'], 'value': signal['id']})
+        return signal_list   
+    else:
+        return 0
 
 def get_arrivalPieChart(signal, day, approach, tdirection):
     data = requests.get(
