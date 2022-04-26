@@ -114,6 +114,8 @@ class peakScatterPlot(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
 
         peakScatter=px.scatter(
@@ -148,6 +150,8 @@ class TotalDelayChart(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
 
         #df.rename(columns = {'delay': 'Delay'}, inplace = True)
@@ -197,6 +201,8 @@ class SplitPieChart(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
 
         # code here
@@ -208,7 +214,7 @@ class SplitPieChart(Resource):
 
         tempDf = df[df["SplitFailure"].isin([True])]
         totalSplitFailure = tempDf.shape[0]
-        SplitRate = int((totalSplitFailure/df.shape[0])*100)
+        SplitRate = int((totalSplitFailure/(df.shape[0]+1))*100)
 
         splitFailure=px.pie(
             data_frame=df,
@@ -242,6 +248,8 @@ class MovementBarChart(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
         df = df[df["approach_direction"].isin(["Northbound","Eastbound","Southbound","Westbound"])]
         moveM=px.histogram(
@@ -273,19 +281,21 @@ class PieChart(Resource):
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+        if not vehicles:
+            return(0)
         df = pd.DataFrame.from_dict(vehicles)
         df.rename(columns = {'red_arrival': 'RedArrival'}, inplace = True)
         df.filter(['RedArrival'])
         df = df[df['RedArrival'].isin([True, False])]
         arrivalCrossings = df.shape[0]
-        greenArrivalRate = (sum(df['RedArrival'] == False) / arrivalCrossings) * 100
+        greenArrivalRate = round((sum(df['RedArrival'] == False) / (arrivalCrossings + 1)) * 100, 2)
 
         arrivalRates=px.pie(
             data_frame=df,
             names="RedArrival",
             color="RedArrival",
             hole=.5,
-            title="Broward " + str(args['signal']) + " Arrival Rates",
+            title="Broward " + str(args['signal']) + " Red Arrival Rates",
             color_discrete_map={'True':'Red', 'False':'#90ee90'}
         )
 
@@ -335,18 +345,15 @@ class User(Resource):
 
 # THIS FUNCTION NEEDS WRAPPER
 # only user user.id can access this endpoint and admins
-@user_ns.route('/users/coverages')
+@user_ns.route('/users/coverages/<int:id>')
 class User_Coverages(Resource):
     @user_ns.doc("Get all User Coverages")
-    def get(self):
-        #print("cookies: {}".format(request.cookies))
-        api_key = request.headers.get('Authorization')
-        print("api key: {}".format(api_key))
-        user = db_User.find_by_id(1)
+    def get(self, id):
+        user = db_User.find_by_id(id)
         if user:
-            return make_response(user.fetch_coverages(), 200)
+            return user.fetch_coverages(), 200
         else:
-            return make_response(NOT_FOUND.format('user_id', id), 404)
+            return NOT_FOUND.format('user_id', id), 404
 
 
 
@@ -374,7 +381,6 @@ class User_Coverages(Resource):
             bad_coverage_id = user.remove_coverages(coverages)
             if bad_coverage_id != 0:
                 return make_response(NOT_FOUND.format('coverage_id', bad_coverage_id), 404)
-
             else:
                 return user.save_to_db()
         else:
@@ -591,7 +597,6 @@ class Signal(Resource):
 
         else:
             return make_response(NOT_FOUND.format('signal_id', id), 404)
-
         return signal.save_to_db()
 
 
@@ -602,9 +607,9 @@ class Regions_from_Coverage(Resource):
     def get(self, id):
         coverage = db_Coverage.find_by_id(id)
         if coverage:
-            return(coverage.get_regions_from_coverage())
+            return coverage.get_regions_from_coverage(), 200
         else:
-            return make_response(NOT_FOUND.format('coverage_id', id, 404))
+            return NOT_FOUND.format('coverage_id', id),  404
     
 @signals_ns.route('/regions/signals/<int:id>')
 class Signals_from_Region(Resource):
@@ -612,9 +617,9 @@ class Signals_from_Region(Resource):
     def get(self, id):
         region = db_Region.find_by_id(id)
         if region:
-            return(region.get_signals_from_region())
+            return region.get_signals_from_region(), 200
         else:
-            return make_response(NOT_FOUND.format('region_id', id, 404))
+            return NOT_FOUND.format('region_id', id), 404
 
 @signals_ns.route('/signals')
 class SignalList(Resource):

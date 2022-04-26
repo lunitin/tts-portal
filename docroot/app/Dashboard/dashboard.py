@@ -1,3 +1,4 @@
+from re import L
 from shutil import move
 import dash
 import requests, json
@@ -8,6 +9,7 @@ import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
+#from sklearn.metrics import coverage_error
 from flask_login import current_user
 from app import strings
 import time
@@ -15,7 +17,6 @@ import time
 from .server_calls import get_coverages_by_user, get_signals_by_region, get_regions_by_coverage, get_arrivalPieChart, get_movementBarChart, get_peakScatterPlot, get_splitPieChart, get_totalDelayChart
 
 base_url = "/dash/app/"
-
 
 def init_dashboard(server):
     dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -117,21 +118,44 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 # Defines the page content for any given light
 def pageContent(light, df):
 
-
     return [
         # Create Title And Dropdown
         html.H1("Broward " + str(light) + " Light", style={"text-align": 'center'}),
+
+        # Create Coverage Dropdown 
         html.Div([
-            html.H2("Day #"),
+            html.H2("Coverage"),
+            dcc.Dropdown(
+                id='coverage',
+                options=get_coverages_by_user()
+            )
+        ],
+        style={"width": "10%"}),  
+
+        # Create Region Dropdown
+        html.Div(id='region-dropdown'),
+
+        # Create Signal Dropdown
+        html.Div(id='signal-dropdown'),
+
+        # Create Day Dropdown
+        html.Div([
+            html.H2("Day"),
             dcc.Dropdown(
                 id='day',
                 options=[
-                        {'label': x, 'value': x}
-                        for x in df['Day'].unique()],
+                        {'label': 'Sunday', 'value': 1},
+                        {'label': 'Monday', 'value': 2},
+                        {'label': 'Tuesday', 'value': 3},
+                        {'label': 'Wednesday', 'value': 4},
+                        {'label': 'Thursday', 'value': 5},
+                        {'label': 'Friday', 'value': 6},
+                        {'label': 'Saturday', 'value': 7},
+                ],
                 value=1
             )
         ],
-        style={"width": "5%"}),
+        style={"width": "10%"}),
 
         # options=get_coverages(1) # replace with list to get user '1's coverages
 
@@ -207,99 +231,19 @@ def arrivalPieChart(light, day, approach, tdirection):
     arrivalRates, greenArrivalRate, arrivalCrossings = get_arrivalPieChart(light, day, approach, tdirection)
     greenArrivalRateStr = "Green Arrival Rate: {}%".format(greenArrivalRate)
     arrivalCrossingsStr = "Arrival Crossings: {}".format(arrivalCrossings)
-    print(get_coverages_by_user())
     return arrivalRates, greenArrivalRateStr, arrivalCrossingsStr
 
 # Makes a split failure pie chart for any given light
 def splitPieChart(light, day, approach, tdirection):
     splitFailure, splitCrossing, totalSplitFailure, SplitRate = get_splitPieChart(light, day, approach, tdirection)
-    # # Get dataframe with only values we care about
-    # dff = df.copy()
-    # dff = dff[dff["Day"] == day]
-    # dff = dff[dff["SplitFailure"].isin(["Yes", "No"])]
-
-    # # Set up df according to approach
-    # if (approach != "ALL"):
-    #     dff = dff[dff["ApproachDirection"] == approach]
-
-    # # Set up df according to travel direction
-    # if (tdirection != "ALL"):
-    #     dff = dff[dff["TravelDirection"] == tdirection]
-
-    # Calculate Split Failure Rate, Total Split Failures, And Crossings
-    #splitCrossings = dff.shape[0]
     splitCrossingStr = "Split Failure Crossings: {}".format(splitCrossing)
-
-    #tempDf = dff[dff["SplitFailure"].isin(["Yes"])]
-    #totalSplitFailure = tempDf.shape[0]
-    #SplitRate = int((totalSplitFailure/dff.shape[0])*100)
-
     totalSplitFailureStr = "Total Split Failures: {}".format(totalSplitFailure)
     SplitRateStr = "Split Failure Rate: {}%".format(SplitRate)
-
-    # # Create pie chart for light
-    # splitFailure=px.pie(
-    #     data_frame=dff,
-    #     names="Peak",
-    #     color="Peak",
-    #     hole=.5,
-    #     title="Broward " + light + " Split Failure By Peak",
-    #     color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
-    # )
 
     return splitFailure, splitCrossingStr, totalSplitFailureStr, SplitRateStr
 
 def totalDelayChart(light, day, approach, tdirection):
     fig, delayCrossingsStr, avgDelayStr, totalDelayStr = get_totalDelayChart(light, day, approach, tdirection)
-    # # Get dataframe with only values we care about
-    # dff = df.copy()
-    # dff = dff[dff["Day"] == day]
-
-    # # Set up df according to approach
-    # if (approach != "ALL"):
-    #     dff = dff[dff["ApproachDirection"] == approach]
-
-    # # Set up df according to travel direction
-    # if (tdirection != "ALL"):
-    #     dff = dff[dff["TravelDirection"] == tdirection]
-
-    # Get total crossings
-    # delayCrossingsStr = "Total Crossings: {}".format(dff.shape[0])
-
-    # # Get average delay
-    # avgDelayStr = "Average Delay: {} (sec/veh)".format(int(dff['Delay'].mean()))
-
-    # # Get total delay in hours (3600 seconds per hour)
-    # totalDelay = int(dff['Delay'].sum()/3600)
-    # totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
-
-    # # Make pie chart for total delay (in hours) by peak
-    # # Going to combine delay times by peak and convert them to hours into a new df
-    # morningDf = dff[dff['Peak'] == 'Morning']
-    # middayDf = dff[dff['Peak'] == 'Midday']
-    # eveningDf = dff[dff['Peak'] == 'Evening']
-    # otherDf = dff[dff['Peak'] == 'Other']
-
-    # # Have to delay in hours
-    # morningDelay = int(morningDf['Delay'].sum()/3600)
-    # middayDelay = int(middayDf['Delay'].sum()/3600)
-    # eveningDelay = int(eveningDf['Delay'].sum()/3600)
-    # otherDelay = int(otherDf['Delay'].sum()/3600)
-
-    # # Now combine all into a new dataframe
-    # d = {'Delay': [morningDelay, middayDelay, eveningDelay, otherDelay], 'Peak': ['Morning', 'Midday', 'Evening', 'Other']}
-    # newDf = pd.DataFrame(data=d)
-
-    # # Create delay pie chart
-    # fig=px.pie(
-    #     data_frame=newDf,
-    #     values='Delay',
-    #     names="Peak",
-    #     color="Peak",
-    #     hole=.5,
-    #     title="Broward " + light + " Total Delay (hours) By Peak",
-    #     color_discrete_map={'Morning':"#90ee90", 'Midday':'#ffd700', "Evening":'red', 'Other':'#808080'}
-    # )
     return fig, delayCrossingsStr, avgDelayStr, totalDelayStr
 
 #subplots scatterPlot? with histogram
@@ -313,28 +257,6 @@ def movementBarChart(light, day, approach, tdirection):
 
 def scatterPlot(light, day, approach, tdirection):
     peakScatter = get_peakScatterPlot(light, day, approach, tdirection)
-    # dff = df.copy()
-    # dff = dff[dff["Day"] == day]
-
-    # # Set up df according to approach
-    # if (approach != "ALL"):
-    #     dff = dff[dff["ApproachDirection"] == approach]
-
-    # # Set up df according to travel direction
-    # if (tdirection != "ALL"):
-    #     dff = dff[dff["TravelDirection"] == tdirection]
-
-    # peakScatter=px.scatter(
-    #     data_frame=dff,
-    #     x= 'Hour',
-    #     y= 'Delay',
-    #     title= "Day " + str(day) + " Broward "+ light + " Delay by Hour",
-    #     opacity= 0.1,
-    #     trendline="lowess",
-    #     trendline_options=dict(frac=0.09),
-    #     trendline_color_override="red"
-    # )
-
     return peakScatter
 
 def init_callbacks(dash_app):
@@ -355,9 +277,12 @@ def init_callbacks(dash_app):
         Output(component_id='movement-3084', component_property='figure')],
         [Input(component_id='day', component_property='value'),
         Input(component_id='approach', component_property='value'),
-        Input(component_id='tdirection', component_property='value')]
+        Input(component_id='tdirection', component_property='value'),
+        Input(component_id='coverage', component_property='value'),
+        Input(component_id='region', component_property='value'),
+        Input(component_id='signal', component_property='value')]
     )
-    def generate_chart(day, approach, tdirection):
+    def generate_chart(day, approach, tdirection, coverage, region, signal):
 
         arrivalRates = arrivalPieChart('3084', day, approach, tdirection)
         splitFailure = splitPieChart('3084', day, approach, tdirection)
@@ -365,7 +290,6 @@ def init_callbacks(dash_app):
         peakScatter = scatterPlot('3084', day, approach, tdirection)
         movement = movementBarChart('3084', day, approach, tdirection)
         return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, movement
-        #movement commented out in return
 
     # This callback uses the above function to return what belongs on the page
     @dash_app.callback(
@@ -383,3 +307,31 @@ def init_callbacks(dash_app):
         # Different page content depending on which page we are pn
         #if pathname == "/dashboard/":
         return pageContent(3084, vehiclesDf3084)
+
+    # Callbacks for region
+    @dash_app.callback(
+        Output('region-dropdown', 'children'),
+        [Input('coverage', 'value')]
+    )
+    def render_region_dropdown(coverage):
+        return html.Div([
+            html.H2("Region"),
+            dcc.Dropdown(
+                id='region',
+                options=get_regions_by_coverage(coverage)
+            ),       
+        ],style={"width": "10%"})
+
+    # Callbacks for signal
+    @dash_app.callback(
+        Output('signal-dropdown', 'children'),
+        [Input('region', 'value')]
+    )
+    def render_signal_dropdown(region):
+        return html.Div([
+            html.H2("Signal"),
+            dcc.Dropdown(
+                id='signal',
+                options=get_signals_by_region(region)
+            ),       
+        ],style={"width": "10%"})
