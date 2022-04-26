@@ -1,3 +1,4 @@
+from re import L
 from shutil import move
 import dash
 import requests, json
@@ -8,6 +9,7 @@ import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
+#from sklearn.metrics import coverage_error
 from flask_login import current_user
 from app import strings
 import time
@@ -15,9 +17,6 @@ import time
 from .server_calls import get_coverages_by_user, get_signals_by_region, get_regions_by_coverage, get_arrivalPieChart, get_movementBarChart, get_peakScatterPlot, get_splitPieChart, get_totalDelayChart
 
 base_url = "/dash/app/"
-
-coverageList = get_coverages_by_user()
-
 
 def init_dashboard(server):
     dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -119,7 +118,6 @@ content = html.Div(id="page-content", children=[], style=CONTENT_STYLE)
 # Defines the page content for any given light
 def pageContent(light, df):
 
-
     return [
         # Create Title And Dropdown
         html.H1("Broward " + str(light) + " Light", style={"text-align": 'center'}),
@@ -129,14 +127,16 @@ def pageContent(light, df):
             html.H2("Coverage"),
             dcc.Dropdown(
                 id='coverage',
-                options=[
-                        {'label': x, 'value': y}
-                        for x, y in coverageList
-                ],
-                value=1
+                options=get_coverages_by_user()
             )
         ],
-        style={"width": "10%"}),        
+        style={"width": "10%"}),  
+
+        # Create Region Dropdown
+        html.Div(id='region-dropdown'),
+
+        # Create Signal Dropdown
+        html.Div(id='signal-dropdown'),
 
         # Create Day Dropdown
         html.Div([
@@ -278,9 +278,11 @@ def init_callbacks(dash_app):
         [Input(component_id='day', component_property='value'),
         Input(component_id='approach', component_property='value'),
         Input(component_id='tdirection', component_property='value'),
-        Input(component_id='coverage', component_property='value')]
+        Input(component_id='coverage', component_property='value'),
+        Input(component_id='region', component_property='value'),
+        Input(component_id='signal', component_property='value')]
     )
-    def generate_chart(day, approach, tdirection, coverage):
+    def generate_chart(day, approach, tdirection, coverage, region, signal):
 
         arrivalRates = arrivalPieChart('3084', day, approach, tdirection)
         splitFailure = splitPieChart('3084', day, approach, tdirection)
@@ -288,7 +290,6 @@ def init_callbacks(dash_app):
         peakScatter = scatterPlot('3084', day, approach, tdirection)
         movement = movementBarChart('3084', day, approach, tdirection)
         return arrivalRates[0], splitFailure[0], arrivalRates[1], arrivalRates[2], splitFailure[1], splitFailure[2], splitFailure[3], totalDelay[0], totalDelay[2], totalDelay[3], totalDelay[1], peakScatter, movement
-        #movement commented out in return
 
     # This callback uses the above function to return what belongs on the page
     @dash_app.callback(
@@ -306,3 +307,31 @@ def init_callbacks(dash_app):
         # Different page content depending on which page we are pn
         #if pathname == "/dashboard/":
         return pageContent(3084, vehiclesDf3084)
+
+    # Callbacks for region
+    @dash_app.callback(
+        Output('region-dropdown', 'children'),
+        [Input('coverage', 'value')]
+    )
+    def render_region_dropdown(coverage):
+        return html.Div([
+            html.H2("Region"),
+            dcc.Dropdown(
+                id='region',
+                options=get_regions_by_coverage(coverage)
+            ),       
+        ],style={"width": "10%"})
+
+    # Callbacks for signal
+    @dash_app.callback(
+        Output('signal-dropdown', 'children'),
+        [Input('region', 'value')]
+    )
+    def render_signal_dropdown(region):
+        return html.Div([
+            html.H2("Signal"),
+            dcc.Dropdown(
+                id='signal',
+                options=get_signals_by_region(region)
+            ),       
+        ],style={"width": "10%"})

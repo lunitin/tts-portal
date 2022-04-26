@@ -295,7 +295,7 @@ class PieChart(Resource):
             names="RedArrival",
             color="RedArrival",
             hole=.5,
-            title="Broward " + str(args['signal']) + "Red Arrival Rates",
+            title="Broward " + str(args['signal']) + " Red Arrival Rates",
             color_discrete_map={'True':'Red', 'False':'#90ee90'}
         )
 
