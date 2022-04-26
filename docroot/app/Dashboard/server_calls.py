@@ -12,21 +12,31 @@ def get_coverages_by_user():
     #coverage_list = []
     #for coverage in coverages_by_current_user_id:
     #    coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['coverage_name']})
-    return [('district 1', 1),('district 2', 2),('district 5', 5)]
+    return [{'label': 'district 1', 'value': 1},
+            {'label': 'district 3', 'value': 3},
+            {'label': 'district 5', 'value': 5}]
 
 def get_regions_by_coverage(id):
-    regions_by_coverage_id = requests.get(BASE_URL+'coverages/regions'+str(id)).json()
-    regions_list = []
-    for region in regions_by_coverage_id:
-        regions_list.append({'label': region[id], 'value': region[id]})
-    return regions_list    
+    #regions_by_coverage_id = requests.get(BASE_URL+'coverages/regions'+str(id)).json()
+    #regions_list = []
+    #for region in regions_by_coverage_id:
+    #    regions_list.append({'label': region[id], 'value': region[id]})
+    #return regions_list    
+    return [{'label': 'Indian River', 'value': 1},
+            {'label': 'St Lucie', 'value': 2},
+            {'label': 'Martin', 'value': 3},
+            {'label': 'Palm Beach', 'value': 4},
+            {'label': 'Broward', 'value': 5}]
 
 def get_signals_by_region(id):
-    signals_by_region_id = requests.get(BASE_URL+'regions/signals/'+str(id)).json()
-    signal_list = []
-    for signal in signals_by_region_id:
-        signal_list.append({'label': signal[id], 'value': signal[id]})
-    return signal_list    
+    #signals_by_region_id = requests.get(BASE_URL+'regions/signals/'+str(id)).json()
+    #signal_list = []
+    #for signal in signals_by_region_id:
+    #    signal_list.append({'label': signal[id], 'value': signal[id]})
+    #return signal_list   
+    return [{'label': '1037', 'value': 1037},
+            {'label': '1113', 'value': 1113},
+            {'label': '1113', 'value': 1113}] 
 
 def get_arrivalPieChart(signal, day, approach, tdirection):
     data = requests.get(
