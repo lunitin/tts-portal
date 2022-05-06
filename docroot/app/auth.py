@@ -4,7 +4,7 @@ Flask routes that require authentication
 
 """
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_required, current_user, logout_user
 from . import db
 from .models import *
@@ -32,8 +32,13 @@ Display information about the account
 @auth.route('/my-account')
 @login_required
 def my_account():
-    print(current_user, flush=True)
-    return render_template('myaccount.html')
+    user = User.query.get(current_user.id)
+    if (user.security_level == 0):
+        coverages = User.query.get(current_user.id).coverages
+        return render_template('myaccount.html', coverages = coverages)
+    else: 
+        coverages = Coverage.query.all()
+        return render_template('myaccount.html', coverages = coverages)
 
 
 """

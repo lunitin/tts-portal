@@ -4,7 +4,7 @@ Flask application initilizaton
 
 """
 
-from flask import Flask, json
+from flask import Flask, json, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail, Message
@@ -77,3 +77,15 @@ app.register_blueprint(admin_blueprint)
 # API route blueprints
 from .resources import api_blueprint
 app.register_blueprint(api_blueprint)
+
+#Handle 404
+@app.errorhandler(404)
+def page_not_found(error):
+    # Render 404 page
+    return render_template('404.html'), 404
+
+#Handle 500
+@app.errorhandler(500)
+def internal_error(error):
+    #render 500 page
+    return render_template('500.html'), 500

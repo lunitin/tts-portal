@@ -1,27 +1,23 @@
-{% extends "base.html" %} {% block content %}
-
-{% for coverage in coveragedata%}
-<h1 class="title">
-    {{coverage.coverage_name}}
-</h1>
-
+{% extends "base.html" %} {% if coveragedata%} {% block html_title %} {{coveragedata.coverage_name}} {% endblock %} 
+{% block page_title %} {{coveragedata.coverage_name}} {% endblock %} {% block content %}
 <div class="container-fluid shadow p-1 mb-2 rounded">
   <div class="row">
     <div class="col">
         <h3>Regions in Coverage Area</h3>
-        <table class="table table-striped table-hover">
+        <table id="regionTable" class="table table-striped table-hover" data-column-defs='[{"sortable": false, "targets": [1]}]'>
             <thead>
                 <tr>
                   <th>Region</th>
-                  </tr>
+                  <th></th>
+                </tr>
               </thead>    
               <tbody>
                 {% for region in regionData %} 
-                <tr class="clickable" type="submit" name="action" onclick="window.location='/coverage-management/{{coverage.id}}/region/{{region.id}}'">
+                <tr>
                   <td>{{region.region_name}}</td>
                   <td>
                     <div class="col-xs-6">
-                      <a href="/region-remove/{{region.id}}/{{coverage.id}}" method="POST">Remove</a>
+                      <a href="/region-remove/{{region.id}}/{{coveragedata.id}}" method="POST">Remove</a>
                     </div>
                   </td>
                 </tr>
@@ -31,12 +27,13 @@
     </div>
     <div class="col">
       <h3>Users with Access</h3>
-      <table class="table table-striped table-hover">
+      <table id="usersTable" class="table table-striped table-hover" data-column-defs='[{"sortable": false, "targets": [3]}]'>
         <thead>
             <tr>
                 <th>User</th>
                 <th>Email</th>
                 <th>Security Level</th>
+                <th></th>
             </tr>
         </thead>    
         <tbody>
@@ -47,7 +44,7 @@
                 <td>{{user.security_level}}</td>
                 <td>
                   <div class="col-xs-6">
-                    <a href="/delete-access/{{coverage.id}}/{{user.id}}" method="POST">Delete</a>
+                    <a href="/delete-access/{{coveragedata.id}}/{{user.id}}" method="POST">Delete</a>
                   </div>
                 </td>
             </tr>
@@ -57,12 +54,11 @@
     </div>
   </div>
 </div>
-{% endfor %}
-
+<script>
+  $(document).ready( function () {
+    $('table.table').DataTable();
+  });
+</script>
 {% endblock %}
+{% endif %}
 
-{% block scripts %}
-  <script>
-  
-  </script>
-{% endblock %}
