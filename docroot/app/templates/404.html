@@ -1,0 +1,17 @@
+{% extends "base.html" %} 
+{% block html_title %} Page Not Found {% endblock %} 
+{% block page_title %} Page Not Found {% endblock %}
+{% block content %}
+
+
+<div class="d-flex align-items-center justify-content-center">
+    <div class="text-center">
+        <h1 class="display-1 fw-bold">404</h1>
+        <p class="fs-3"> Opps! Page not found.</p>
+        <p class="lead"> The page you’re looking for doesn’t exist.</p>
+        <a href="{{url_for('auth.dashboard')}}" class="btn btn-primary">Home</a>
+    </div>
+</div>
+
+
+{% endblock %}

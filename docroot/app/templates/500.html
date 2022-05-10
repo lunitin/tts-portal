@@ -1,0 +1,18 @@
+{% extends "base.html" %} 
+{% block html_title %} Internal Server Error {% endblock %} 
+{% block page_title %} Internal Server Error {% endblock %}
+{% block content %}
+
+
+<div class="d-flex align-items-center justify-content-center">
+    <div class="text-center">
+        <h1 class="display-1 fw-bold">500</h1>
+        <p class="fs-3"> Opps, something went wrong</p>
+        <p class="lead"> We're experiencing an internal server problem.</p>
+        <p class="lead"> Please try again later or contact us.</p>
+        <a href="{{url_for('auth.dashboard')}}" class="btn btn-primary">Home</a>
+    </div>
+</div>
+
+
+{% endblock %}
