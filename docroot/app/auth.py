@@ -39,7 +39,6 @@ def my_account():
 """
 Route to request a password change
 """
-
 @auth.route('/change-password', methods=['GET'])
 @login_required
 def change_password():
@@ -56,10 +55,6 @@ def change_password_post():
     password1 = request.form.get('password')
     password2 = request.form.get('password2')
 
-    print("== old:", old_password)
-    print("== p1:", password1)
-    print("== p2:", password2)
-
     # Verify that the two password strings match
     if password1 != password2:
         flash(strings.ERROR_PASSWORD_MISMATCH, 'danger')
@@ -69,7 +64,6 @@ def change_password_post():
 
     # Load the user found in the token
     user = User.query.filter_by(id=current_user.id).first()
-    print("=== pass:", user.password)
 
     # Check if the old password matches
     # check if the user actually exists
