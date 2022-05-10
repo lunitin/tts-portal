@@ -36,7 +36,7 @@ def my_account():
     if (user.security_level == 0):
         coverages = User.query.get(current_user.id).coverages
         return render_template('myaccount.html', coverages = coverages)
-    else: 
+    else:
         coverages = Coverage.query.all()
         return render_template('myaccount.html', coverages = coverages)
 

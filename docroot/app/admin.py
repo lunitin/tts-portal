@@ -25,7 +25,7 @@ def admin_required(f):
             return redirect(url_for('auth.dashboard'))
         return f(*args, **kwargs)
     return decorated_function
-    
+
 
 """
 Authenticated User Management Page
@@ -106,7 +106,7 @@ def update(user_id):
         full_name = user_update.first_name + " " + user_update.last_name
         flash(strings.TPL_USER_UPDATED.format(name=full_name), 'success')
     else:
-        flash(strings.ERROR_USER_DNE, 'danger')  
+        flash(strings.ERROR_USER_DNE, 'danger')
 
     return redirect(url_for('admin.users'))
 
@@ -148,7 +148,7 @@ Authenticated Coverage Details Page
 @login_required
 @admin_required
 def coverage(coverage_id):
-    #Grab coverage based on id. 
+    #Grab coverage based on id.
     # coverage = Coverage.query.get(coverage_id)
     coverage = db.session.query(Coverage).get(coverage_id)
 
@@ -157,7 +157,7 @@ def coverage(coverage_id):
     #Get regions associated with coverage
     # regions = Region.query.filter(Region.coverage_id == coverage_id)
         regions = db.session.query(Region).filter(Region.coverage_id == coverage_id)
-        #Get all users that have access to coverage area. 
+        #Get all users that have access to coverage area.
         # users = User.query.filter(User.coverages.any(id = coverage_id))
         users = db.session.query(User).filter(User.coverages.any(id = coverage_id))
         return render_template('coverage.html', coveragedata = coverage, regionData = regions, accessdata = users)
@@ -172,7 +172,7 @@ Authenticated Coverage Region Page
 @login_required
 @admin_required
 def region(region_id):
-    #Grab coverage based on id. 
+    #Grab coverage based on id.
     region = Region.query.get(region_id)
     if (region):
         #Get signals associated with coverage
@@ -206,7 +206,7 @@ def add_coverage():
             db.session.commit()
         else:
             flash(strings.TPL_ERROR_USER_TO_COVERAGE.format(user=selected_user,coverage=coverage.coverage_name), 'danger')
-            
+
     return redirect(url_for('admin.coverages'))
 
 """
@@ -221,10 +221,10 @@ def delete_access(coverage_id, user_id):
     coverage = Coverage.query.get(coverage_id)
     result = User.remove_coverages(selected_user, [str(coverage_id)])
     if(result == 0):
-        flash(strings.TPL_DEL_USER_ACCESS.format(user=selected_user.first_name,coverage=coverage.coverage_name), 'success')        
+        flash(strings.TPL_DEL_USER_ACCESS.format(user=selected_user.first_name,coverage=coverage.coverage_name), 'success')
         db.session.commit()
     else :
-        flash(strings.TPL_ERR_DEL_USER_ACCESS.format(user=selected_user.first_name,coverage=coverage.coverage_name), 'danger')        
+        flash(strings.TPL_ERR_DEL_USER_ACCESS.format(user=selected_user.first_name,coverage=coverage.coverage_name), 'danger')
     return redirect(url_for('admin.coverage', coverage_id=coverage_id))
 
 """
@@ -306,7 +306,7 @@ def add_region():
             flash(strings.TPL_REGION_TO_COVERAGE.format(coverage=coverage.coverage_name), 'success')
     else:
         flash(strings.ERROR_COVERAGE_DNE, 'danger')
-    
+
     return redirect(url_for('admin.coverages'))
 
 """
@@ -348,8 +348,8 @@ def delete_region(region_id):
 # @login_required
 # @admin_required
 # def add_region_signal(region_id):
-# 
-#     
+#
+#
 # @admin.route('/500')
 # def error500():
 #     abort(500)
