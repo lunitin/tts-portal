@@ -25,18 +25,7 @@ def admin_required(f):
             return redirect(url_for('auth.dashboard'))
         return f(*args, **kwargs)
     return decorated_function
-
-
-"""
-Test Admin Page
-"""
-@admin.route('/admin')
-@login_required
-@admin_required
-def test_admin():
-    print(current_user.security_level)
-    return 'This is an admin only page'
-
+    
 
 """
 Authenticated User Management Page
@@ -50,7 +39,7 @@ def users():
 
 
 """
-Create new user. 
+Create new user.
 """
 @admin.route('/create-user', methods=['POST'])
 @login_required
@@ -88,7 +77,7 @@ def create_user():
                         date_created = datetime.now(),
                         date_last_password_change = datetime.now()
                         )
-        
+
         #Add to db
         db.session.add(new_user)
         db.session.commit()
@@ -99,7 +88,7 @@ def create_user():
         return redirect(url_for('admin.users'))
 
 """
-Update user. 
+Update user.
 """
 @admin.route('/update/<int:user_id>',  methods = ['POST'])
 @login_required
@@ -120,7 +109,7 @@ def update(user_id):
         flash(strings.ERROR_USER_DNE, 'danger')  
 
     return redirect(url_for('admin.users'))
- 
+
 
 @admin.route('/delete/<int:user_id>',  methods = ['POST'])
 @login_required
@@ -143,11 +132,11 @@ Authenticated Coverage Management Page
 def coverages():
     users = User.query.filter(User.security_level == 0).all()
 
-    #Coverage query results with number of signals associated with them. 
+    #Coverage query results with number of signals associated with them.
     coverages = Coverage.query.all()
     #Coverage.query.join(Signal, Coverage.coverage_id == Signal.coverage_id, isouter = True).with_entities(Coverage.coverage_id, Coverage.coverage_name, func.count(distinct(Signal.signal_number)).label("numSignals")).all()
-    
-    #Regions 
+
+    #Regions
     regions = Region.query.filter(Region.coverage_id == None)
     return render_template('coverageMgmt.html', userdata = users, coveragedata = coverages, regionData = regions)
 
@@ -163,6 +152,7 @@ def coverage(coverage_id):
     # coverage = Coverage.query.get(coverage_id)
     coverage = db.session.query(Coverage).get(coverage_id)
 
+
     if (coverage):
     #Get regions associated with coverage
     # regions = Region.query.filter(Region.coverage_id == coverage_id)
@@ -173,6 +163,7 @@ def coverage(coverage_id):
         return render_template('coverage.html', coveragedata = coverage, regionData = regions, accessdata = users)
     else:
         abort(404)
+
 
 """
 Authenticated Coverage Region Page
@@ -187,12 +178,13 @@ def region(region_id):
         #Get signals associated with coverage
         signals = Signal.query.filter(Signal.region_id == region_id)
 
+
         return render_template('region.html', regionData = region, signalData = signals)
     else:
         abort(404)
 
 """
-Add User(s) to Coverage. 
+Add User(s) to Coverage.
 """
 @admin.route('/coverage-add', methods=['POST'])
 @login_required
@@ -205,7 +197,7 @@ def add_coverage():
 
     coverage = Coverage.query.get(coverage_select_id[0])
 
-    #loop to add each user to coverage. 
+    #loop to add each user to coverage.
     for selected_user in multi_select:
         user = User.query.get(selected_user)
         new_access = User.add_coverages(user,coverage_select_id)
@@ -218,7 +210,7 @@ def add_coverage():
     return redirect(url_for('admin.coverages'))
 
 """
-Delete User From Coverage. 
+Delete User From Coverage.
 """
 @admin.route('/delete-access/<int:coverage_id>/<int:user_id>')
 @login_required
@@ -236,7 +228,7 @@ def delete_access(coverage_id, user_id):
     return redirect(url_for('admin.coverage', coverage_id=coverage_id))
 
 """
-Add New Coverage. 
+Add New Coverage.
 """
 @admin.route('/coverage-create', methods=['POST'])
 @login_required
@@ -248,28 +240,28 @@ def create_coverage():
 
     new_coverage = Coverage(id = None, coverage_name = create_coverage_name)
     db.session.add(new_coverage)
-    db.session.commit()  
-    
+    db.session.commit()
+
     if (multi_select_region[0] != ""):
         for selected_region in multi_select_region:
                 region = Region.query.get(selected_region)
-                #set region coverage id.  
+                #set region coverage id.
                 region.coverage_id = new_coverage.id
-                db.session.commit()  
+                db.session.commit()
 
     flash(strings.MSG_COVERAGE_CREATED, 'success')
     return redirect(url_for('admin.coverages'))
 
 
 """
-Delete Coverage. 
+Delete Coverage.
 """
 @admin.route('/coverage-delete/<int:coverage_id>', methods=['POST'])
 @login_required
 @admin_required
 def delete_coverage(coverage_id):
     coverage_delete = Coverage.query.get(coverage_id)
-    #Null regions with coverage_id that is being deleted. 
+    #Null regions with coverage_id that is being deleted.
     Region.query.filter(Region.coverage_id == coverage_delete.id).update({Region.coverage_id: None})
     db.session.delete(coverage_delete)
     db.session.commit()
@@ -279,14 +271,14 @@ def delete_coverage(coverage_id):
 
 
 """
-Remove Region From Coverage. 
+Remove Region From Coverage.
 """
 @admin.route('/region-remove/<int:region_id>/<int:coverage_id>')
 @login_required
 @admin_required
 def remove_region(region_id, coverage_id):
     remove_region = Region.query.get(region_id)
-    #Null regions with coverage_id that is being deleted. 
+    #Null regions with coverage_id that is being deleted.
     remove_region.coverage_id = None
     db.session.commit()
 
@@ -294,21 +286,21 @@ def remove_region(region_id, coverage_id):
     return redirect(url_for('admin.coverage', coverage_id=coverage_id))
 
 """
-Add Region to Coverage. 
+Add Region to Coverage.
 """
 @admin.route('/coverage-add-region', methods=['POST'])
 @login_required
 @admin_required
 def add_region():
-    #Query Coverage and Region to add. 
+    #Query Coverage and Region to add.
     multi_select_region = request.form.getlist('selectRegionAdd')
     coverage_select_id = request.form.get('selectCoverageRegionAdd')
     coverage = Coverage.query.get(coverage_select_id)
-    
+
     if coverage:
         for region_id in multi_select_region:
             region = Region.query.get(region_id)
-            #Set region coverage id to add.  
+            #Set region coverage id to add.
             region.coverage_id = coverage.id
             db.session.commit()
             flash(strings.TPL_REGION_TO_COVERAGE.format(coverage=coverage.coverage_name), 'success')
