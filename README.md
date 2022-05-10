@@ -4,7 +4,6 @@
 
 - [Install Docker](https://docs.docker.com/get-docker/)
 - [Install Docker Compose](https://docs.docker.com/compose/install/)
-- [Install Watchman](https://facebook.github.io/watchman/docs/install.html) (optional)
 
 ## Architecture
 
@@ -137,26 +136,24 @@ WEB_CONCURRENCY: 2
 
 For more options see: https://github.com/tiangolo/meinheld-gunicorn-flask-docker
 
-## Watchman
+#### `LOG_LEVEL`
 
-Watchman is a helper application that will watch files in the project for changes and trigger a reload of the Flask app when changes have been detected.
+The log level for Gunicorn.
 
-To simplify things, the docker-compose and watchman commands are wrapped in a makefile.
+One of:
 
-Bring up the Docker stack
+- `debug`
+- `info`
+- `warning`
+- `error`
+- `critical`
 
-```
-make up
-```
+By default, set to `info`.
 
-Stop the Docker stack
+If you need to squeeze more performance sacrificing logging, set it to `warning`, for example:
 
-```
-make down
-```
+You can set it in docker-compose.yaml:
 
-Rebuild all Docker containers
-
-```
-make clean
+```bash
+LOG_LEVEL: "warning"
 ```
