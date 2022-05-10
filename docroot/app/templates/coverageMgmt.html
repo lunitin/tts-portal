@@ -2,11 +2,11 @@
 block page_title %} Coverage Management {% endblock %} {%block content %}
 
 <div class="container-fluid">
-  <div class="row">
+  <div class="row justify-content-center mb-5">
     <!-- left -->
-    <div class="col-sm-5">
+    <div class="col-sm-2">
       <!-- Create Coverages Form-->
-      <div class="container shadow p-1 mb-2 rounded">
+      <div class="container shadow p-3 mb-2 rounded">
         <form action="/coverage-create" method="POST">
           <h3>Create Coverage</h3>
           <input class="form-control" id="create_coverage_name" name="create_coverage_name" placeholder="Coverage Name">
@@ -17,63 +17,15 @@ block page_title %} Coverage Management {% endblock %} {%block content %}
             <option value="{{region.id}}">{{region.region_name}}</option>
             {% endfor %}
           </select>
-          <div class="form-group">
+          <div class="form-group mt-2">
             <button type="submit" class="btn btn-primary">Create Coverage</button>
           </div>
         </form>
       </div>
-
-      <!-- Add Users to Coverages Form -->
-      <div class="container shadow p-1 mb-2 rounded">
-        <form action="/coverage-add" method="POST">
-            <h3>Add Users to Coverage</h3>
-            <h5>Select Users</h5>
-            <input class="form-control" id="searchUsr" placeholder="Search Users...">
-            <select id ="usermultiselect" name="selectUserList" class="form-select form-select-lg mb-3" multiple size="4">
-              {% for user in userdata %} 
-              <option value="{{user.id}}">{{user.first_name}} {{user.last_name}}</option>
-              {% endfor %}
-            </select>
-            <h5>Select Coverage Areas to Assign to</h5>
-            <input class="form-control" id="searchCvg" placeholder="Search Coverages...">
-            <select id="coverageselect" name="selectCoverageId" class="form-select form-select-lg mb-3" size="4">
-              {% for coverages in coveragedata %} 
-              <option value="{{coverages.id}}">{{coverages.coverage_name}}</option>
-              {% endfor %}
-            </select>
-            <div class="form-group">
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </form>
-      </div>
-
-      <!-- Add Regions To Coverage Areas -->
-      <div class="container shadow p-1 mb-2 rounded">
-        <form action="/coverage-add-region" method="POST">
-          <h3>Add Region to Coverage Areas</h3>
-          <h5>Select Region Areas to Assign to</h5>
-          <input class="form-control" id="searchRegion" placeholder="Search Regions...">
-          <select id ="region-multiselect" name="selectRegionAdd" class="form-select form-select-lg mb-3" multiple size="4">
-            {% for region in regionData %} 
-            <option value="{{region.id}}">{{region.region_name}}</option>
-            {% endfor %}
-          </select>
-          <h5>Select Coverage Area</h5>
-          <input class="form-control" id="searchCvgReg" placeholder="Search Coverages...">
-          <select id="coverage-region-select" name="selectCoverageRegionAdd" class="form-select form-select-lg mb-3" size="4">
-            {% for coverages in coveragedata %} 
-            <option value="{{coverages.id}}">{{coverages.coverage_name}}</option>
-            {% endfor %}
-          </select>
-          <div class="form-group">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-      </form>
-      </div>
     </div>
     <!-- right -->
-    <div class="col-6">
-      <div class="container shadow p-1 mb-2 rounded">
+    <div class="col-sm-5">
+      <div class="container shadow p-3 mb-2 rounded" style="max-height:500px; width: 100%;">
           <h3>Coverages</h3>
             <table id="coverageTable" class="table table-striped table-hover" data-column-defs='[{"sortable": false, "targets": [1]}]'>
                 <thead>
@@ -88,7 +40,7 @@ block page_title %} Coverage Management {% endblock %} {%block content %}
                   <tr>
                     <td>{{coverages.coverage_name}}</td>
                     <td>
-                    <div class="col-xs-3">
+                    <div class="col-xs-2">
                       <a href="/coverage-management/{{coverages.id}}">Details</a>
                       <a href=""  data-bs-toggle="modal" data-bs-target="#modaldelete{{coverages.id}}">Delete</a> 
                     </div>
@@ -120,6 +72,61 @@ block page_title %} Coverage Management {% endblock %} {%block content %}
             </table>
         </div>
     </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-sm-3 me-5">
+      <!-- Add Users to Coverages Form -->
+      <div class="container shadow p-3 mb-2 rounded">
+        <form action="/coverage-add" method="POST">
+            <h3>Add Users to Coverage</h3>
+            <h5>Select Users</h5>
+            <input class="form-control" id="searchUsr" placeholder="Search Users...">
+            <select id ="usermultiselect" name="selectUserList" class="form-select form-select-lg mb-3" multiple size="4">
+              {% for user in userdata %} 
+              <option value="{{user.id}}">{{user.first_name}} {{user.last_name}}</option>
+              {% endfor %}
+            </select>
+            <h5>Select Coverage Areas to Assign to</h5>
+            <input class="form-control" id="searchCvg" placeholder="Search Coverages...">
+            <select id="coverageselect" name="selectCoverageId" class="form-select form-select-lg mb-3" size="4">
+              {% for coverages in coveragedata %} 
+              <option value="{{coverages.id}}">{{coverages.coverage_name}}</option>
+              {% endfor %}
+            </select>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="col-sm-3">
+      <!-- Add Regions To Coverage Areas -->
+      <div class="container shadow p-3 mb-2 rounded">
+        <form action="/coverage-add-region" method="POST">
+          <h3>Add Region to Coverage Areas</h3>
+          <h5>Select Region Areas to Assign to</h5>
+          <input class="form-control" id="searchRegion" placeholder="Search Regions...">
+          <select id ="region-multiselect" name="selectRegionAdd" class="form-select form-select-lg mb-3" multiple size="4">
+            {% for region in regionData %} 
+            <option value="{{region.id}}">{{region.region_name}}</option>
+            {% endfor %}
+          </select>
+          <h5>Select Coverage Area</h5>
+          <input class="form-control" id="searchCvgReg" placeholder="Search Coverages...">
+          <select id="coverage-region-select" name="selectCoverageRegionAdd" class="form-select form-select-lg mb-3" size="4">
+            {% for coverages in coveragedata %} 
+            <option value="{{coverages.id}}">{{coverages.coverage_name}}</option>
+            {% endfor %}
+          </select>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
   </div>
 </div>
 
@@ -176,8 +183,14 @@ block page_title %} Coverage Management {% endblock %} {%block content %}
       setInterval(search(input, multiselect), 300);
     });
     
-    $('#coverageTable').DataTable();
-  
+    $('#coverageTable').DataTable({ 
+      scrollY: '225px',
+      scrollCollapse: true,
+      "columns": [
+        null,
+        { "width": "20%" }       
+        ]
+      } );
   });
 </script>
 {% endblock %}

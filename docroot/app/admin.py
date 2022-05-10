@@ -177,10 +177,10 @@ def coverage(coverage_id):
 """
 Authenticated Coverage Region Page
 """
-@admin.route('/coverage-management/<int:coverage_id>/region/<int:region_id>', methods=['GET'])
+@admin.route('/region/<int:region_id>', methods=['GET'])
 @login_required
 @admin_required
-def region(coverage_id,region_id):
+def region(region_id):
     #Grab coverage based on id. 
     region = Region.query.get(region_id)
     if (region):
