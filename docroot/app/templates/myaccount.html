@@ -1,57 +1,70 @@
-{% extends "base.html" %} {% block html_title %} My Account {% endblock %}
-{% block page_title %} My Account {% endblock %} {% block content %}
+{% extends "base.html" %} {% block html_title %} My Account {% endblock %} {%
+block page_title %} My Account {% endblock %} {% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-auto">
-            <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                <img class="rounded-circle" width="150px" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ft4.ftcdn.net%2Fjpg%2F02%2F15%2F84%2F43%2F240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg&f=1&nofb=1">
-                <br>
-                <span class="font-weight-bold">{{current_user.first_name}} {{current_user.last_name}}</span>
-            </div>
-        </div>
-        <div class="col-md-auto d-flex align-items-center">
-            <div class="p-3 py-5">
-                <div class="row mb-3">
-                    <label class="labels">E-mail::</label><br>
-                    <span class="font-weight-bold">{{current_user.email_address}}</span>
-                </div>
-                <div class="row mb-3">
-                    <label class="labels">Security Level:</label><br>
-                    {% if current_user.is_admin() %}
-                    <span class="font-weight-bold">Admin</span>
-                    {% else %}
-                    <span class="font-weight-bold">User</span>
-                    {% endif %}
-                </div>
-                <div class="row">
-                    <button>Change Password</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row justify-content-center">
-        <div class="container p-3 shadow p-1 mb-2 rounded">
-            <h3>Coverages</h3>
-              <table id="coverageTable" class="table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>Coverage</th>
-                    </tr>
-                  </thead>    
-                  <tbody>
-                    {% for coverages in coverages %}    
-                    <tr>
-                      <td>{{coverages.coverage_name}}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-              </table>
-          </div>
+  <div class="row justify-content-center">
+    <div class="col-md-auto">
+      <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+        <img
+          class="rounded-circle"
+          width="150px"
+          src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ft4.ftcdn.net%2Fjpg%2F02%2F15%2F84%2F43%2F240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg&f=1&nofb=1"
+        />
+        <br />
+        <span class="font-weight-bold"
+          >{{current_user.first_name}} {{current_user.last_name}}</span
+        >
       </div>
+    </div>
+    <div class="col-md-auto d-flex align-items-center">
+      <div class="p-3 py-5">
+        <div class="row mb-3">
+          <label class="labels">E-mail:</label><br />
+          <span class="font-weight-bold">{{current_user.email_address}}</span>
+        </div>
+        <div class="row mb-3">
+          <label class="labels">Security Level:</label><br />
+          {% if current_user.is_admin() %}
+          <span class="font-weight-bold">Admin</span>
+          {% else %}
+          <span class="font-weight-bold">User</span>
+          {% endif %}
+        </div>
+        <div class="row">
+          <a
+            href="/change-password"
+            class="btn btn-primary btn-block"
+            role="button"
+            aria-disabled="true"
+          >
+            Change Password
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <div class="container p-3 shadow p-1 mb-2 rounded">
+      <h3>Coverages</h3>
+      <table id="coverageTable" class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Coverage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for coverages in coverages %}
+          <tr>
+            <td>{{coverages.coverage_name}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 <script>
-    $(document).ready( function () {
-        $('#coverageTable').DataTable();
-    });
+  $(document).ready(function() {
+    $("#coverageTable").DataTable();
+  });
 </script>
 {% endblock %}
