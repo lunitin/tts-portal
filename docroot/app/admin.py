@@ -4,12 +4,11 @@ Flask routes that require the administrator role
 
 """
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_required, current_user, logout_user
 from functools import wraps
 from . import db, strings
-from .models import User, Coverage, Signal, Region, access_table
-from sqlalchemy import func, distinct
+from .models import User, Coverage, Signal, Region
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
@@ -46,25 +45,25 @@ Create new user.
 @login_required
 @admin_required
 def create_user():
-    form_fname = request.form.get('first_name')
-    form_lname = request.form.get('last_name')
-    form_email = request.form.get('email_address')
+    form_fname = request.form.get('first_name').strip().capitalize()
+    form_lname = request.form.get('last_name').strip().capitalize()
+    form_email = request.form.get('email_address').strip().lower()
     form_security = request.form.get('security_level')
-    form_password = request.form.get('password')
+    form_password = request.form.get('password').strip()
     error = None
 
-    if not form_fname or not form_fname.strip():
+    if not form_fname or not form_fname:
         error = 'First name is missing'
-    if not form_lname or not form_lname.strip():
-        error = 'First name is missing'
-    if not form_email or not form_email.strip() or '@' not in form_email:
-        error = 'Email is missing or needs "@"'
-    if not form_password or not form_password.strip():
+    if not form_lname or not form_lname:
+        error = 'Last name is missing'
+    if not form_email or not form_email or '@' not in form_email:
+        error = 'Email is missing or not a valid email'
+    if not form_password or not form_password:
         error = 'Password is required'
 
     if error:
         flash(error, 'warning')
-        return redirect(url_for('auth.users'))
+        return redirect(url_for('admin.users'))
 
     existing_email = User.query.filter(User.email_address == form_email).one_or_none()
 
@@ -82,11 +81,10 @@ def create_user():
         #Add to db
         db.session.add(new_user)
         db.session.commit()
-        flash("Account " + form_email + " was created!", 'success')
+        flash(strings.TPL_USER_CREATED.format(email=form_email), 'success')
         return redirect(url_for('admin.users'))
-
     else:
-        flash("Account with" + form_email + " already exists", 'danger')
+        flash(strings.TPL_EXISTING_EMAIL.format(email=form_email), 'danger')
         return redirect(url_for('admin.users'))
 
 """
@@ -97,13 +95,19 @@ Update user.
 @admin_required
 def update(user_id):
     user_update = User.query.get(user_id)
-    user_update.first_name = request.form.get('first_name')
-    user_update.last_name = request.form.get('last_name')
-    user_update.email_address = request.form.get('email_address')
-    user_update.security_level = request.form.get('security_level')
-    db.session.commit()
 
-    flash("User " + user_update.first_name + ", " + user_update.last_name + " Updated Successfully!", 'success')
+    if (user_update):
+        user_update.first_name = request.form.get('first_name')
+        user_update.last_name = request.form.get('last_name')
+        user_update.email_address = request.form.get('email_address')
+        user_update.security_level = request.form.get('security_level')
+        db.session.commit()
+
+        full_name = user_update.first_name + " " + user_update.last_name
+        flash(strings.TPL_USER_UPDATED.format(name=full_name), 'success')
+    else:
+        flash(strings.ERROR_USER_DNE, 'danger')  
+
     return redirect(url_for('admin.users'))
 
 
@@ -115,7 +119,7 @@ def delete(user_id):
     db.session.delete(user_delete)
     db.session.commit()
 
-    flash("User deleted Successfully", 'success')
+    flash(strings.MSG_USER_DELETED, 'success')
     return redirect(url_for('admin.users'))
 
 
@@ -144,32 +148,40 @@ Authenticated Coverage Details Page
 @login_required
 @admin_required
 def coverage(coverage_id):
-    #Grab coverage based on id.
-    coverage = Coverage.query.filter(Coverage.id == coverage_id)
+    #Grab coverage based on id. 
+    # coverage = Coverage.query.get(coverage_id)
+    coverage = db.session.query(Coverage).get(coverage_id)
 
+
+    if (coverage):
     #Get regions associated with coverage
-    regions = Region.query.filter(Region.coverage_id == coverage_id)
+    # regions = Region.query.filter(Region.coverage_id == coverage_id)
+        regions = db.session.query(Region).filter(Region.coverage_id == coverage_id)
+        #Get all users that have access to coverage area. 
+        # users = User.query.filter(User.coverages.any(id = coverage_id))
+        users = db.session.query(User).filter(User.coverages.any(id = coverage_id))
+        return render_template('coverage.html', coveragedata = coverage, regionData = regions, accessdata = users)
+    else:
+        abort(404)
 
-    #Get all users that have access to coverage area.
-    users = User.query.filter(User.coverages.any(id = coverage_id))
-
-    return render_template('coverage.html', coveragedata = coverage, regionData = regions, accessdata = users)
 
 """
 Authenticated Coverage Region Page
 """
-@admin.route('/coverage-management/<int:coverage_id>/region/<int:region_id>', methods=['GET'])
+@admin.route('/region/<int:region_id>', methods=['GET'])
 @login_required
 @admin_required
-def region(coverage_id,region_id):
-    #Grab coverage based on id.
-    regions = Region.query.filter(Region.id == region_id)
+def region(region_id):
+    #Grab coverage based on id. 
+    region = Region.query.get(region_id)
+    if (region):
+        #Get signals associated with coverage
+        signals = Signal.query.filter(Signal.region_id == region_id)
 
-    #Get signals associated with coverage
-    signals = Signal.query.filter(Signal.region_id == region_id)
 
-    return render_template('region.html', regionData = regions, signalData = signals)
-
+        return render_template('region.html', regionData = region, signalData = signals)
+    else:
+        abort(404)
 
 """
 Add User(s) to Coverage.
@@ -190,11 +202,11 @@ def add_coverage():
         user = User.query.get(selected_user)
         new_access = User.add_coverages(user,coverage_select_id)
         if (new_access == 0):
-            flash("User(s) were successfully added to " + coverage.coverage_name, 'success')
+            flash(strings.TPL_ADD_USERS_TO_COVERAGE.format(coverage=coverage.coverage_name), 'success')
             db.session.commit()
         else:
-            flash(selected_user + " was not added to " + coverage.coverage_name, 'danger')
-
+            flash(strings.TPL_ERROR_USER_TO_COVERAGE.format(user=selected_user,coverage=coverage.coverage_name), 'danger')
+            
     return redirect(url_for('admin.coverages'))
 
 """
@@ -209,10 +221,10 @@ def delete_access(coverage_id, user_id):
     coverage = Coverage.query.get(coverage_id)
     result = User.remove_coverages(selected_user, [str(coverage_id)])
     if(result == 0):
-        flash(selected_user.first_name + "'s access was removed from" + coverage.coverage_name, 'success')
+        flash(strings.TPL_DEL_USER_ACCESS.format(user=selected_user.first_name,coverage=coverage.coverage_name), 'success')        
         db.session.commit()
     else :
-        flash(selected_user.first_name + "'s access was not removed from" + coverage.coverage_name, 'danger')
+        flash(strings.TPL_ERR_DEL_USER_ACCESS.format(user=selected_user.first_name,coverage=coverage.coverage_name), 'danger')        
     return redirect(url_for('admin.coverage', coverage_id=coverage_id))
 
 """
@@ -237,7 +249,7 @@ def create_coverage():
                 region.coverage_id = new_coverage.id
                 db.session.commit()
 
-    flash(create_coverage_name + " was successfully added!", 'success')
+    flash(strings.MSG_COVERAGE_CREATED, 'success')
     return redirect(url_for('admin.coverages'))
 
 
@@ -254,7 +266,7 @@ def delete_coverage(coverage_id):
     db.session.delete(coverage_delete)
     db.session.commit()
 
-    flash("Coverage deleted Successfully", 'success')
+    flash(strings.MSG_COVERAGE_DELETED, 'success')
     return redirect(url_for('admin.coverages'))
 
 
@@ -270,7 +282,7 @@ def remove_region(region_id, coverage_id):
     remove_region.coverage_id = None
     db.session.commit()
 
-    flash("Region removed Successfully", 'success')
+    flash(strings.MSG_REGION_DELETED, 'success')
     return redirect(url_for('admin.coverage', coverage_id=coverage_id))
 
 """
@@ -291,10 +303,10 @@ def add_region():
             #Set region coverage id to add.
             region.coverage_id = coverage.id
             db.session.commit()
-            flash("Region Added to " + coverage.coverage_name + " Successfully", 'success')
+            flash(strings.TPL_REGION_TO_COVERAGE.format(coverage=coverage.coverage_name), 'success')
     else:
-        flash("Error adding region to " + coverage.coverage_name, 'danger')
-
+        flash(strings.ERROR_COVERAGE_DNE, 'danger')
+    
     return redirect(url_for('admin.coverages'))
 
 """
@@ -303,7 +315,7 @@ Add Region
 @admin.route('/region-add', methods=['POST'])
 @login_required
 @admin_required
-def create_region(region_id):
+def create_region():
     create_region_name = request.form.get('region_name')
 
     new_region = Region(id = None,
@@ -312,7 +324,7 @@ def create_region(region_id):
     db.session.add(new_region)
     db.session.commit()
 
-    flash("Region created Successfully", 'success')
+    flash(strings.MSG_REGION_CREATED, 'success')
     return redirect(url_for('admin.coverages'))
 
 """
@@ -326,7 +338,7 @@ def delete_region(region_id):
     db.session.delete(delete_region)
     db.session.commit()
 
-    flash("Region deleted Successfully", 'success')
+    flash(strings.MSG_REGION_REMOVED, 'success')
     return redirect(url_for('admin.coverages'))
 
 # """
@@ -336,4 +348,8 @@ def delete_region(region_id):
 # @login_required
 # @admin_required
 # def add_region_signal(region_id):
-#
+# 
+#     
+# @admin.route('/500')
+# def error500():
+#     abort(500)

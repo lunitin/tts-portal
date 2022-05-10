@@ -1,12 +1,12 @@
-{% extends "base.html" %} {% block content %} {% for region in regionData%} {%
-block content %} {% block page_title %} Coverage Area Dashboard{% endblock %}
-{{region.region_name}}
+{% extends "base.html" %} {% block html_title %} Region {% endblock %} 
+{% block page_title %} {% endblock %} {%block content %}
 
-<div class="container-fluid shadow p-1 mb-2 rounded">
-  <div class="row">
-    <div class="col">
+
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-sm-5 shadow p-3 mb-2 me-4 rounded" style="height: 525px;">
       <h3>Signals in Region</h3>
-      <table class="table table-striped table-hover">
+      <table id="signalTable" class="table table-striped table-hover">
         <thead>
           <tr>
             <th>Region</th>
@@ -23,5 +23,12 @@ block content %} {% block page_title %} Coverage Area Dashboard{% endblock %}
     </div>
   </div>
 </div>
-
+<script>
+  $(document).ready( function () {
+    $('#signalTable').DataTable({ 
+      scrollY: '225px',
+      scrollCollapse: true
+      });
+  });
+</script>
 {% endblock %}
