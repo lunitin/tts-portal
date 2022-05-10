@@ -8,6 +8,7 @@ WEBSITE_HTML_TITLE_TRAILER = ": Traffic Technology Services"
 
 # Errors
 ERROR_USER_NOT_FOUND_INVALID_PASS = "Please check your login details and try again."
+ERROR_PASSWORD_INVALID = "Incorrect password."
 ERROR_TOKEN_GENERATION = "Error generating token, contact your administrator."
 ERROR_TOKEN_SIGNATURE = "Token signature is invalid, please try again."
 ERROR_TOKEN_EXPIRED = "Token expired, please try again."
