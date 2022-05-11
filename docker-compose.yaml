@@ -6,26 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-    ports:
-      - "8080:80"
-    networks:
-      - tts-net
-    volumes:
-      - ./docroot:/app
-    restart: on-failure
-
-  db:
-    container_name: db
-    build:
-      context: .
-      dockerfile: Dockerfile.db
-    # For persistent data between startup/shutdown
-    # volumes:
-    #   - tts-db:/var/lib/mysql
-    # Set max_allowed_packet to 1GB (or any other value)
-    command: --max_allowed_packet=1073741824
     environment:
-      MYSQL_ROOT_PASSWORD: "beastm0de"
       # This image will check how many CPU cores are available in the current
       # server running your container.
       # It will set the number of workers to the number of CPU cores multiplied
@@ -48,6 +29,26 @@ services:
       #
       # By default, set to info.
       #LOG_LEVEL: "info"
+    ports:
+      - "8080:80"
+    networks:
+      - tts-net
+    volumes:
+      - ./docroot:/app
+    restart: on-failure
+
+  db:
+    container_name: db
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    # For persistent data between startup/shutdown
+    # volumes:
+    #   - tts-db:/var/lib/mysql
+    # Set max_allowed_packet to 1GB (or any other value)
+    command: --max_allowed_packet=1073741824
+    environment:
+      MYSQL_ROOT_PASSWORD: "beastm0de"
     networks:
       - tts-net
     restart: on-failure
