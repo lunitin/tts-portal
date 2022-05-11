@@ -78,12 +78,6 @@ docker exec -it db bash
 mysql -u root -p beastm0de
 ```
 
-When Python code is updated inside the docroot/ folder, the following command will instruct the running web container to reload the new code.
-
-```
-touch docroot/uwsgi.ini
-```
-
 When the database is configured with persistent mode, SQL data will live in the docker volume and not be reset when the MySQL container stops and starts. If a clean run is necessary the volume must be removed when the container is down:
 
 ```
