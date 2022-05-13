@@ -26,6 +26,11 @@ def init_dashboard(server):
     # This defines the app layout
     dash_app.layout = html.Div([
         dcc.Location(id="url"),
+        dcc.Loading(
+            id="loading-1",
+            type="default",
+            children=html.Div(id="loading-output-1")
+        ),
         html.Div(id='dashboard-wrapper')
     ])
     # Eliminate callback errors for dynamic elements

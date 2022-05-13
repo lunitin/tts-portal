@@ -71,7 +71,7 @@ def get_peakScatterPlot(signal, day, approach, tdirection):
     return p
 
 def get_totalDelayChart(signal, day, approach, tdirection):
-    print("=== gettotalDelayChart", signal, day, approach, tdirection, flush=True)
+    #print("=== gettotalDelayChart", signal, day, approach, tdirection, flush=True)
     data = requests.get(
         url=BASE_URL+'dashboard/totalDelayChart',
         params={
@@ -80,7 +80,7 @@ def get_totalDelayChart(signal, day, approach, tdirection):
             'signal': str(signal),
             'tdirection': str(tdirection)
         }).json()
-    print("=== Fetched getTotalDelaychart data:", data)
+    #print("=== Fetched getTotalDelaychart data:", data)
     if data == 0:
         return(0,0,0,0)
     p = plotly.io.from_json(data['plot'])
