@@ -138,18 +138,24 @@ class peakScatterPlot(Resource):
 class TotalDelayChart(Resource):
     @dashboard_ns.doc('Get totalDelayChart information')
     def get(self):
+        print("-- totalDelayChart API", flush=True)
         parser = reqparse.RequestParser()
         parser.add_argument('signal', type=int)
         parser.add_argument('day', type=int)
         parser.add_argument('approach', type=str)
         parser.add_argument('tdirection', type=str)
         args = parser.parse_args()
+        print("==args", args, flush=True)
         if args['approach'] == 'ALL': args['approach'] = None
         if args['tdirection'] == "ALL": args['tdirection'] = None
+        print("==args2", args, flush=True)
+
         vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+
+        print("== vehicles", vehicles, flush=True)
         if not vehicles:
             return(0)
         df = pd.DataFrame.from_dict(vehicles)

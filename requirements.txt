@@ -7,9 +7,9 @@ mysql-connector
 mysqlclient
 datetime
 flask-login
-werkzeug>=2.0
+werkzeug==2.0.2
 flask-mail
-itsdangerous>=2.0
+itsdangerous==2.0
 Flask-SQLAlchemy>=2.5.0
 flask-restx
 Flask-SQLAlchemy-Session==1.1

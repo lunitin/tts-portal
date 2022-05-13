@@ -5,7 +5,7 @@ import requests, json
 import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
+from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
@@ -21,7 +21,7 @@ base_url = "/dash/app/"
 
 
 def init_dashboard(server):
-    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=[dbc.themes.BOOTSTRAP])
+    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css'])
     print("== init current user:", current_user)
     # This defines the app layout
     dash_app.layout = html.Div([
