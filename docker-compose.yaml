@@ -12,7 +12,7 @@ services:
       # It will set the number of workers to the number of CPU cores multiplied
       # by this value.
       # Default: 2
-      WORKERS_PER_CORE: "2"
+      #WORKERS_PER_CORE: "2"
       # Override the automatic definition of number of workers.
       # If this is not set
       # Set to the number of CPU cores in the current server multiplied by the

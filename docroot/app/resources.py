@@ -348,7 +348,10 @@ class User(Resource):
 @user_ns.route('/users/coverages/<int:id>')
 class User_Coverages(Resource):
     @user_ns.doc("Get all User Coverages")
+
     def get(self, id):
+        print("--invoking GET User_Coverages(Resource): ", id, flush=True)
+
         user = db_User.find_by_id(id)
         if user:
             return user.fetch_coverages(), 200
@@ -610,7 +613,7 @@ class Regions_from_Coverage(Resource):
             return coverage.get_regions_from_coverage(), 200
         else:
             return NOT_FOUND.format('coverage_id', id),  404
-    
+
 @signals_ns.route('/regions/signals/<int:id>')
 class Signals_from_Region(Resource):
     @signals_ns.doc('Fetch all signals from region id')

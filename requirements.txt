@@ -3,6 +3,7 @@ Flask>=2.0.1
 greenlet==0.4.17
 
 # Requirements for TTS Portal
+mysql-connector
 mysqlclient
 datetime
 flask-login
