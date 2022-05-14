@@ -66,7 +66,7 @@ def set_layout():
 
     content = html.Div(id="dash-wrapper", className="container-fluid", children=[
                 # Identifier
-                html.Div(className="dash-wrapper__fields row",children=[
+                html.Div(className="dash-wrapper__title row",children=[
                     html.Div( className="col-12", children=[
                         html.H1('Coverage : Region : Signal')
                     ])
@@ -111,89 +111,94 @@ def set_layout():
                         ),
                     ])
                 ]),
-                # Details
-                html.Div(className="dash-wrapper__fields-detail row",children=[
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Day'),
-                        dcc.Dropdown(
-                            id='day',
-                            options = [{'label': 'Sunday', 'value': 1},
-                                {'label': 'Monday', 'value': 2},
-                                {'label': 'Tuesday', 'value': 3},
-                                {'label': 'Wednesday', 'value': 4},
-                                {'label': 'Thursday', 'value': 5},
-                                {'label': 'Friday', 'value': 6},
-                                {'label': 'Saturday', 'value': 7},
-                            ],
-                            value='2'
-                        )
-                    ]),
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Approach'),
-                        dcc.Dropdown(
-                            id='approach',
-                            options=[{'label': 'ALL', 'value': 'ALL'},
-                                {'label': 'Northbound', 'value': 'Northbound'},
-                                {'label': 'Eastbound', 'value': 'Eastbound'},
-                                {'label': 'Southbound', 'value': 'Southbound'},
-                                {'label': 'Westbound', 'value': 'Westbound'},
-                            ],
-                            value='ALL'
-                        )
-                    ]),
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Travel Direction'),
-                        dcc.Dropdown(
-                            id='direction',
-                            options=[{'label': 'ALL', 'value': 'ALL'},
-                                {'label': 'Straight', 'value': 'Straight'},
-                                {'label': 'Left', 'value': 'Left'},
-                                {'label': 'Right', 'value': 'Right'},
-                            ],
-                            value='ALL'
-                        )
-                    ])
-                ]),
 
-                # Pies
-                html.Div(className="dash-wrapper__pie row",children=[
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Total Delay'),
-                        html.Div(id="dash-wrapper__pie--delay", children=[
-                            dcc.Graph(id="dash-wrapper__pie--delay-chart"),
+                dbc.Fade([
+                    # Details
+                    html.Div(className="dash-wrapper__fields-detail row",children=[
+                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                            html.H1('Day'),
+                            dcc.Dropdown(
+                                id='day',
+                                options = [{'label': 'Sunday', 'value': 1},
+                                    {'label': 'Monday', 'value': 2},
+                                    {'label': 'Tuesday', 'value': 3},
+                                    {'label': 'Wednesday', 'value': 4},
+                                    {'label': 'Thursday', 'value': 5},
+                                    {'label': 'Friday', 'value': 6},
+                                    {'label': 'Saturday', 'value': 7},
+                                ],
+                                value='2'
+                            )
+                        ]),
+                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                            html.H1('Approach'),
+                            dcc.Dropdown(
+                                id='approach',
+                                options=[{'label': 'ALL', 'value': 'ALL'},
+                                    {'label': 'Northbound', 'value': 'Northbound'},
+                                    {'label': 'Eastbound', 'value': 'Eastbound'},
+                                    {'label': 'Southbound', 'value': 'Southbound'},
+                                    {'label': 'Westbound', 'value': 'Westbound'},
+                                ],
+                                value='ALL'
+                            )
+                        ]),
+                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                            html.H1('Travel Direction'),
+                            dcc.Dropdown(
+                                id='direction',
+                                options=[{'label': 'ALL', 'value': 'ALL'},
+                                    {'label': 'Straight', 'value': 'Straight'},
+                                    {'label': 'Left', 'value': 'Left'},
+                                    {'label': 'Right', 'value': 'Right'},
+                                ],
+                                value='ALL'
+                            )
+                        ])
+                    ]),
+                    # Pies
+                    html.Div(className="dash-wrapper__pie row",children=[
+                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                            html.H1('Total Delay'),
+                            html.Div(id="dash-wrapper__pie--delay", children=[
+                                dcc.Graph(id="dash-wrapper__pie--delay-chart"),
+                            ]),
+                        ]),
+                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                            html.H1('Arrival Rates'),
+                            html.Div(id="dash-wrapper__pie--arrival", children=[
+                                dcc.Graph(id="dash-wrapper__pie--arrival-chart"),
+                            ]),
+                        ]),
+                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                            html.H1('Split Failure'),
+                            html.Div(id="dash-wrapper__pie--splitfail", children=[
+                                dcc.Graph(id="dash-wrapper__pie--splitfail-chart"),
+                            ]),
+                        ])
+                    ]),
+                    # Movement
+                    html.Div(className="dash-wrapper__bar row",children=[
+                        html.Div( className="col-12", children=[
+                            html.H1('Movement'),
+                            html.Div(id="dash-wrapper__bar--movement", children=[
+                                dcc.Graph(id="dash-wrapper__bar--movement-chart"),
+                            ]),
+                        ]),
+                    # Delay
+                    html.Div(className="dash-wrapper__scatter row",children=[
+                        html.Div( className="col", children=[
+                            html.H1('Delay by Hour'),
+                            html.Div(id="dash-wrapper__scatter", children=[
+                                dcc.Graph(id="dash-wrapper__scatter--delay-chart"),
+                            ]),
                         ]),
                     ]),
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Arrival Rates'),
-                        html.Div(id="dash-wrapper__pie--arrival", children=[
-                            dcc.Graph(id="dash-wrapper__pie--arrival-chart"),
-                        ]),
-                    ]),
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Split Failure'),
-                        html.Div(id="dash-wrapper__pie--splitfail", children=[
-                            dcc.Graph(id="dash-wrapper__pie--splitfail-chart"),
-                        ]),
-                    ])
                 ]),
-                # Movement
-                html.Div(className="dash-wrapper__bar row",children=[
-                    html.Div( className="col-12", children=[
-                        html.H1('Movement'),
-                        html.Div(id="dash-wrapper__bar--movement", children=[
-                            dcc.Graph(id="dash-wrapper__bar--movement-chart"),
-                        ]),
-                    ]),
-                # Delay
-                html.Div(className="dash-wrapper__scatter row",children=[
-                    html.Div( className="col", children=[
-                        html.H1('Delay by Hour'),
-                        html.Div(id="dash-wrapper__scatter", children=[
-                            dcc.Graph(id="dash-wrapper__scatter--delay-chart"),
-                        ]),
-                    ]),
-                ]),
-            ]),
+                ],
+                id='dash-wrapper__fields--graphs',
+                is_in=False,
+                appear=False,),
         ])
     return content
 
@@ -308,6 +313,7 @@ def init(app):
         Output(component_id='dash-wrapper__pie--splitfail-chart', component_property='figure'),
         Output(component_id='dash-wrapper__bar--movement-chart', component_property='figure'),
         Output(component_id='dash-wrapper__scatter--delay-chart', component_property='figure'),
+        Output(component_id='dash-wrapper__fields--graphs', component_property='is_in'),
         #Output(component_id='dash-wrapper__pie--splitfail', component_property='children'),
         #Output(component_id='dash-wrapper__delay--chart', component_property='children'),
         #Output(component_id='dash-wrapper__movement--chart', component_property='children'),
@@ -341,8 +347,9 @@ def init(app):
             dl = get_peakScatterPlot(signal, day, approach, direction)
         else:
             print("-- Skipping update_graphs", flush=True)
+            raise PreventUpdate
 
-        return td, ar, sf, mv, dl
+        return td, ar, sf, mv, dl, True
 
 
 # def init_callbacks(dash_app):
