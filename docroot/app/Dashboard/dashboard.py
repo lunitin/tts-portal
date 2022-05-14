@@ -81,21 +81,34 @@ def set_layout():
                             placeholder = 'Select a Coverage Area'
                         )
                     ]),
+
+                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                            dbc.Fade([
+                                html.H1('Region'),
+                                dcc.Dropdown(
+                                    id='region',
+                                    options = [],
+                                    placeholder='Depends on Coverage Area'
+                                )],
+                                id='dash-wrapper__fields--region--fade',
+                                is_in=False,
+                                appear=False,
+                            ),
+                        ]),
+
+
                     html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Region'),
-                        dcc.Dropdown(
-                            id='region',
-                            options = [],
-                            placeholder='Depends on Coverage Area'
-                        )
-                    ]),
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Signal'),
-                        dcc.Dropdown(
-                            id='signal',
-                            options = [],
-                            placeholder='Depends on Region'
-                        )
+                        dbc.Fade([
+                            html.H1('Signal'),
+                            dcc.Dropdown(
+                                id='signal',
+                                options = [],
+                                placeholder='Depends on Region'
+                            )],
+                            id='dash-wrapper__fields--signal--fade',
+                            is_in=False,
+                            appear=False,
+                        ),
                     ])
                 ]),
                 # Details
@@ -206,6 +219,7 @@ def init(app):
     @app.callback(
         Output(component_id='region', component_property='options'),
         Output(component_id='region', component_property='placeholder'),
+        Output(component_id='dash-wrapper__fields--region--fade', component_property='is_in'),
         Input(component_id='coverage', component_property='value')
 
     )
@@ -229,11 +243,12 @@ def init(app):
             print("--skipping coverage\n", flush=True)
             raise PreventUpdate
 
-        return region, 'Select a Region'
+        return region, 'Select a Region', True
 
     @app.callback(
         Output(component_id='signal', component_property='options'),
         Output(component_id='signal', component_property='placeholder'),
+        Output(component_id='dash-wrapper__fields--signal--fade', component_property='is_in'),
         Input(component_id='region', component_property='value')
 
     )
@@ -254,7 +269,7 @@ def init(app):
             raise PreventUpdate
 
 
-        return signal, 'Select a Signal'
+        return signal, 'Select a Signal', True
 
 
     # Update Signals
