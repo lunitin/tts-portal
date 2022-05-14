@@ -62,6 +62,7 @@ def set_layout():
     print("= Coverages", coverage, flush=True)
     coverage = get_coverages_by_user();
     print("= Coverages", coverage, flush=True)
+    #coverage.insert(0, {"label": "Select a Coverage Area", "value": ''})
 
     content = html.Div(id="dash-wrapper", className="container-fluid", children=[
                 # Identifier
@@ -76,21 +77,24 @@ def set_layout():
                         html.H1('Coverage'),
                         dcc.Dropdown(
                             id='coverage',
-                            options = coverage
+                            options = coverage,
+                            placeholder = 'Select a Coverage Area'
                         )
                     ]),
                     html.Div( className="col-12 col-md-6 col-xl-4", children=[
                         html.H1('Region'),
                         dcc.Dropdown(
                             id='region',
-                            options = []
+                            options = [],
+                            placeholder='Depends on Coverage Area'
                         )
                     ]),
                     html.Div( className="col-12 col-md-6 col-xl-4", children=[
                         html.H1('Signal'),
                         dcc.Dropdown(
                             id='signal',
-                            options = []
+                            options = [],
+                            placeholder='Depends on Region'
                         )
                     ])
                 ]),
@@ -201,6 +205,7 @@ def init(app):
 
     @app.callback(
         Output(component_id='region', component_property='options'),
+        Output(component_id='region', component_property='placeholder'),
         Input(component_id='coverage', component_property='value')
 
     )
@@ -218,15 +223,17 @@ def init(app):
             coverage = input
             #region = rand_opt(coverage)
             region = get_regions_by_coverage(input)
+            #region.insert(0,{'label': 'Select a Region', 'value': ''})
             print("== rand regions", region, flush=True)
         else:
             print("--skipping coverage\n", flush=True)
             raise PreventUpdate
 
-        return region
+        return region, 'Select a Region'
 
     @app.callback(
         Output(component_id='signal', component_property='options'),
+        Output(component_id='signal', component_property='placeholder'),
         Input(component_id='region', component_property='value')
 
     )
@@ -240,13 +247,14 @@ def init(app):
             region = input
             #signal = rand_opt(region)
             signal = get_signals_by_region(input)
+
             print("=== signals", signal, flush=True)
         else:
             print("-- skipping region\n", flush=True)
             raise PreventUpdate
 
 
-        return signal
+        return signal, 'Select a Signal'
 
 
     # Update Signals
