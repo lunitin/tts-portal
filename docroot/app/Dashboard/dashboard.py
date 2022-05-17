@@ -27,9 +27,10 @@ def init_dashboard(server):
     dash_app.layout = html.Div([
         dcc.Location(id="url"),
         dcc.Loading(
-            id="loading-1",
+            id="dashboard-loading",
             type="default",
-            children=html.Div(id="loading-output-1")
+            fullscreen= True,
+            children=html.Div(id="dashboard-loading--spinner")
         ),
         html.Div(id='dashboard-wrapper')
     ])
@@ -83,6 +84,11 @@ def set_layout():
                     ]),
 
                         html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                            # dcc.Loading(
+                            #     id="region-loading",
+                            #     type="default",
+                            #     children=html.Div(id="region-loading--spinner")
+                            # ),
                             dbc.Fade([
                                 html.H1('Region'),
                                 dcc.Dropdown(
@@ -98,6 +104,7 @@ def set_layout():
 
 
                     html.Div( className="col-12 col-md-6 col-xl-4", children=[
+
                         dbc.Fade([
                             html.H1('Signal'),
                             dcc.Dropdown(
@@ -215,24 +222,35 @@ def init(app):
     # If authorized, load dash elements
     @app.callback(
         Output(component_id='dashboard-wrapper', component_property='children'),
+        Output(component_id='dashboard-loading', component_property='children'),
         Input('url', 'pathname')
     )
     def page(url):
-        print("- page callback", flush=True)
-        return set_layout()
 
+        # Check User Authorization here
+
+
+        print("- page callback", flush=True)
+        return set_layout(), True
+
+
+
+    # Update Regions
     @app.callback(
         Output(component_id='region', component_property='options'),
         Output(component_id='region', component_property='placeholder'),
+        #Output(component_id='region-loading', component_property='children'),
+
         Output(component_id='dash-wrapper__fields--region--fade', component_property='is_in'),
         Input(component_id='coverage', component_property='value')
 
     )
-    # Update Regions
+
     def cb_coverage(input):
         coverage = []
-        print("== cb_coverage current user:", current_user)
-
+        print("== cb_coverage callback:", current_user)
+        # if n_clicks is None:
+        #     raise PreventUpdate
 
         region = []
         if dash.callback_context.triggered[0]['prop_id'].split('.')[0] == "coverage":
@@ -244,21 +262,24 @@ def init(app):
             region = get_regions_by_coverage(input)
             #region.insert(0,{'label': 'Select a Region', 'value': ''})
             print("== rand regions", region, flush=True)
+            return region, 'Select a Region', True
         else:
             print("--skipping coverage\n", flush=True)
             raise PreventUpdate
 
-        return region, 'Select a Region', True
+
 
     @app.callback(
         Output(component_id='signal', component_property='options'),
         Output(component_id='signal', component_property='placeholder'),
+        #Output(component_id='signal-loading', component_property='children'),
         Output(component_id='dash-wrapper__fields--signal--fade', component_property='is_in'),
         Input(component_id='region', component_property='value')
 
     )
     # Update Regions
     def cb_region(input):
+        print("== cb_region callback:", current_user)
         signal = []
         if dash.callback_context.triggered[0]['prop_id'].split('.')[0] == "region":
             print("==REGION CHANGED ",flush=True)
@@ -269,12 +290,12 @@ def init(app):
             signal = get_signals_by_region(input)
 
             print("=== signals", signal, flush=True)
+
+            return signal, 'Select a Signal', True#, True
+
         else:
             print("-- skipping region\n", flush=True)
             raise PreventUpdate
-
-
-        return signal, 'Select a Signal', True
 
 
     # Update Signals
@@ -299,12 +320,14 @@ def init(app):
             signal = input
             #day = rand_opt(signal)
             print("=== day", day, flush=True)
+
+            # Reset day/dir/approach to defaults
+            return '2', 'ALL', 'ALL'
         else:
             print("--skipping cb_signals\n", flush=True)
             raise PreventUpdate
 
-        # Reset day/dir/approach to defaults
-        return '2', 'ALL', 'ALL'
+
 
     # Update tier 3 filters and graphs
     @app.callback(
