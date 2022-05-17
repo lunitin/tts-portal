@@ -5,8 +5,7 @@ import requests, json
 import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
-from dash import dcc
-from dash import html
+from dash import html, dcc, ctx
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 #from sklearn.metrics import coverage_error
@@ -20,20 +19,26 @@ from .server_calls import get_coverages_by_user, get_signals_by_region, get_regi
 base_url = "/dash/app/"
 
 
+
+
 def init_dashboard(server):
-    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css'])
+    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css', '/css/core.css'])
     print("== init current user:", current_user)
     # This defines the app layout
     dash_app.layout = html.Div([
         dcc.Location(id="url"),
-        dcc.Loading(
-            id="dashboard-loading",
-            type="default",
+        dbc.Spinner(
             fullscreen= True,
-            children=html.Div(id="dashboard-loading--spinner")
+            color="primary",
+            size="md",
+            delay_hide=10,
+            fullscreen_style={'background-color': 'rgba(255, 255, 255, 0.60)'},
+            children=[
+                html.Div(id='dashboard-wrapper')
+            ],
         ),
-        html.Div(id='dashboard-wrapper')
-    ])
+    ], className='loading-wrapper')
+
     # Eliminate callback errors for dynamic elements
     dash_app.config.suppress_callback_exceptions=True
 
@@ -63,19 +68,16 @@ def set_layout():
     print("= Coverages", coverage, flush=True)
     coverage = get_coverages_by_user();
     print("= Coverages", coverage, flush=True)
-    #coverage.insert(0, {"label": "Select a Coverage Area", "value": ''})
 
     content = html.Div(id="dash-wrapper", className="container-fluid", children=[
                 # Identifier
                 html.Div(className="dash-wrapper__title row",children=[
-                    html.Div( className="col-12", children=[
-                        html.H1('Coverage : Region : Signal')
-                    ])
+                    html.Div( className="col-12", children=[])
                 ]),
                 # Zone
                 html.Div(className="dash-wrapper__fields row",children=[
                     html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        html.H1('Coverage'),
+                        dbc.Label('Coverage Area'),
                         dcc.Dropdown(
                             id='coverage',
                             options = coverage,
@@ -83,30 +85,23 @@ def set_layout():
                         )
                     ]),
 
-                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            # dcc.Loading(
-                            #     id="region-loading",
-                            #     type="default",
-                            #     children=html.Div(id="region-loading--spinner")
-                            # ),
-                            dbc.Fade([
-                                html.H1('Region'),
-                                dcc.Dropdown(
-                                    id='region',
-                                    options = [],
-                                    placeholder='Depends on Coverage Area'
-                                )],
-                                id='dash-wrapper__fields--region--fade',
-                                is_in=False,
-                                appear=False,
-                            ),
-                        ]),
-
+                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
+                        dbc.Fade([
+                            dbc.Label('Region'),
+                            dcc.Dropdown(
+                                id='region',
+                                options = [],
+                                placeholder='Depends on Coverage Area'
+                            )],
+                            id='dash-wrapper__fields--region--fade',
+                            is_in=False,
+                            appear=False,
+                        ),
+                    ]),
 
                     html.Div( className="col-12 col-md-6 col-xl-4", children=[
-
                         dbc.Fade([
-                            html.H1('Signal'),
+                            dbc.Label('Signal'),
                             dcc.Dropdown(
                                 id='signal',
                                 options = [],
@@ -116,14 +111,14 @@ def set_layout():
                             is_in=False,
                             appear=False,
                         ),
-                    ])
+                    ]),
                 ]),
 
                 dbc.Fade([
                     # Details
                     html.Div(className="dash-wrapper__fields-detail row",children=[
                         html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            html.H1('Day'),
+                            dbc.Label('Day'),
                             dcc.Dropdown(
                                 id='day',
                                 options = [{'label': 'Sunday', 'value': 1},
@@ -138,7 +133,7 @@ def set_layout():
                             )
                         ]),
                         html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            html.H1('Approach'),
+                            dbc.Label('Approach'),
                             dcc.Dropdown(
                                 id='approach',
                                 options=[{'label': 'ALL', 'value': 'ALL'},
@@ -151,7 +146,7 @@ def set_layout():
                             )
                         ]),
                         html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            html.H1('Travel Direction'),
+                            dbc.Label('Travel Direction'),
                             dcc.Dropdown(
                                 id='direction',
                                 options=[{'label': 'ALL', 'value': 'ALL'},
@@ -166,19 +161,19 @@ def set_layout():
                     # Pies
                     html.Div(className="dash-wrapper__pie row",children=[
                         html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            html.H1('Total Delay'),
+                            dbc.Label('Total Delay'),
                             html.Div(id="dash-wrapper__pie--delay", children=[
                                 dcc.Graph(id="dash-wrapper__pie--delay-chart"),
                             ]),
                         ]),
                         html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            html.H1('Arrival Rates'),
+                            dbc.Label('Arrival Rates'),
                             html.Div(id="dash-wrapper__pie--arrival", children=[
                                 dcc.Graph(id="dash-wrapper__pie--arrival-chart"),
                             ]),
                         ]),
                         html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            html.H1('Split Failure'),
+                            dbc.Label('Split Failure'),
                             html.Div(id="dash-wrapper__pie--splitfail", children=[
                                 dcc.Graph(id="dash-wrapper__pie--splitfail-chart"),
                             ]),
@@ -187,7 +182,7 @@ def set_layout():
                     # Movement
                     html.Div(className="dash-wrapper__bar row",children=[
                         html.Div( className="col-12", children=[
-                            html.H1('Movement'),
+                            dbc.Label('Movement'),
                             html.Div(id="dash-wrapper__bar--movement", children=[
                                 dcc.Graph(id="dash-wrapper__bar--movement-chart"),
                             ]),
@@ -195,7 +190,7 @@ def set_layout():
                     # Delay
                     html.Div(className="dash-wrapper__scatter row",children=[
                         html.Div( className="col", children=[
-                            html.H1('Delay by Hour'),
+                            dbc.Label('Delay by Hour'),
                             html.Div(id="dash-wrapper__scatter", children=[
                                 dcc.Graph(id="dash-wrapper__scatter--delay-chart"),
                             ]),
@@ -222,16 +217,16 @@ def init(app):
     # If authorized, load dash elements
     @app.callback(
         Output(component_id='dashboard-wrapper', component_property='children'),
-        Output(component_id='dashboard-loading', component_property='children'),
         Input('url', 'pathname')
     )
     def page(url):
 
-        # Check User Authorization here
-
+        # Ensure we're an authenticated user before rendering any content
+        if not current_user or not current_user.is_authenticated:
+            return html.Div(strings.ERROR_PAGE_PERMISSION_DENIED)
 
         print("- page callback", flush=True)
-        return set_layout(), True
+        return set_layout()
 
 
 
@@ -239,29 +234,25 @@ def init(app):
     @app.callback(
         Output(component_id='region', component_property='options'),
         Output(component_id='region', component_property='placeholder'),
-        #Output(component_id='region-loading', component_property='children'),
-
         Output(component_id='dash-wrapper__fields--region--fade', component_property='is_in'),
-        Input(component_id='coverage', component_property='value')
-
+        Input(component_id='coverage', component_property='value'),
     )
 
     def cb_coverage(input):
         coverage = []
-        print("== cb_coverage callback:", current_user)
-        # if n_clicks is None:
-        #     raise PreventUpdate
+        print("== cb_coverage callback, triggered by ",  ctx.triggered_id)
 
         region = []
-        if dash.callback_context.triggered[0]['prop_id'].split('.')[0] == "coverage":
+        if ctx.triggered_id == "coverage":
             print("==COVERAGE CHANGED ",flush=True)
             print("==coverage input ", input, flush=True)
             print("=== load regions()", flush=True)
-            coverage = input
+
             #region = rand_opt(coverage)
             region = get_regions_by_coverage(input)
-            #region.insert(0,{'label': 'Select a Region', 'value': ''})
+
             print("== rand regions", region, flush=True)
+
             return region, 'Select a Region', True
         else:
             print("--skipping coverage\n", flush=True)
@@ -279,13 +270,13 @@ def init(app):
     )
     # Update Regions
     def cb_region(input):
-        print("== cb_region callback:", current_user)
+        print("== cb_region callback, triggered by ",  ctx.triggered_id)
         signal = []
-        if dash.callback_context.triggered[0]['prop_id'].split('.')[0] == "region":
+        if ctx.triggered_id == "region":
             print("==REGION CHANGED ",flush=True)
             print("==region input ", input, flush=True)
             print("=== load signals()", flush=True)
-            region = input
+
             #signal = rand_opt(region)
             signal = get_signals_by_region(input)
 
@@ -300,19 +291,17 @@ def init(app):
 
     # Update Signals
     @app.callback(
-        # Graph Output
-        # Output(component_id='direction', component_property='children'),
-        # Output(component_id='day', component_property='children'),
-        # Output(component_id='approach', component_property='children'),
-        # Filter Fields
         Output(component_id='day', component_property='value'),
         Output(component_id='direction', component_property='value'),
         Output(component_id='approach', component_property='value'),
         Input(component_id='signal', component_property='value'),
     )
     def cb_signal(input):
+
+        print("== cb_region callback, triggered by ",  ctx.triggered_id)
+
         day = []
-        if dash.callback_context.triggered[0]['prop_id'].split('.')[0] == "signal":
+        if ctx.triggered_id == "signal":
             print("==SIGNAL CHANGED ", flush=True)
             #reply = 'true'
             print("==signal input ", input, flush=True)
@@ -337,20 +326,18 @@ def init(app):
         Output(component_id='dash-wrapper__bar--movement-chart', component_property='figure'),
         Output(component_id='dash-wrapper__scatter--delay-chart', component_property='figure'),
         Output(component_id='dash-wrapper__fields--graphs', component_property='is_in'),
-        #Output(component_id='dash-wrapper__pie--splitfail', component_property='children'),
-        #Output(component_id='dash-wrapper__delay--chart', component_property='children'),
-        #Output(component_id='dash-wrapper__movement--chart', component_property='children'),
         Input(component_id='signal', component_property='value'),
         Input(component_id='day', component_property='value'),
         Input(component_id='approach', component_property='value'),
         Input(component_id='direction', component_property='value'),
     )
-    def update_graphs(signal, day, approach, direction):
-        td=[]
-        ar=[]
+    def cb_update_graphs(signal, day, approach, direction):
+        td = []
+        ar = []
         sf = []
         mv = []
         dl = []
+        print("== cb_update_graphs callback, triggered by ",  ctx.triggered_id)
         print("== Updating graphs", signal, day, approach, direction, flush=True)
 
         if (signal != None):
@@ -368,11 +355,13 @@ def init(app):
 
             # Scatter
             dl = get_peakScatterPlot(signal, day, approach, direction)
+
+            return td, ar, sf, mv, dl, True
         else:
             print("-- Skipping update_graphs", flush=True)
             raise PreventUpdate
 
-        return td, ar, sf, mv, dl, True
+
 
 
 # def init_callbacks(dash_app):
@@ -385,7 +374,7 @@ def init(app):
 #
 #     return [
 #         # Create Title And Dropdown
-#         html.H1("Broward " + str(light) + " Light", style={"text-align": 'center'}),
+#         dbc.Label("Broward " + str(light) + " Light", style={"text-align": 'center'}),
 #
 #         # Create Coverage Dropdown
 #         html.Div([
