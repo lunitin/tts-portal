@@ -19,8 +19,6 @@ from .server_calls import get_coverages_by_user, get_signals_by_region, get_regi
 base_url = "/dash/app/"
 
 
-
-
 def init_dashboard(server):
     dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css', '/css/dash.css'],)
     print("== init current user:", current_user)
@@ -45,6 +43,8 @@ def init_dashboard(server):
     init(dash_app)
     return dash_app.server
 
+"""
+# Random pull down data generation function
 
 import random
 def rand_opt(fake):
@@ -54,11 +54,24 @@ def rand_opt(fake):
             o.append({"label": i , "value": i })
 
     return o
+"""
+
+# Default Plotly Graph options
+graph_config = {
+    'displaylogo': False,
+    'margin': { 'autoexpand': False,
+                't': 0,
+                'r': 0,
+                'b': 0,
+                'l': 0,
+    },
+
+}
+
 
 ##############
 # App Layout #
 ##############
-
 
 def set_layout():
     coverage = []
@@ -69,14 +82,11 @@ def set_layout():
     coverage = get_coverages_by_user();
     print("= Coverages", coverage, flush=True)
 
-    content = html.Div(id="dash-wrapper", className="container-fluid", children=[
-                # Identifier
-                html.Div(className="dash-wrapper__title row",children=[
-                    html.Div( className="col-12", children=[])
-                ]),
-                # Zone
-                html.Div(className="dash-wrapper__fields row",children=[
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
+    content = dbc.Container(id="dash-wrapper", fluid=True, children=[
+
+                # Area Selection Fields
+                dbc.Row(id="dash-wrapper__fields", children=[
+                    dbc.Col(width=12, md=4, xl=4, children=[
                         dbc.Label('Coverage Area'),
                         dcc.Dropdown(
                             id='coverage',
@@ -85,123 +95,188 @@ def set_layout():
                         )
                     ]),
 
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        dbc.Fade([
-                            dbc.Label('Region'),
-                            dcc.Dropdown(
-                                id='region',
-                                options = [],
-                                placeholder='Select a Region'
-                            )],
-                            id='dash-wrapper__fields--region--fade',
+                    dbc.Col(width=12, md=4, xl=4, children=[
+                        dbc.Fade(id='dash-wrapper__fields--region--fade',
                             is_in=False,
                             appear=False,
+                            children= [
+                                dbc.Label('Region'),
+                                dcc.Dropdown(
+                                    id='region',
+                                    options = [],
+                                    placeholder='Select a Region'
+                                )
+                            ],
                         ),
                     ]),
 
-                    html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                        dbc.Fade([
-                            dbc.Label('Signal'),
-                            dcc.Dropdown(
-                                id='signal',
-                                options = [],
-                                placeholder='Select a Signal'
-                            )],
-                            id='dash-wrapper__fields--signal--fade',
+                    dbc.Col(width=12, md=4, xl=4, children=[
+                        dbc.Fade(id='dash-wrapper__fields--signal--fade',
                             is_in=False,
                             appear=False,
+                            children = [
+                                dbc.Label('Signal'),
+                                dcc.Dropdown(
+                                    id='signal',
+                                    options = [],
+                                    placeholder='Select a Signal'
+                                )
+                            ],
+
                         ),
                     ]),
                 ]),
 
-                dbc.Fade([
-                    # Details
-                    html.Div(className="dash-wrapper__fields-detail row",children=[
-                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            dbc.Label('Day'),
-                            dcc.Dropdown(
-                                id='day',
-                                options = [{'label': 'Sunday', 'value': 1},
-                                    {'label': 'Monday', 'value': 2},
-                                    {'label': 'Tuesday', 'value': 3},
-                                    {'label': 'Wednesday', 'value': 4},
-                                    {'label': 'Thursday', 'value': 5},
-                                    {'label': 'Friday', 'value': 6},
-                                    {'label': 'Saturday', 'value': 7},
-                                ],
-                                value='2'
-                            )
+                # Filter Fields and Graphs
+                dbc.Fade(id='dash-wrapper__fields--graphs--fade',
+                    is_in=False,
+                    appear=False,
+                    children = [
+                        # Should we have an Area/Region/Signal Title here?
+                        # dbc.Row(id="dash-wrapper__title", children=[
+                        #     dbc.Col(width=12, children=[
+                        #         html.Span([html.H3(id="dash-wrapper__title--coverage")]),
+                        #         html.Span([html.H3(id="dash-wrapper__title--region")]),
+                        #         html.Span([html.H3(id="dash-wrapper__title--signal")]),
+                        #     ]),
+                        # ]),
+
+                        # Detail Filter Fields
+                        dbc.Row(id="dash-wrapper__fields-detail", className='mt-3 mb-4', children=[
+                            dbc.Col(width=12, md=4, xl=4, children=[
+                                dbc.Label('Day'),
+                                dcc.Dropdown(
+                                    id='day',
+                                    options = [{'label': 'Sunday', 'value': 1},
+                                        {'label': 'Monday', 'value': 2},
+                                        {'label': 'Tuesday', 'value': 3},
+                                        {'label': 'Wednesday', 'value': 4},
+                                        {'label': 'Thursday', 'value': 5},
+                                        {'label': 'Friday', 'value': 6},
+                                        {'label': 'Saturday', 'value': 7},
+                                    ],
+                                    value='2',
+                                    placeholder='Day',
+                                    clearable=False,
+                                )
+                            ]),
+                            dbc.Col(width=12, md=4, xl=4, children=[
+                                dbc.Label('Approach'),
+                                dcc.Dropdown(
+                                    id='approach',
+                                    options=[{'label': 'ALL', 'value': 'ALL'},
+                                        {'label': 'Northbound', 'value': 'Northbound'},
+                                        {'label': 'Eastbound', 'value': 'Eastbound'},
+                                        {'label': 'Southbound', 'value': 'Southbound'},
+                                        {'label': 'Westbound', 'value': 'Westbound'},
+                                    ],
+                                    value='ALL',
+                                    placeholder='Approach',
+                                    clearable=False,
+                                )
+                            ]),
+                            dbc.Col(width=12, md=4, xl=4, children=[
+                                dbc.Label('Travel Direction'),
+                                dcc.Dropdown(
+                                    id='direction',
+                                    options=[{'label': 'ALL', 'value': 'ALL'},
+                                        {'label': 'Straight', 'value': 'Straight'},
+                                        {'label': 'Left', 'value': 'Left'},
+                                        {'label': 'Right', 'value': 'Right'},
+                                    ],
+                                    value='ALL',
+                                    placeholder='Direction',
+                                    clearable=False,
+                                )
+                            ])
                         ]),
-                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            dbc.Label('Approach'),
-                            dcc.Dropdown(
-                                id='approach',
-                                options=[{'label': 'ALL', 'value': 'ALL'},
-                                    {'label': 'Northbound', 'value': 'Northbound'},
-                                    {'label': 'Eastbound', 'value': 'Eastbound'},
-                                    {'label': 'Southbound', 'value': 'Southbound'},
-                                    {'label': 'Westbound', 'value': 'Westbound'},
-                                ],
-                                value='ALL'
-                            )
+                        # Pie Charts
+                        dbc.Row(id="dash-wrapper__pie row",children=[
+                            dbc.Col(width=12, md=4, xl=4, className='', children=[
+                                #dbc.Label('Total Delay'),
+                                dbc.Row([
+                                    dbc.Col(id="dash-wrapper__pie--delay", children=[
+                                        dcc.Graph(id="dash-wrapper__pie--delay-chart", config=graph_config),
+                                    ]),
+                                ]),
+                                dbc.Row([
+                                    dbc.Col([
+                                        html.Div(['Total Crossings:']),
+                                        html.Div([dbc.Label(id="dash-wrapper__pie--delay-label1")]),
+                                    ]),
+                                    dbc.Col([
+                                        html.Div(['Average Delay:']),
+                                        html.Div([dbc.Label(id="dash-wrapper__pie--delay-label2"),' sec/vehicle'],),
+                                    ]),
+                                    dbc.Col([
+                                        html.Div(['Total Delay:']),
+                                        html.Div([dbc.Label(id="dash-wrapper__pie--delay-label3"), ' hours']),
+                                    ]),
+                                ]),
+                            ]),
+                            dbc.Col(width=12, md=4, xl=4,  className='border-start border-light', children=[
+                                #dbc.Label('Arrival Rates'),
+                                dbc.Row([
+                                    html.Div(id="dash-wrapper__pie--arrival", children=[
+                                        dcc.Graph(id="dash-wrapper__pie--arrival-chart", config=graph_config),
+                                    ]),
+                                ]),
+                                dbc.Row([
+                                    dbc.Col([
+                                        html.Div(['Green Arrival Rate:']),
+                                        html.Div([dbc.Label(id="dash-wrapper__pie--arrival-label1"), '%']),
+                                    ]),
+                                    dbc.Col([
+                                        html.Div(['Arrival Crossings:']),
+                                        html.Div([dbc.Label(id="dash-wrapper__pie--arrival-label2")]),
+                                    ]),
+                                ]),
+                            ]),
+                            dbc.Col(width=12, md=4, xl=4,  className='border-start border-light', children=[
+                                #dbc.Label('Split Failure'),
+                                dbc.Row([
+                                    dbc.Col(id="dash-wrapper__pie--splitfail", children=[
+                                        dcc.Graph(id="dash-wrapper__pie--splitfail-chart", config=graph_config),
+                                    ]),
+                                ]),
+                                dbc.Row([
+                                    dbc.Col([
+                                        html.Div(['Split Failure Crossings:']),
+                                        html.Div([dbc.Label(id="dash-wrapper__pie--splitfail-label1")]),
+                                    ]),
+                                    dbc.Col([
+                                        html.Div(['Total Split Failures:']),
+                                        html.Div([dbc.Label(id="dash-wrapper__pie--splitfail-label2")]),
+                                    ]),
+                                    dbc.Col([
+                                        html.Div(['Split Failure Rate:']),
+                                        html.Div([dbc.Label(id="dash-wrapper__pie--splitfail-label3"), '%']),
+                                    ]),
+                                ]),
+                            ])
                         ]),
-                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            dbc.Label('Travel Direction'),
-                            dcc.Dropdown(
-                                id='direction',
-                                options=[{'label': 'ALL', 'value': 'ALL'},
-                                    {'label': 'Straight', 'value': 'Straight'},
-                                    {'label': 'Left', 'value': 'Left'},
-                                    {'label': 'Right', 'value': 'Right'},
-                                ],
-                                value='ALL'
-                            )
-                        ])
+                        # Movement charts
+                        dbc.Row(id="dash-wrapper__bar", children=[
+                                #dbc.Label('Movement'),
+                                dbc.Col(id="dash-wrapper__bar--movement",  className='', children=[
+                                    dcc.Graph(id="dash-wrapper__bar--movement-chart", config=graph_config),
+                                ]),
+                            ]),
+
+                        # Delay Chart
+                        dbc.Row(id="dash-wrapper__scatter",children=[
+
+                            #dbc.Label('Delay by Hour'),
+                            dbc.Col(id="dash-wrapper__scatter",  className='', children=[
+                                dcc.Graph(id="dash-wrapper__scatter--delay-chart", config=graph_config),
+                            ]),
+
+                        ]),
                     ]),
-                    # Pies
-                    html.Div(className="dash-wrapper__pie row",children=[
-                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            dbc.Label('Total Delay'),
-                            html.Div(id="dash-wrapper__pie--delay", children=[
-                                dcc.Graph(id="dash-wrapper__pie--delay-chart"),
-                            ]),
-                        ]),
-                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            dbc.Label('Arrival Rates'),
-                            html.Div(id="dash-wrapper__pie--arrival", children=[
-                                dcc.Graph(id="dash-wrapper__pie--arrival-chart"),
-                            ]),
-                        ]),
-                        html.Div( className="col-12 col-md-6 col-xl-4", children=[
-                            dbc.Label('Split Failure'),
-                            html.Div(id="dash-wrapper__pie--splitfail", children=[
-                                dcc.Graph(id="dash-wrapper__pie--splitfail-chart"),
-                            ]),
-                        ])
-                    ]),
-                    # Movement
-                    html.Div(className="dash-wrapper__bar row",children=[
-                        html.Div( className="col-12", children=[
-                            dbc.Label('Movement'),
-                            html.Div(id="dash-wrapper__bar--movement", children=[
-                                dcc.Graph(id="dash-wrapper__bar--movement-chart"),
-                            ]),
-                        ]),
-                    # Delay
-                    html.Div(className="dash-wrapper__scatter row",children=[
-                        html.Div( className="col", children=[
-                            dbc.Label('Delay by Hour'),
-                            html.Div(id="dash-wrapper__scatter", children=[
-                                dcc.Graph(id="dash-wrapper__scatter--delay-chart"),
-                            ]),
-                        ]),
-                    ]),
-                ]),
                 ],
-                id='dash-wrapper__fields--graphs',
-                is_in=False,
-                appear=False,),
-        ])
+            )
+
+
     return content
 
 # Field callbacks are automatically called once
@@ -229,10 +304,12 @@ def init(app):
     @app.callback(
         Output(component_id='region', component_property='options'),
         Output(component_id='dash-wrapper__fields--region--fade', component_property='is_in'),
+
         Input(component_id='coverage', component_property='value'),
+        Input(component_id='coverage', component_property='options'),
     )
 
-    def cb_coverage(coverage):
+    def cb_coverage(coverage, options):
         print("== cb_coverage callback, triggered by ",  ctx.triggered_id)
 
         if ctx.triggered_id == "coverage":
@@ -254,6 +331,7 @@ def init(app):
 
     @app.callback(
         Output(component_id='signal', component_property='options'),
+
         Input(component_id='coverage', component_property='value'),
         Input(component_id='region', component_property='value')
 
@@ -325,48 +403,65 @@ def init(app):
 
     # Update tier 3 filters and graphs
     @app.callback(
-        Output(component_id='dash-wrapper__fields--graphs', component_property='is_in'),
+        Output(component_id='dash-wrapper__fields--graphs--fade', component_property='is_in'),
+
         Output(component_id='dash-wrapper__pie--delay-chart', component_property='figure'),
+        Output(component_id='dash-wrapper__pie--delay-label1', component_property='children'),
+        Output(component_id='dash-wrapper__pie--delay-label2', component_property='children'),
+        Output(component_id='dash-wrapper__pie--delay-label3', component_property='children'),
+
         Output(component_id='dash-wrapper__pie--arrival-chart', component_property='figure'),
+        Output(component_id='dash-wrapper__pie--arrival-label1', component_property='children'),
+        Output(component_id='dash-wrapper__pie--arrival-label2', component_property='children'),
+
         Output(component_id='dash-wrapper__pie--splitfail-chart', component_property='figure'),
+        Output(component_id='dash-wrapper__pie--splitfail-label1', component_property='children'),
+        Output(component_id='dash-wrapper__pie--splitfail-label2', component_property='children'),
+        Output(component_id='dash-wrapper__pie--splitfail-label3', component_property='children'),
+
         Output(component_id='dash-wrapper__bar--movement-chart', component_property='figure'),
         Output(component_id='dash-wrapper__scatter--delay-chart', component_property='figure'),
+
         State(component_id='region', component_property='value'),
         Input(component_id='signal', component_property='value'),
         Input(component_id='day', component_property='value'),
         Input(component_id='approach', component_property='value'),
         Input(component_id='direction', component_property='value'),
+
     )
     def cb_update_graphs(region, signal, day, approach, direction):
-        td = []
-        ar = []
-        sf = []
-        mv = []
-        dl = []
+
         print("== cb_update_graphs callback, triggered by ",  ctx.triggered_id)
         print("== Updating graphs", signal, day, approach, direction, flush=True)
 
+        # Fetch charts and labels
         if (region != None and signal != None):
 
-            # Total Delay
-            td, tds, tdl, sdf = get_totalDelayChart(signal, day, approach, direction)
-            #print("== total delay retry", td)
-            # Arrival Pie Chart
-            ar, ar1, ar2 = get_arrivalPieChart(signal, day, approach, direction)
-            #print("== arrival", ar)
-            # Split Failure
-            sf, sf1, sf2, sf3 = get_splitPieChart(signal, day, approach, direction)
-            # Movement
-            mv = get_movementBarChart(signal, day, approach, direction)
 
-            # Scatter
-            dl = get_peakScatterPlot(signal, day, approach, direction)
+            fig_td, lbl_td1, lbl_td2, lbl_td3 = get_totalDelayChart(signal, day, approach, direction)
 
-            return True, td, ar, sf, mv, dl
+
+            fig_ar, lbl_ar1, lbl_ar2 = get_arrivalPieChart(signal, day, approach, direction)
+
+            fig_sf, lbl_sf1, lbl_sf2, lbl_sf3 = get_splitPieChart(signal, day, approach, direction)
+
+            fig_mv = get_movementBarChart(signal, day, approach, direction)
+
+            fig_dl = get_peakScatterPlot(signal, day, approach, direction)
+
+            return (True,
+                fig_td, lbl_td1, lbl_td2, lbl_td3,
+                fig_ar, lbl_ar1, lbl_ar2,
+                fig_sf, lbl_sf1, lbl_sf2, lbl_sf3,
+                fig_mv, fig_dl)
+        # Clear charts and labels and fade out
         else:
-            return False, [], [], [], [], []
-            print("-- Skipping update_graphs", flush=True)
-            raise PreventUpdate
+            return (False,
+                [], '','','',
+                [], '','',
+                [], '','','',
+                [], []
+             )
 
 
 

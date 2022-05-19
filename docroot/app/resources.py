@@ -128,6 +128,11 @@ class peakScatterPlot(Resource):
             trendline_options=dict(frac=0.09),
             trendline_color_override="red"
         )
+        peakScatter.update_layout(
+            xaxis_title='hour of day',
+            yaxis_title='delay (s)',
+
+        )
 
         return {
             'plot': plotly.io.to_json(peakScatter)
@@ -160,15 +165,13 @@ class TotalDelayChart(Resource):
         #df.rename(columns = {'delay': 'Delay'}, inplace = True)
 
         # Get total crossings
-        delayCrossingsStr = "Total Crossings: {}".format(df.shape[0])
+        delayCrossings = df.shape[0]
 
         # Get average delay
-        avgDelayStr = "Average Delay: {} (sec/veh)".format(int(df['delay'].mean()))
+        avgDelay = int(df['delay'].mean())
 
         # Get total delay in hours (3600 seconds per hour)
         totalDelay = int(df['delay'].sum()/3600)
-        totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
-
 
         # Create delay pie chart
         fig_delay=px.pie(
@@ -183,9 +186,9 @@ class TotalDelayChart(Resource):
 
         return {
             'plot': plotly.io.to_json(fig_delay),
-            'delayCrossingsStr': delayCrossingsStr,
-            'avgDelayStr': avgDelayStr,
-            'totalDelayStr': totalDelayStr
+            'delayCrossings': delayCrossings,
+            'avgDelay': avgDelay,
+            'totalDelay': totalDelay
         }
 
 @dashboard_ns.route('/dashboard/splitPieChart')
@@ -262,6 +265,10 @@ class MovementBarChart(Resource):
             title= "Broward " + str(args['signal']) + " Delay by Movement",
             facet_col="travel_direction",
             color="peak"
+        )
+
+        moveM.update_layout(
+            yaxis_title='sum of delay (s)',
         )
 
         return {

@@ -85,7 +85,7 @@ def get_totalDelayChart(signal, day, approach, tdirection):
     if data == 0:
         return(0,0,0,0)
     p = plotly.io.from_json(data['plot'])
-    return p, data['delayCrossingsStr'], data['avgDelayStr'], data['totalDelayStr']
+    return p, data['delayCrossings'], data['avgDelay'], data['totalDelay']
 
 def get_splitPieChart(signal, day, approach, tdirection):
     data = requests.get(
