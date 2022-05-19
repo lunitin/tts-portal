@@ -6,8 +6,9 @@ from flask_login import current_user
 BASE_URL = 'http://localhost/api/'
 
 def get_coverages_by_user():
-    current_user_id = '1'
-    url = BASE_URL+'users/coverages/' + current_user_id
+    print("== get_coverages current user id", current_user.id)
+    # @TODO - make this work for admins
+    url = BASE_URL+'users/coverages/' + str(current_user.id)
     print("--invoking get_coverages_by_user to ", url,  flush=True)
 
     res = requests.get(url)

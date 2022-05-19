@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
 from dash import html, dcc, ctx
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 #from sklearn.metrics import coverage_error
 from flask_login import current_user
@@ -22,10 +22,10 @@ base_url = "/dash/app/"
 
 
 def init_dashboard(server):
-    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css', '/css/core.css'])
+    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css', '/css/core.css'],)
     print("== init current user:", current_user)
     # This defines the app layout
-    dash_app.layout = html.Div([
+    dash_app.layout = html.Div(id="dash-row", children = [
         dcc.Location(id="url"),
         dbc.Spinner(
             fullscreen= True,
@@ -91,7 +91,7 @@ def set_layout():
                             dcc.Dropdown(
                                 id='region',
                                 options = [],
-                                placeholder='Depends on Coverage Area'
+                                placeholder='Select a Region'
                             )],
                             id='dash-wrapper__fields--region--fade',
                             is_in=False,
@@ -105,7 +105,7 @@ def set_layout():
                             dcc.Dropdown(
                                 id='signal',
                                 options = [],
-                                placeholder='Depends on Region'
+                                placeholder='Select a Signal'
                             )],
                             id='dash-wrapper__fields--signal--fade',
                             is_in=False,
@@ -206,15 +206,10 @@ def set_layout():
 
 # Field callbacks are automatically called once
 def init(app):
-    # Load Regions for the User
-    coverage = []
-    region = []
-    signal = []
-    day = []
 
     print("== app current user:", current_user)
 
-    # If authorized, load dash elements
+    #
     @app.callback(
         Output(component_id='dashboard-wrapper', component_property='children'),
         Input('url', 'pathname')
@@ -233,27 +228,24 @@ def init(app):
     # Update Regions
     @app.callback(
         Output(component_id='region', component_property='options'),
-        Output(component_id='region', component_property='placeholder'),
         Output(component_id='dash-wrapper__fields--region--fade', component_property='is_in'),
         Input(component_id='coverage', component_property='value'),
     )
 
-    def cb_coverage(input):
-        coverage = []
+    def cb_coverage(coverage):
         print("== cb_coverage callback, triggered by ",  ctx.triggered_id)
 
-        region = []
         if ctx.triggered_id == "coverage":
             print("==COVERAGE CHANGED ",flush=True)
-            print("==coverage input ", input, flush=True)
+            print("==coverage input ", coverage, flush=True)
             print("=== load regions()", flush=True)
 
             #region = rand_opt(coverage)
-            region = get_regions_by_coverage(input)
+            regions = get_regions_by_coverage(coverage)
 
-            print("== rand regions", region, flush=True)
+            print("== regions", regions, flush=True)
 
-            return region, 'Select a Region', True
+            return regions, True
         else:
             print("--skipping coverage\n", flush=True)
             raise PreventUpdate
@@ -262,27 +254,29 @@ def init(app):
 
     @app.callback(
         Output(component_id='signal', component_property='options'),
-        Output(component_id='signal', component_property='placeholder'),
-        #Output(component_id='signal-loading', component_property='children'),
-        Output(component_id='dash-wrapper__fields--signal--fade', component_property='is_in'),
+        Input(component_id='coverage', component_property='value'),
         Input(component_id='region', component_property='value')
 
     )
     # Update Regions
-    def cb_region(input):
+    def cb_region(coverage, region):
         print("== cb_region callback, triggered by ",  ctx.triggered_id)
-        signal = []
-        if ctx.triggered_id == "region":
+
+        # Fetch signals when a region is selected
+        if ctx.triggered_id == "region" and region != None:
             print("==REGION CHANGED ",flush=True)
-            print("==region input ", input, flush=True)
+            print("==region input ", coverage, region, flush=True)
             print("=== load signals()", flush=True)
 
             #signal = rand_opt(region)
-            signal = get_signals_by_region(input)
+            signals = get_signals_by_region(region)
 
-            print("=== signals", signal, flush=True)
+            print("=== signals", signals, flush=True)
 
-            return signal, 'Select a Signal', True#, True
+            return signals #, True
+        # Fade in when a coverage is selected
+        # elif ctx.triggered_id == "coverage":
+        #     return [], True
 
         else:
             print("-- skipping region\n", flush=True)
@@ -294,24 +288,35 @@ def init(app):
         Output(component_id='day', component_property='value'),
         Output(component_id='direction', component_property='value'),
         Output(component_id='approach', component_property='value'),
+        Output(component_id='dash-wrapper__fields--signal--fade', component_property='is_in'),
+
+        Input(component_id='coverage', component_property='value'),
+        Input(component_id='region', component_property='value'),
         Input(component_id='signal', component_property='value'),
     )
-    def cb_signal(input):
+    def cb_signal(coverage, region, signal):
 
         print("== cb_region callback, triggered by ",  ctx.triggered_id)
 
-        day = []
-        if ctx.triggered_id == "signal":
+        # Fade out if there is no region i.e. coverage area changed
+        if region == None:
+            return '2', 'ALL', 'ALL', False
+        # Update graphs if a signal is selected
+        elif ctx.triggered_id == "signal" and signal != None:
             print("==SIGNAL CHANGED ", flush=True)
-            #reply = 'true'
-            print("==signal input ", input, flush=True)
-            print("== load day()", flush=True)
-            signal = input
-            #day = rand_opt(signal)
-            print("=== day", day, flush=True)
 
-            # Reset day/dir/approach to defaults
-            return '2', 'ALL', 'ALL'
+            print("==signal input ", coverage, region, signal, flush=True)
+            print("== set filter dropdowns, load graphs", flush=True)
+
+            # Reset day/dir/approach to defaults and fade graphs in
+            return '2', 'ALL', 'ALL', True
+        # Fade in if triggered from a region selection
+        elif ctx.triggered_id == "region":
+            return '2', 'ALL', 'ALL', True
+        # Reset day/dir/approach to defaults and fade graphs out
+        elif ctx.triggered_id == "coverage":
+            return '2', 'ALL', 'ALL', False
+
         else:
             print("--skipping cb_signals\n", flush=True)
             raise PreventUpdate
@@ -320,18 +325,19 @@ def init(app):
 
     # Update tier 3 filters and graphs
     @app.callback(
+        Output(component_id='dash-wrapper__fields--graphs', component_property='is_in'),
         Output(component_id='dash-wrapper__pie--delay-chart', component_property='figure'),
         Output(component_id='dash-wrapper__pie--arrival-chart', component_property='figure'),
         Output(component_id='dash-wrapper__pie--splitfail-chart', component_property='figure'),
         Output(component_id='dash-wrapper__bar--movement-chart', component_property='figure'),
         Output(component_id='dash-wrapper__scatter--delay-chart', component_property='figure'),
-        Output(component_id='dash-wrapper__fields--graphs', component_property='is_in'),
+        State(component_id='region', component_property='value'),
         Input(component_id='signal', component_property='value'),
         Input(component_id='day', component_property='value'),
         Input(component_id='approach', component_property='value'),
         Input(component_id='direction', component_property='value'),
     )
-    def cb_update_graphs(signal, day, approach, direction):
+    def cb_update_graphs(region, signal, day, approach, direction):
         td = []
         ar = []
         sf = []
@@ -340,7 +346,7 @@ def init(app):
         print("== cb_update_graphs callback, triggered by ",  ctx.triggered_id)
         print("== Updating graphs", signal, day, approach, direction, flush=True)
 
-        if (signal != None):
+        if (region != None and signal != None):
 
             # Total Delay
             td, tds, tdl, sdf = get_totalDelayChart(signal, day, approach, direction)
@@ -356,8 +362,9 @@ def init(app):
             # Scatter
             dl = get_peakScatterPlot(signal, day, approach, direction)
 
-            return td, ar, sf, mv, dl, True
+            return True, td, ar, sf, mv, dl
         else:
+            return False, [], [], [], [], []
             print("-- Skipping update_graphs", flush=True)
             raise PreventUpdate
 
