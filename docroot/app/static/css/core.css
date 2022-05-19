@@ -32,8 +32,3 @@
   color: white;
   font-size: 2em;
 }
-
-
-.loading-wrapper > div {
-    visibility: visible !important;
-}

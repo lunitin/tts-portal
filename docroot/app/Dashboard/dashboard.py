@@ -22,7 +22,7 @@ base_url = "/dash/app/"
 
 
 def init_dashboard(server):
-    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css', '/css/core.css'],)
+    dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css', '/css/dash.css'],)
     print("== init current user:", current_user)
     # This defines the app layout
     dash_app.layout = html.Div(id="dash-row", children = [
