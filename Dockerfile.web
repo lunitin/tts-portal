@@ -1,13 +1,18 @@
-
-#FROM tiangolo/meinheld-gunicorn-flask:python3.8
-
+# Basicframework
 FROM tiangolo/uwsgi-nginx-flask:python3.8
 
+# Faster framework implementation but seems to have a problem with threads dying
+#FROM tiangolo/meinheld-gunicorn-flask:python3.8
+
+# Install additional system packages
 RUN apt update
 RUN apt install -y libc-dev mariadb-client libmariadb-dev liblapack-dev libopenblas-dev
+
+# Set up nginx paths
 ENV STATIC_URL /static
 ENV STATIC_PATH /var/www/app/static
 
+# Install python requirements
 COPY requirements.txt /var/www/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /var/www/requirements.txt

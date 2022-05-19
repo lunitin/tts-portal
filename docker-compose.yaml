@@ -7,6 +7,9 @@ services:
       context: .
       dockerfile: Dockerfile.web
     environment:
+      #####
+      # These are only valid for image tiangolo/meinheld-gunicorn-flask:python3.8
+      #
       # This image will check how many CPU cores are available in the current
       # server running your container.
       # It will set the number of workers to the number of CPU cores multiplied
@@ -28,7 +31,8 @@ services:
       # critical
       #
       # By default, set to info.
-      LOG_LEVEL: "info"
+      # LOG_LEVEL: "info"
+      ######
     ports:
       - "8080:80"
     networks:
