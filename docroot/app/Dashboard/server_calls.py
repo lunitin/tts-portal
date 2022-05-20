@@ -1,17 +1,18 @@
 import json, requests
 from ..resources import User_Coverages
 import plotly
-from flask import jsonify
+from flask import jsonify, request
 from flask_login import current_user
 BASE_URL = 'http://localhost/api/'
 
 def get_coverages_by_user():
     print("== get_coverages current user id", current_user.id)
+    print("-- Cookies", request.cookies.get('session'))
     # @TODO - make this work for admins
     url = BASE_URL+'users/coverages/' + str(current_user.id)
     print("--invoking get_coverages_by_user to ", url,  flush=True)
 
-    res = requests.get(url)
+    res = requests.get(url, cookies=request.cookies)
     #print("-- get_coverages_status: ", res.status_code, flush=True)
     if res.status_code == 200:
         coverage_list = []

@@ -1,6 +1,7 @@
 
 from flask import request, make_response, Blueprint
 from flask_restx import Resource, fields, Namespace, reqparse
+from flask_login import current_user
 from .models import User as db_User
 from .models import Vehicle as db_Vehicle
 from .models import Signal as db_Signal
@@ -361,7 +362,8 @@ class User_Coverages(Resource):
 
     def get(self, id):
         print("--invoking GET User_Coverages(Resource): ", id, flush=True)
-
+        print("-- API Cookies", request.cookies.get('session'))
+        print("-- API User ID", current_user.id)
         user = db_User.find_by_id(id)
         if user:
             return user.fetch_coverages(), 200
