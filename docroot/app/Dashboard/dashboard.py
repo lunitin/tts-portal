@@ -1,19 +1,10 @@
-from re import L
-from shutil import move
 import dash
-import requests, json
-import pandas as pd
-import plotly.express as px
 import dash_bootstrap_components as dbc
 from dash import html, dcc, ctx
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-#from sklearn.metrics import coverage_error
 from flask_login import current_user
 from app import strings
-import time
-
-
 from .server_calls import get_coverages_by_user, get_signals_by_region, get_regions_by_coverage, get_arrivalPieChart, get_movementBarChart, get_peakScatterPlot, get_splitPieChart, get_totalDelayChart
 
 base_url = "/dash/app/"
@@ -456,6 +447,7 @@ def init(app):
                 fig_mv, fig_dl)
         # Clear charts and labels and fade out
         else:
+            print("-- skipping graphs")
             return (False,
                 [], '','','',
                 [], '','',
