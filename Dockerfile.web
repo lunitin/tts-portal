@@ -12,6 +12,16 @@ RUN apt install -y libc-dev mariadb-client libmariadb-dev liblapack-dev libopenb
 ENV STATIC_URL /static
 ENV STATIC_PATH /var/www/app/static
 
+# Nginx Performance Tweaks
+
+# UWSGI processes to start
+#ENV UWSGI_CHEAPER 6
+# UWSGI maximum processes
+#ENV UWSGI_PROCESSES 16
+# Let Nginx auto detect the number of processes based upon cpu
+#ENV NGINX_WORKER_PROCESSES auto
+
+
 # Install python requirements
 COPY requirements.txt /var/www/requirements.txt
 RUN pip install --upgrade pip
