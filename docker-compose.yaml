@@ -52,9 +52,10 @@ services:
     command: --max_allowed_packet=1073741824
     environment:
       MYSQL_ROOT_PASSWORD: "beastm0de"
-    tmpfs:
-     - /var/lib/mysql/:rw,noexec,nosuid,size=600m
-     - /tmp/:rw,noexec,nosuid,size=50m
+    # tmpfs for extra performance, only available on Linix/Mac
+    #tmpfs:
+    # - /var/lib/mysql/:rw,noexec,nosuid,size=600m
+    # - /tmp/:rw,noexec,nosuid,size=50m
     networks:
       - tts-net
     restart: on-failure
