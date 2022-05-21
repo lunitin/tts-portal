@@ -15,7 +15,7 @@ ERROR_TOKEN_EXPIRED = "Token expired, please try again."
 ERROR_SMTP_FAILURE = "Could not send email message, contact your administrator."
 ERROR_PASSWORD_MISMATCH = "Passwords do not match."
 ERROR_PASSWORD_RESET = "Your password could not be reset, contact your administrator."
-ERROR_PAGE_PERMISSION_DENIED = "You do not have permission to view that page"
+ERROR_PAGE_PERMISSION_DENIED = "You do not have permission to view that page."
 
 ERROR_USER_DNE = "User does not exist!"
 ERROR_COVERAGE_DNE = "Coverage does not exist!"

@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from flask_login import current_user
 from app import strings
+import json
 from .server_calls import get_coverages_by_user, get_signals_by_region, get_regions_by_coverage, get_arrivalPieChart, get_movementBarChart, get_peakScatterPlot, get_splitPieChart, get_totalDelayChart
 
 base_url = "/dash/app/"
@@ -13,8 +14,9 @@ base_url = "/dash/app/"
 # Connect Dash up to Flask
 def init_dashboard(server):
     dash_app = dash.Dash(__name__,server=server,routes_pathname_prefix=base_url,external_stylesheets=['/css/bootstrap.css', '/css/dash.css'],)
-    print("== init current user:", current_user)
-    # This defines the app layout
+
+    # This defines the app container within the DOM
+    # loading-wrapper class is used to override visibility of fullscreen parent div
     dash_app.layout = html.Div(id="dash-row", children = [
         dcc.Location(id="url"),
         dbc.Spinner(
@@ -48,6 +50,7 @@ def rand_opt(fake):
     return o
 """
 
+
 # Default Plotly Graph options
 graph_config = {
     'displaylogo': False,
@@ -64,17 +67,21 @@ graph_config = {
 ##############
 # App Layout #
 ##############
-
 def set_layout():
     coverage = []
-    print("-- setting layout", flush=True)
 
-    print("== layout current user:", current_user)
-    print("= Coverages", coverage, flush=True)
+    # API
+    # We use the API here so that admins can fetch all coverage areas since
+    # user relationships will only return explicit coverage memberships
+    # This delays page loading a bit
+    # @TODO - Swap when User model relatonships are fixed for admins
     coverage = get_coverages_by_user();
-    print("= Coverages", coverage, flush=True)
 
-    content = dbc.Container(id="dash-wrapper", fluid=True, children=[
+    # User Relationships
+    #for c in current_user.coverages:
+    #   coverage.append({'label': c.coverage_name, 'value': c.id})
+
+    return dbc.Container(id="dash-wrapper", fluid=True, children=[
 
                 # Area Selection Fields
                 dbc.Row(id="dash-wrapper__fields", children=[
@@ -269,14 +276,10 @@ def set_layout():
             )
 
 
-    return content
-
-# Field callbacks are automatically called once
+# Field callbacks are initialized on page load and will contain current_user data
 def init(app):
 
-    print("== app current user:", current_user)
-
-    #
+    # Page generation callback
     @app.callback(
         Output(component_id='dashboard-wrapper', component_property='children'),
         Input('url', 'pathname')
@@ -287,12 +290,10 @@ def init(app):
         if not current_user or not current_user.is_authenticated:
             return html.Div(strings.ERROR_PAGE_PERMISSION_DENIED)
 
-        print("- page callback", flush=True)
+        #print("- page callback", flush=True)
         return set_layout()
 
 
-
-    # Update Regions
     @app.callback(
         Output(component_id='region', component_property='options'),
         Output(component_id='dash-wrapper__fields--region--fade', component_property='is_in'),
@@ -300,25 +301,24 @@ def init(app):
         Input(component_id='coverage', component_property='value'),
         Input(component_id='coverage', component_property='options'),
     )
-
     def cb_coverage(coverage, options):
-        print("== cb_coverage callback, triggered by ",  ctx.triggered_id)
 
         if ctx.triggered_id == "coverage":
-            print("==COVERAGE CHANGED ",flush=True)
-            print("==coverage input ", coverage, flush=True)
-            print("=== load regions()", flush=True)
+            regions = []
+            #regions = rand_opt(coverage)
+            # API
+            #regions = get_regions_by_coverage(coverage)
 
-            #region = rand_opt(coverage)
-            regions = get_regions_by_coverage(coverage)
-
-            print("== regions", regions, flush=True)
+            # User Relationships
+            for c in current_user.coverages:
+                if c.id == coverage:
+                    for r in c.regions:
+                        regions.append({'label': r.region_name, 'value': r.id})
+                    break
 
             return regions, True
         else:
-            print("--skipping coverage\n", flush=True)
             raise PreventUpdate
-
 
 
     @app.callback(
@@ -328,28 +328,30 @@ def init(app):
         Input(component_id='region', component_property='value')
 
     )
-    # Update Regions
     def cb_region(coverage, region):
-        print("== cb_region callback, triggered by ",  ctx.triggered_id)
 
         # Fetch signals when a region is selected
         if ctx.triggered_id == "region" and region != None:
-            print("==REGION CHANGED ",flush=True)
-            print("==region input ", coverage, region, flush=True)
-            print("=== load signals()", flush=True)
+            signals = []
 
-            #signal = rand_opt(region)
-            signals = get_signals_by_region(region)
+            #signals = rand_opt(region)
+            # API
+            #signals = get_signals_by_region(region)
 
-            print("=== signals", signals, flush=True)
+            # User Relationships
+            for c in current_user.coverages:
+                if c.id == coverage:
+                    for r in c.regions:
+                        if r.id == region:
+                            for s in r.signals:
+                                signals.append({'label': s.id, 'value': s.id})
+                            break
 
             return signals
         else:
-            print("-- skipping region\n", flush=True)
             raise PreventUpdate
 
 
-    # Update Signals
     @app.callback(
         Output(component_id='day', component_property='value'),
         Output(component_id='direction', component_property='value'),
@@ -362,34 +364,27 @@ def init(app):
     )
     def cb_signal(coverage, region, signal):
 
-        print("== cb_region callback, triggered by ",  ctx.triggered_id)
-
         # Fade out if there is no region i.e. coverage area changed
         if region == None:
             return '2', 'ALL', 'ALL', False
+
         # Update graphs if a signal is selected
         elif ctx.triggered_id == "signal" and signal != None:
-            print("==SIGNAL CHANGED ", flush=True)
-
-            print("==signal input ", coverage, region, signal, flush=True)
-            print("== set filter dropdowns, load graphs", flush=True)
-
             # Reset day/dir/approach to defaults and fade graphs in
             return '2', 'ALL', 'ALL', True
+
         # Fade in if triggered from a region selection
         elif ctx.triggered_id == "region":
             return '2', 'ALL', 'ALL', True
+
         # Reset day/dir/approach to defaults and fade graphs out
         elif ctx.triggered_id == "coverage":
             return '2', 'ALL', 'ALL', False
 
         else:
-            print("--skipping cb_signals\n", flush=True)
             raise PreventUpdate
 
 
-
-    # Update tier 3 filters and graphs
     @app.callback(
         Output(component_id='dash-wrapper__fields--graphs--fade', component_property='is_in'),
 
@@ -419,9 +414,6 @@ def init(app):
     )
     def cb_update_graphs(region, signal, day, approach, direction):
 
-        print("== cb_update_graphs callback, triggered by ",  ctx.triggered_id)
-        print("== Updating graphs", signal, day, approach, direction, flush=True)
-
         # Fetch charts and labels
         if (region != None and signal != None):
 
@@ -442,7 +434,6 @@ def init(app):
                 fig_mv, fig_dl)
         # Clear charts and labels and fade out
         else:
-            print("-- skipping graphs")
             return (False,
                 [], '','','',
                 [], '','',

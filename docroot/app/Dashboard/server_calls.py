@@ -6,25 +6,20 @@ from flask_login import current_user
 BASE_URL = 'http://localhost/api/'
 
 def get_coverages_by_user():
-    print("== get_coverages current user id", current_user.id)
-    print("-- Cookies", request.cookies.get('session'))
-    # @TODO - make this work for admins
-    url = BASE_URL+'users/coverages/' + str(current_user.id)
-    print("--invoking get_coverages_by_user to ", url,  flush=True)
 
+    url = BASE_URL+'users/coverages/' + str(current_user.id)
     res = requests.get(url, cookies=request.cookies)
-    #print("-- get_coverages_status: ", res.status_code, flush=True)
+
     if res.status_code == 200:
         coverage_list = []
         for coverage in json.loads(res.json()):
             coverage_list.append({'label': coverage['coverage_name'], 'value': coverage['id']})
-        #print("-- coverage_list: ", coverage_list, flush=True)
         return coverage_list
     else:
         return 0
 
 def get_regions_by_coverage(id):
-    res = requests.get(BASE_URL+'coverages/regions/'+str(id))
+    res = requests.get(BASE_URL+'coverages/regions/'+str(id), cookies=request.cookies)
     if res.status_code == 200:
         regions_list = []
         for region in json.loads(res.json()):
@@ -34,7 +29,7 @@ def get_regions_by_coverage(id):
         return 0
 
 def get_signals_by_region(id):
-    res = requests.get(BASE_URL+'regions/signals/'+str(id))
+    res = requests.get(BASE_URL+'regions/signals/'+str(id), cookies=request.cookies)
     if res.status_code == 200:
         signal_list = []
         for signal in json.loads(res.json()):
@@ -51,8 +46,9 @@ def get_arrivalPieChart(signal, day, approach, tdirection):
             'approach': str(approach),
             'signal': str(signal),
             'tdirection': str(tdirection)
-        }).json()
-    #print("=== Fetched get_arrivalPieChart data:", data)
+        },
+        cookies=request.cookies).json()
+
     if data == 0:
         return(0,0,0)
     p = plotly.io.from_json(data['plot'])
@@ -66,14 +62,15 @@ def get_peakScatterPlot(signal, day, approach, tdirection):
             'approach': str(approach),
             'signal': str(signal),
             'tdirection': str(tdirection)
-        }).json()
+        },
+        cookies=request.cookies).json()
     if data == 0:
         return(0)
     p = plotly.io.from_json(data['plot'])
     return p
 
 def get_totalDelayChart(signal, day, approach, tdirection):
-    #print("=== gettotalDelayChart", signal, day, approach, tdirection, flush=True)
+
     data = requests.get(
         url=BASE_URL+'dashboard/totalDelayChart',
         params={
@@ -81,8 +78,9 @@ def get_totalDelayChart(signal, day, approach, tdirection):
             'approach': str(approach),
             'signal': str(signal),
             'tdirection': str(tdirection)
-        }).json()
-    #print("=== Fetched getTotalDelaychart data:", data)
+        },
+        cookies=request.cookies).json()
+
     if data == 0:
         return(0,0,0,0)
     p = plotly.io.from_json(data['plot'])
@@ -96,7 +94,8 @@ def get_splitPieChart(signal, day, approach, tdirection):
             'approach': str(approach),
             'signal': str(signal),
             'tdirection': str(tdirection)
-        }).json()
+        },
+        cookies=request.cookies).json()
     if data == 0:
         return(0,0,0,0)
     p = plotly.io.from_json(data['plot'])
@@ -110,7 +109,8 @@ def get_movementBarChart(signal, day, approach, tdirection):
             'approach': str(approach),
             'signal': str(signal),
             'tdirection': str(tdirection)
-        }).json()
+        },
+        cookies=request.cookies).json()
     if data == 0:
         return(0)
     p = plotly.io.from_json(data['plot'])
