@@ -106,7 +106,7 @@ Update user.
 @admin_required
 def update(user_id):
     user_update = User.query.get(user_id)
-
+    
     if (user_update):
         user_update.first_name = request.form.get('first_name')
         user_update.last_name = request.form.get('last_name')
@@ -220,7 +220,7 @@ def add_coverage():
 """
 Delete User From Coverage. 
 """
-@admin.route('/delete-access/<int:coverage_id>/<int:user_id>')
+@admin.route('/delete-access/<int:coverage_id>/<int:user_id>', methods=['DELETE'])
 @login_required
 @admin_required
 def delete_access(coverage_id, user_id):
@@ -264,7 +264,7 @@ def create_coverage():
 """
 Delete Coverage. 
 """
-@admin.route('/coverage-delete/<int:coverage_id>', methods=['POST'])
+@admin.route('/coverage-delete/<int:coverage_id>', methods=['DELETE'])
 @login_required
 @admin_required
 def delete_coverage(coverage_id):
@@ -338,7 +338,7 @@ def create_region():
 """
 Remove Region
 """
-@admin.route('/region-delete/<int:region_id>', methods=['POST'])
+@admin.route('/region-delete/<int:region_id>', methods=['DELETE'])
 @login_required
 @admin_required
 def delete_region(region_id):
