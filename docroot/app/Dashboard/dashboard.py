@@ -74,6 +74,7 @@ def set_layout():
     # We use the API here so that admins can fetch all coverage areas since
     # user relationships will only return explicit coverage memberships
     # This delays page loading a bit
+
     # @TODO - Swap when User model relatonships are fixed for admins
     coverage = get_coverages_by_user();
 
@@ -307,14 +308,14 @@ def init(app):
             regions = []
             #regions = rand_opt(coverage)
             # API
-            #regions = get_regions_by_coverage(coverage)
+            regions = get_regions_by_coverage(coverage)
 
             # User Relationships
-            for c in current_user.coverages:
-                if c.id == coverage:
-                    for r in c.regions:
-                        regions.append({'label': r.region_name, 'value': r.id})
-                    break
+            # for c in current_user.coverages:
+            #     if c.id == coverage:
+            #         for r in c.regions:
+            #             regions.append({'label': r.region_name, 'value': r.id})
+            #         break
 
             return regions, True
         else:
@@ -336,16 +337,16 @@ def init(app):
 
             #signals = rand_opt(region)
             # API
-            #signals = get_signals_by_region(region)
+            signals = get_signals_by_region(region)
 
             # User Relationships
-            for c in current_user.coverages:
-                if c.id == coverage:
-                    for r in c.regions:
-                        if r.id == region:
-                            for s in r.signals:
-                                signals.append({'label': s.id, 'value': s.id})
-                            break
+            # for c in current_user.coverages:
+            #     if c.id == coverage:
+            #         for r in c.regions:
+            #             if r.id == region:
+            #                 for s in r.signals:
+            #                     signals.append({'label': s.id, 'value': s.id})
+            #                 break
 
             return signals
         else:
