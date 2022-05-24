@@ -89,10 +89,14 @@ class User(UserMixin, BaseModel):
     date_created = db.Column(db.DateTime, nullable=True)
     date_last_login = db.Column(db.DateTime, nullable=True)
     date_last_password_change = db.Column(db.DateTime, nullable=True)
+    
+    # @TODO Override coverage relationships for Admins
     coverages = db.relationship('Coverage', secondary=access_table, backref='users', lazy='subquery')
 
     def is_admin(self):
-        return (self.security_level)
+        if self.security_level == 1:
+            return True
+        return False
 
     def fetch_coverages(self):
         return json.dumps([c.as_dict() for c in self.coverages])
@@ -215,7 +219,7 @@ class Region(BaseModel):
 
     def get_id(self):
         return (self.region_id)
-    
+
     def get_signals_from_region(self):
         return json.dumps([c.as_dict() for c in self.signals])
 

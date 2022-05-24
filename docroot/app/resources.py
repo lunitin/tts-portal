@@ -1,25 +1,149 @@
 
 from flask import request, make_response, Blueprint
 from flask_restx import Resource, fields, Namespace, reqparse
+from flask_login import current_user
 from .models import User as db_User
 from .models import Vehicle as db_Vehicle
 from .models import Signal as db_Signal
 from .models import Coverage as db_Coverage
 from .models import Region as db_Region
+from . import strings
+from functools import wraps
 from flask_restx import Api
 import pandas as pd
 import plotly.express as px
 import plotly
+import json
 NOT_FOUND = "{}: {} not found."
-
+ERROR_PAGE_PERMISSION_DENIED = "You do not have permission to view that page."
 
 api_blueprint = Blueprint('api', __name__)
 api = Api(api_blueprint, version='1.0', doc="/apidocs", title='TTS-Portal Application API', validate=True)
 
 
-#@api.errorhandler
-#def sql_error(message, error):
-#    return make_response(message, error)
+"""
+Decorator to check if the current user is authenticated
+"""
+def api_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return make_response(ERROR_PAGE_PERMISSION_DENIED, 401)
+        return f(*args, **kwargs)
+    return decorated_function
+
+"""
+Decorator to check if the user is authenticated and is an admin
+"""
+def api_admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin():
+            return make_response(ERROR_PAGE_PERMISSION_DENIED, 401)
+        return f(*args, **kwargs)
+    return decorated_function
+
+"""
+Decorator to check if the user has access to a coverage area
+"""
+def api_coverage_access_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin():
+
+            # Could come from kwargs or request
+            # @TODO refactor all methods to pass id
+            if 'id' not in kwargs:
+               id = request.args.get('coverage')
+            else:
+               id = kwargs['id']
+
+            access = False
+            for c in current_user.coverages:
+                if c.id == int(kwargs['id']):
+                    access = True
+                    break
+
+            if not access:
+                print("-- User not authorized for coverage area")
+                return make_response(ERROR_PAGE_PERMISSION_DENIED, 401)
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+"""
+Decorator to check if the user has access to a region
+"""
+def api_region_access_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+
+        if not current_user.is_admin():
+
+            # Could come from kwargs or request
+            # @TODO refactor all methods to pass id
+            if 'id' not in kwargs:
+               id = request.args.get('region')
+            else:
+               id = kwargs['id']
+
+            access = False
+            for c in current_user.coverages:
+                for r in c.regions:
+                    if r.id == int(id) :
+                        access = True
+                        break
+
+            if not access:
+                print("-- User not authorized for region")
+                return make_response(ERROR_PAGE_PERMISSION_DENIED, 401)
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+"""
+Decorator to check if the user has access to a signal
+"""
+def api_signal_access_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+
+        if not current_user.is_admin():
+
+            # Could come from kwargs or request
+            # @TODO refactor all methods to pass id
+            if 'id' not in kwargs:
+               id = request.args.get('signal')
+            else:
+               id = kwargs['id']
+
+            access = False
+            for c in current_user.coverages:
+                for r in c.regions:
+                    for s in r.signals:
+                        if s.id == int(id):
+                            access = True
+                            break
+
+            if not access:
+                print("-- User not authorized for signal")
+                return make_response(ERROR_PAGE_PERMISSION_DENIED, 401)
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+"""
+Decorator to prevent access to routes except from localhost, i.e Dash
+"""
+def api_localhost_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not request.remote_addr == "127.0.0.1":
+            return make_response(ERROR_PAGE_PERMISSION_DENIED, 401)
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # Namespace Delcarations for all objects, and Listed objects in db
 # all urls will have the '/api' prefix (i.e. {{base_url}}/api/coverages/{{id}})
@@ -85,7 +209,6 @@ signal = signals_ns.model('Signal', {
     'vehicles': fields.List(fields.Integer, default=None)
 })
 
-
 coverage = coverages_ns.model('Coverage', {
     'id': fields.Integer(required=False),
     'coverage_name': fields.String(default="this"),
@@ -101,6 +224,9 @@ region = regions_ns.model('Region', {
 @dashboard_ns.route('/dashboard/peakScatterPlot')
 class peakScatterPlot(Resource):
     @dashboard_ns.doc('Get peakScatterPlot information')
+    @api_localhost_only
+    #@api_login_required
+    #@api_signal_access_required
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('signal', type=int)
@@ -128,6 +254,11 @@ class peakScatterPlot(Resource):
             trendline_options=dict(frac=0.09),
             trendline_color_override="red"
         )
+        peakScatter.update_layout(
+            xaxis_title='hour of day',
+            yaxis_title='delay (s)',
+
+        )
 
         return {
             'plot': plotly.io.to_json(peakScatter)
@@ -137,6 +268,9 @@ class peakScatterPlot(Resource):
 @dashboard_ns.route('/dashboard/totalDelayChart')
 class TotalDelayChart(Resource):
     @dashboard_ns.doc('Get totalDelayChart information')
+    @api_localhost_only
+    #@api_login_required
+    #@api_signal_access_required
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('signal', type=int)
@@ -146,26 +280,24 @@ class TotalDelayChart(Resource):
         args = parser.parse_args()
         if args['approach'] == 'ALL': args['approach'] = None
         if args['tdirection'] == "ALL": args['tdirection'] = None
+
         vehicles, _ = db_Vehicle.search_by(SignalID=[args['signal']],
                                         TravelDirection=args['tdirection'],
                                         ApproachDirection=args['approach'],
                                         Day=[args['day']])
+
         if not vehicles:
             return(0)
         df = pd.DataFrame.from_dict(vehicles)
 
-        #df.rename(columns = {'delay': 'Delay'}, inplace = True)
-
         # Get total crossings
-        delayCrossingsStr = "Total Crossings: {}".format(df.shape[0])
+        delayCrossings = df.shape[0]
 
         # Get average delay
-        avgDelayStr = "Average Delay: {} (sec/veh)".format(int(df['delay'].mean()))
+        avgDelay = int(df['delay'].mean())
 
         # Get total delay in hours (3600 seconds per hour)
         totalDelay = int(df['delay'].sum()/3600)
-        totalDelayStr = "Total Delay: {} (hours)".format(totalDelay)
-
 
         # Create delay pie chart
         fig_delay=px.pie(
@@ -180,14 +312,18 @@ class TotalDelayChart(Resource):
 
         return {
             'plot': plotly.io.to_json(fig_delay),
-            'delayCrossingsStr': delayCrossingsStr,
-            'avgDelayStr': avgDelayStr,
-            'totalDelayStr': totalDelayStr
+            'delayCrossings': delayCrossings,
+            'avgDelay': avgDelay,
+            'totalDelay': totalDelay
         }
+
 
 @dashboard_ns.route('/dashboard/splitPieChart')
 class SplitPieChart(Resource):
     @dashboard_ns.doc('Get splitFailurePieChart information')
+    @api_localhost_only
+    #@api_login_required
+    #@api_signal_access_required
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('signal', type=int)
@@ -232,9 +368,12 @@ class SplitPieChart(Resource):
             'splitRate': SplitRate
         }
 
+
 @dashboard_ns.route('/dashboard/movementBarChart')
 class MovementBarChart(Resource):
     @dashboard_ns.doc('Get movementBarChart information')
+    @api_localhost_only
+    #@api_signal_access_required
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('signal', type=int)
@@ -261,13 +400,21 @@ class MovementBarChart(Resource):
             color="peak"
         )
 
+        moveM.update_layout(
+            yaxis_title='sum of delay (s)',
+        )
+
         return {
             'plot': plotly.io.to_json(moveM)
         }
 
+
 @dashboard_ns.route('/dashboard/arrivalPieChart')
 class PieChart(Resource):
     @dashboard_ns.doc('Get arrivalPieChart information')
+    @api_localhost_only
+    #@api_login_required
+    #@api_signal_access_required
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('signal', type=int)
@@ -309,6 +456,7 @@ class PieChart(Resource):
 class User(Resource):
     #@user_ns.marshal_with(user)
     @user_ns.doc('Get single user by id')
+    @api_admin_required
     def get(self, id):
         user = db_User.find_by_id(id)
         if user:
@@ -318,6 +466,7 @@ class User(Resource):
 
 
     @user_ns.doc('Delete single user by id')
+    @api_admin_required
     def delete(self, id):
         user = db_User.find_by_id(id)
         if user:
@@ -326,6 +475,7 @@ class User(Resource):
 
 
     @user_ns.doc('Patch a single user by id')
+    @api_admin_required
     #@user_ns.marshal_with(user)
     def patch(self, id):
         coverage = db_Coverage.find_by_id(id)
@@ -342,15 +492,22 @@ class User(Resource):
             return make_response(NOT_FOUND.format('coverage ', id), 404)
 
 
-
-# THIS FUNCTION NEEDS WRAPPER
-# only user user.id can access this endpoint and admins
 @user_ns.route('/users/coverages/<int:id>')
 class User_Coverages(Resource):
     @user_ns.doc("Get all User Coverages")
+    @api_login_required
     def get(self, id):
+        # Can only fetch your own coverages
+        if current_user.id != id:
+            return ERROR_PAGE_PERMISSION_DENIED, 401
+
         user = db_User.find_by_id(id)
-        if user:
+
+        # Admins get all coverage areas
+        #@TODO revert when User model is updated for admin coverages
+        if user and user.is_admin():
+            return json.dumps(db_Coverage.find_all()[0]), 200
+        elif user:
             return user.fetch_coverages(), 200
         else:
             return NOT_FOUND.format('user_id', id), 404
@@ -358,6 +515,7 @@ class User_Coverages(Resource):
 
 
     @user_ns.doc("Add list of Coverages to User")
+    @api_admin_required
     def post(self, id):
         user = db_User.find_by_id(id)
         if user:
@@ -373,6 +531,7 @@ class User_Coverages(Resource):
 
 
     @user_ns.doc("Remove list of Coverages to User")
+    @api_admin_required
     def delete(self, id):
         user = db_User.find_by_id(id)
         if user:
@@ -387,11 +546,10 @@ class User_Coverages(Resource):
             return make_response(NOT_FOUND.format('user_id', id), 404)
 
 
-
-
 @users_ns.route('/users')
 class UserList(Resource):
     @users_ns.doc('Get all Users')
+    @api_admin_required
     #@users_ns.marshal_with(user, as_list=True)
     def get(self):
         return db_User.find_all()
@@ -399,6 +557,7 @@ class UserList(Resource):
     #@users_ns.marshal_with(user)
     @users_ns.expect(user)
     @users_ns.doc('Create a user')
+    @api_admin_required
     def post(self):
         new_user = db_User()
         data = request.get_json()
@@ -423,6 +582,7 @@ class UserList(Resource):
 class Vehicle(Resource):
     #@vehicle_ns.marshal_with(vehicle)
     @vehicle_ns.doc('Get a single vehicle from id')
+    @api_admin_required
     def get(self, id):
         vehicle = db_Vehicle.find_by_id(id)
         if vehicle:
@@ -431,6 +591,7 @@ class Vehicle(Resource):
             return make_response(NOT_FOUND.format('vehicle_id', id), 404)
 
     @vehicle_ns.doc('delete a single vehicle by id')
+    @api_admin_required
     def delete(self, id):
         vehicle = db_Vehicle.find_by_id(id)
         if vehicle:
@@ -439,6 +600,7 @@ class Vehicle(Resource):
 
 
     @vehicle_ns.doc('patch a single vehicle by id')
+    @api_admin_required
     #@vehicle_ns.marshal_with(vehicle)
     def patch(self, id):
         vehicle = db_Vehicle.find_by_id(id)
@@ -479,9 +641,11 @@ class Vehicle(Resource):
 
         return vehicle.save_to_db()
 
+
 @vehicles_ns.route('/vehicles')
 class Vehicle(Resource):
     @vehicles_ns.doc('Retrieve all vehicles that meet criteria')
+    @api_admin_required
     #@vehicles_ns.marshal_with(vehicle, as_list=True)
     def get(self):
         data = request.get_json()
@@ -499,6 +663,7 @@ class Vehicle(Resource):
     #@vehicles_ns.marshal_with(vehicle)
     @vehicles_ns.expect(vehicle)
     @vehicles_ns.doc('Create a vehicle instance')
+    @api_admin_required
     def post(self):
         new_vehicle = db_Vehicle()
         data = request.get_json()
@@ -538,10 +703,12 @@ class Vehicle(Resource):
 
         return new_vehicle.save_to_db()
 
+
 @vehicles_ns.route('/vehicles/signals/<int:id>')
 class VehicleList_by_Signal(Resource):
     #@vehicles_ns.marshal_with(vehicle, as_list=True)
     @vehicles_ns.doc("Fetch all vehicles based on Signal")
+    @api_admin_required
     def get(self, id):
         signal = db_Signal.find_by_id(id)
         if signal:
@@ -554,6 +721,7 @@ class VehicleList_by_Signal(Resource):
 class VehicleList_by_Coverage(Resource):
     #@vehicles_ns.marshal_with(vehicle, as_list=True)
     @vehicles_ns.doc('Fetch all vehicles based on Coverage')
+    @api_admin_required
     def get(self, id):
         coverage = db_Coverage.find_by_id(id)
         if coverage:
@@ -565,6 +733,8 @@ class VehicleList_by_Coverage(Resource):
 @signal_ns.route('/signals/<int:id>')
 class Signal(Resource):
     @signal_ns.doc('Get a single signal from id')
+    @api_login_required
+    @api_signal_access_required
     #@signal_ns.marshal_with(coverage)
     def get(self, id):
         signal = db_Signal.find_by_id(id)
@@ -575,6 +745,7 @@ class Signal(Resource):
 
 
     @signal_ns.doc('delete a single signal with id')
+    @api_admin_required
     def delete(self, id):
         signal = db_Signal.find_by_id(id)
         if signal:
@@ -584,6 +755,7 @@ class Signal(Resource):
 
 
     @signal_ns.doc('patch a single signal')
+    @api_admin_required
     #@signal_ns.marshal_with(coverage,)
     def patch(self, id):
         signal = db_Signal.find_by_id(id)
@@ -600,20 +772,24 @@ class Signal(Resource):
         return signal.save_to_db()
 
 
-
 @regions_ns.route('/coverages/regions/<int:id>')
 class Regions_from_Coverage(Resource):
     @regions_ns.doc('Fetch all regions from coverage id')
+    @api_login_required
+    @api_coverage_access_required
     def get(self, id):
         coverage = db_Coverage.find_by_id(id)
         if coverage:
             return coverage.get_regions_from_coverage(), 200
         else:
             return NOT_FOUND.format('coverage_id', id),  404
-    
+
+
 @signals_ns.route('/regions/signals/<int:id>')
 class Signals_from_Region(Resource):
     @signals_ns.doc('Fetch all signals from region id')
+    @api_login_required
+    @api_region_access_required
     def get(self, id):
         region = db_Region.find_by_id(id)
         if region:
@@ -621,9 +797,11 @@ class Signals_from_Region(Resource):
         else:
             return NOT_FOUND.format('region_id', id), 404
 
+
 @signals_ns.route('/signals')
 class SignalList(Resource):
     @signals_ns.doc('Get all Signals')
+    @api_admin_required
     #@signals_ns.marshal_with(signal, as_list=True)
     def get(self):
         return db_Signal.find_all()
@@ -631,6 +809,7 @@ class SignalList(Resource):
     #@signals_ns.marshal_with(signal)
     @signals_ns.expect(signal)
     @signals_ns.doc('Create a signal')
+    @api_admin_required
     def post(self):
         new_signal = db_Signal()
         data = request.get_json()
@@ -651,10 +830,13 @@ class SignalList(Resource):
 
         return new_signal.save_to_db()
 
+
 @coverage_ns.route('/coverages/<int:id>')
 class Coverage(Resource):
     #@coverage_ns.marshal_with(coverage)
     @coverage_ns.doc('get a single covereage from id')
+    @api_login_required
+    @api_coverage_access_required
     def get(self, id):
         coverage = db_Coverage.find_by_id(id)
         if coverage:
@@ -664,6 +846,7 @@ class Coverage(Resource):
 
 
     @coverage_ns.doc('Delete a single coverage with id')
+    @api_admin_required
     def delete(self, id):
         coverage = db_Coverage.find_by_id(id)
         if coverage:
@@ -673,6 +856,7 @@ class Coverage(Resource):
 
     #@coverage_ns.marshal_with(coverage)
     @coverage_ns.doc("Patch a single coverage with id")
+    @api_admin_required
     def patch(self, id):
         coverage = db_Coverage.find_by_id(id)
         if coverage:
@@ -692,12 +876,14 @@ class Coverage(Resource):
 class CoverageList(Resource):
     @coverages_ns.doc('Get all Coverages')
     #@coverages_ns.marshal_with(coverage, as_list=True)
+    @api_admin_required
     def get(self):
         return db_Coverage.find_all()
 
     #@coverages_ns.marshal_with(coverage)
     @coverages_ns.expect(coverage)
     @coverages_ns.doc('Create a Coverage')
+    @api_admin_required
     def post(self):
         new_coverage = db_Coverage()
         data = request.get_json()

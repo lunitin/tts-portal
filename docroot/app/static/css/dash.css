@@ -1,0 +1,4 @@
+/* Custom CSS for Dashboard */
+.loading-wrapper > div {
+    visibility: visible !important;
+}
