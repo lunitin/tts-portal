@@ -25,7 +25,7 @@
                       <a
                         href="/region-remove/{{region.id}}/{{coveragedata.id}}"
                         class="btn btn-danger btn-xs"
-                        method="DELETE"
+                        method="POST"
                         >Remove</a
                       >
                     </div>
@@ -61,7 +61,7 @@
                     <a
                       href="/delete-access/{{coveragedata.id}}/{{user.id}}"
                       class="btn btn-danger btn-xs"
-                      method="DELETE"
+                      method="POST"
                       >Remove</a
                     >
                   </div>
@@ -79,7 +79,7 @@
 <script>
   $(document).ready( function () {
     $('table.table').DataTable({ 
-      scrollY: '225px',
+      scrollY: '300px',
       scrollCollapse: true,
       "columns": [
         null,

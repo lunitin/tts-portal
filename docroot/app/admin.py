@@ -61,6 +61,8 @@ def create_user():
     form_email = request.form.get('email_address').strip().lower()
     form_security = request.form.get('security_level')
     form_password = request.form.get('password').strip()
+    form_confrim_password = request.form.get('confirm-password').strip()
+
     error = None
 
     if not form_fname or not form_fname:
@@ -71,9 +73,11 @@ def create_user():
         error = 'Email is missing or not a valid email'
     if not form_password or not form_password:
         error = 'Password is required'
+    if form_confrim_password != form_password:
+        error = 'Password does not match'
 
     if error:
-        flash(error, 'warning')
+        flash(error, 'danger')
         return redirect(url_for('admin.users'))
 
     existing_email = User.query.filter(User.email_address == form_email).one_or_none()
@@ -220,7 +224,7 @@ def add_coverage():
 """
 Delete User From Coverage. 
 """
-@admin.route('/delete-access/<int:coverage_id>/<int:user_id>', methods=['DELETE'])
+@admin.route('/delete-access/<int:coverage_id>/<int:user_id>', methods=['POST'])
 @login_required
 @admin_required
 def delete_access(coverage_id, user_id):
@@ -264,7 +268,7 @@ def create_coverage():
 """
 Delete Coverage. 
 """
-@admin.route('/coverage-delete/<int:coverage_id>', methods=['DELETE'])
+@admin.route('/coverage-delete/<int:coverage_id>', methods=['POST'])
 @login_required
 @admin_required
 def delete_coverage(coverage_id):
