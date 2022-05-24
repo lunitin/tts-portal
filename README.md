@@ -5,6 +5,16 @@
 - [Install Docker](https://docs.docker.com/get-docker/)
 - [Install Docker Compose](https://docs.docker.com/compose/install/)
 
+
+After cloning the repository create a local configuration file:
+
+```
+cp docroot/app/config.example.py docroot/app/config.py
+```
+
+Edit `docroot/app/config.py` and customize the URL, port, mail settings, and secret keys as needed.
+
+
 ## Architecture
 
 Docker compose is used to build and launch the required Docker containers, networks, and storage volumes.
@@ -18,28 +28,30 @@ These files determine how to build and configure each container.
 | web       | Dockerfile.web |
 | db        | Dockerfile.db  |
 
+
 ### Networking
 
-Docker compose builds the private network **tts-net** that facilitates communication between the Python application and the database.
+Docker compose builds the private network **tts-net** that facilitates communication between the Python application and the MariaDB database.
 
-Port 80 of the web container is also redirected to port 8080 on the docker host.
+By default, port 80 of the web container is redirected to port 8080 on the docker host.
 
-After bringing up the containers, the development URL is available at:
+After bringing up the containers, the development URL is available by default at:
 
 http://localhost:8080/
 
-This port can be customized in config.py
+This port can be customized in `docroot/app/config.py`
+
 
 ### Containers
 
-#### MySQL
+#### MariaDB
 
-The MySQL container uses a docker volume **tts-db** to cache MySQL table data. This storage
-persists between a stop and start of a container, put is purged when an image is rebuilt.
+The db container uses a docker volume **tts-db** to store MariaDB table data. By default, this storage persists between a stop and start of a container, but is purged when an image is rebuilt. If tmpfs is used, then the database will be reloaded
+every time the container is started.
 
 #### Python Flask Webserver
 
-The directory docroot/ is mounted inside the **db** container which is then served by the Flask UWSGI server.
+The directory `docroot/` is mounted inside the **db** container which is then served by the Flask UWSGI server.
 
 ##### Python Packages
 
@@ -90,64 +102,18 @@ docker volume rm tts-portal_tts-db
 
 ## Performance Enhancements
 
-#### `WORKERS_PER_CORE`
+Edit `Dockerfile.web` and customize the NGINX and UWSGI worker processes.
 
-This image will check how many CPU cores are available in the current server running your container.
+For details on these options see: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask/
 
-It will set the number of workers to the number of CPU cores multiplied by this value.
 
-By default:
+If running on Linux/OSX, tmpfs can be enabled to load the database into memory for faster performance.
 
-- `2`
+Edit `docker-compose.yml` and uncomment the `tmpfs:` section.
 
-You can set it in docker-compose.yaml
 
-```bash
-WORKERS_PER_CORE: 4
-```
+## Splash Images
 
-If you used the value `3` in a server with 2 CPU cores, it would run 6 worker processes.
+Login page background images are loaded randomly from `docroot/app/static/images/splash`. Simply add more images to expand the options.
 
-You can use floating point values too.
-
-So, for example, if you have a big server (let's say, with 8 CPU cores) running several applications, and you have an ASGI application that you know won't need high performance. And you don't want to waste server resources. You could make it use `0.5` workers per CPU core.
-
-In a server with 8 CPU cores, this would make it start only 4 worker processes.
-
-#### `WEB_CONCURRENCY`
-
-Override the automatic definition of number of workers.
-
-By default:
-
-- Set to the number of CPU cores in the current server multiplied by the environment variable `WORKERS_PER_CORE`. So, in a server with 2 cores, by default it will be set to `4`.
-
-You can set it in docker-compose.yaml
-
-```bash
-WEB_CONCURRENCY: 2
-```
-
-For more options see: https://github.com/tiangolo/meinheld-gunicorn-flask-docker
-
-#### `LOG_LEVEL`
-
-The log level for Gunicorn.
-
-One of:
-
-- `debug`
-- `info`
-- `warning`
-- `error`
-- `critical`
-
-By default, set to `info`.
-
-If you need to squeeze more performance sacrificing logging, set it to `warning`, for example:
-
-You can set it in docker-compose.yaml:
-
-```bash
-LOG_LEVEL: "warning"
-```
+**Ensure only valid image files exist in this directory.**
