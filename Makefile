@@ -3,9 +3,6 @@
 up:
 	docker-compose up
 
-watch:
-	watchman-make -p 'docroot/**/*.py' 'docroot/**/*.html' 'docroot/**/*.css' 'docroot/**/*.js' -s 1 --run 'touch docroot/uwsgi.ini'
-
 down:
 	docker-compose down
 

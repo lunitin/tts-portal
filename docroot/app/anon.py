@@ -24,15 +24,6 @@ anon = Blueprint('anon', __name__)
 # Fetch splash screen image list
 splash_images = fnmatch.filter(os.listdir('app/static/images/splash'), '*')
 
-"""
-Moved to auth.py /dashboard
-Default home page route
-
-@anon.route('/')
-def index():
-
-    return render_template('index.html')
-"""
 
 """
 Display the login form
@@ -106,8 +97,6 @@ def forgot_password_post():
     # Only send recovery if it is a valid user and token
     if user and token:
         try:
-            #print("Sending recovery email to " + user.email_address)
-
             # Recipients must be an array
             msg = Message(strings.TPL_EMAIL_FORGOT_PASSWORD_SUBJECT, recipients=[user.email_address])
 
@@ -137,13 +126,11 @@ def recover_password():
     raw_token = request.args.get('token')
     token = base64.urlsafe_b64decode(raw_token)
 
-    ## @TODO Refactor to generic token valid func
+    # Decode and verify the provided token
     s = Serializer(config.IDS_SECRET_KEYS, salt="forgot-password", expires_in=config.IDS_FORGOT_PASSWORD_VALIDITY_TIMER)
 
-    # Try to decode and verify the token timestamp
     try:
         payload = s.loads(token)
-        print("Payload: ", payload)
     except SignatureExpired:
         flash(strings.ERROR_TOKEN_EXPIRED, 'danger')
         return redirect(url_for('anon.forgot_password'))
@@ -151,8 +138,6 @@ def recover_password():
         flash(strings.ERROR_TOKEN_SIGNATURE, 'danger')
         return redirect(url_for('anon.forgot_password'))
     ## end
-
-    #print("Verified Payload: ", payload)
 
     return render_template(template, token=raw_token, image = random.choice(splash_images))
 
@@ -174,10 +159,9 @@ def recover_password_post():
 
     # Check complexity requirements???
 
-    ## @TODO Refactor to generic token valid func
+    # Decode and verify the provided token
     s = Serializer(config.IDS_SECRET_KEYS, salt="forgot-password", expires_in=config.IDS_FORGOT_PASSWORD_VALIDITY_TIMER)
 
-    # Try to decode and verify the token timestamp
     try:
         payload = s.loads(token)
     except SignatureExpired:
@@ -204,20 +188,6 @@ def recover_password_post():
         flash(strings.ERROR_PASSWORD_RESET, 'danger')
 
     return redirect(url_for('anon.login'))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

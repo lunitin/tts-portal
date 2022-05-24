@@ -6,6 +6,32 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
+    #####
+    # Options are only valid for image tiangolo/meinheld-gunicorn-flask:python3.8
+    #environment:
+      # This image will check how many CPU cores are available in the current
+      # server running your container.
+      # It will set the number of workers to the number of CPU cores multiplied
+      # by this value.
+      # Default: 2
+      #WORKERS_PER_CORE: "2"
+      # Override the automatic definition of number of workers.
+      # If this is not set
+      # Set to the number of CPU cores in the current server multiplied by the
+      # environment variable WORKERS_PER_CORE. So, in a server with 2 cores, by
+      # default it will be set to 4.
+      #WEB_CONCURRENCY: "2"
+      # Logging Levels
+      # The log level for Gunicorn. One of:
+      # debug
+      # info
+      # warning
+      # error
+      # critical
+      #
+      # By default, set to info.
+      # LOG_LEVEL: "info"
+      ######
     ports:
       - "8080:80"
     networks:
@@ -22,10 +48,14 @@ services:
     # For persistent data between startup/shutdown
     # volumes:
     #   - tts-db:/var/lib/mysql
-    # Set max_allowed_packet to 256M (or any other value)
+    # Set max_allowed_packet to 1GB (or any other value)
     command: --max_allowed_packet=1073741824
     environment:
       MYSQL_ROOT_PASSWORD: "beastm0de"
+    # tmpfs for extra performance, only available on Linix/Mac
+    #tmpfs:
+    # - /var/lib/mysql/:rw,noexec,nosuid,size=600m
+    # - /tmp/:rw,noexec,nosuid,size=50m
     networks:
       - tts-net
     restart: on-failure

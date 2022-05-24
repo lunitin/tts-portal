@@ -4,7 +4,16 @@
 
 - [Install Docker](https://docs.docker.com/get-docker/)
 - [Install Docker Compose](https://docs.docker.com/compose/install/)
-- [Install Watchman](https://facebook.github.io/watchman/docs/install.html) (optional)
+
+
+After cloning the repository create a local configuration file:
+
+```
+cp docroot/app/config.example.py docroot/app/config.py
+```
+
+Edit `docroot/app/config.py` and customize the URL, port, mail settings, and secret keys as needed.
+
 
 ## Architecture
 
@@ -19,26 +28,30 @@ These files determine how to build and configure each container.
 | web       | Dockerfile.web |
 | db        | Dockerfile.db  |
 
+
 ### Networking
 
-Docker compose builds the private network **tts-net** that facilitates communication between the Python application and the database.
+Docker compose builds the private network **tts-net** that facilitates communication between the Python application and the MariaDB database.
 
-Port 80 of the web container is also redirected to port 8000 on the docker host.
+By default, port 80 of the web container is redirected to port 8080 on the docker host.
 
-After bringing up the containers, the development URL is available at:
+After bringing up the containers, the development URL is available by default at:
 
-http://localhost:8000/
+http://localhost:8080/
+
+This port can be customized in `docroot/app/config.py`
+
 
 ### Containers
 
-#### MySQL
+#### MariaDB
 
-The MySQL container uses a docker volume **tts-db** to cache MySQL table data. This storage
-persists between a stop and start of a container, put is purged when an image is rebuilt.
+The db container uses a docker volume **tts-db** to store MariaDB table data. By default, this storage persists between a stop and start of a container, but is purged when an image is rebuilt. If tmpfs is used, then the database will be reloaded
+every time the container is started.
 
 #### Python Flask Webserver
 
-The directory docroot/ is mounted inside the **db** container which is then served by the Flask UWSGI server.
+The directory `docroot/` is mounted inside the **db** container which is then served by the Flask UWSGI server.
 
 ##### Python Packages
 
@@ -77,12 +90,6 @@ docker exec -it db bash
 mysql -u root -p beastm0de
 ```
 
-When Python code is updated inside the docroot/ folder, the following command will instruct the running web container to reload the new code.
-
-```
-touch docroot/uwsgi.ini
-```
-
 When the database is configured with persistent mode, SQL data will live in the docker volume and not be reset when the MySQL container stops and starts. If a clean run is necessary the volume must be removed when the container is down:
 
 ```
@@ -93,26 +100,20 @@ docker volume ls
 docker volume rm tts-portal_tts-db
 ```
 
-## Watchman
+## Performance Enhancements
 
-Watchman is a helper application that will watch files in the project for changes and trigger a reload of the Flask app when changes have been detected.
+Edit `Dockerfile.web` and customize the NGINX and UWSGI worker processes.
 
-To simplify things, the docker-compose and watchman commands are wrapped in a makefile.
+For details on these options see: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask/
 
-Bring up the Docker stack
 
-```
-make up
-```
+If running on Linux/OSX, tmpfs can be enabled to load the database into memory for faster performance.
 
-Stop the Docker stack
+Edit `docker-compose.yml` and uncomment the `tmpfs:` section.
 
-```
-make down
-```
 
-Rebuild all Docker containers
+## Splash Images
 
-```
-make clean
-```
+Login page background images are loaded randomly from `docroot/app/static/images/splash`. Simply add more images to expand the options.
+
+**Ensure only valid image files exist in this directory.**
