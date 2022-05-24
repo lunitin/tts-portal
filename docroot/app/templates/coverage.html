@@ -17,9 +17,22 @@
                   <td>{{region.region_name}}</td>
                   <td>
                     <div class="col-xs-6">
+                      <a
+                        href="/region/{{region.id}}"
+                        class="btn btn-primary btn-xs"
+                        >Details</a
+                      >
+                      <a
+                        href="/region-remove/{{region.id}}/{{coveragedata.id}}"
+                        class="btn btn-danger btn-xs"
+                        method="POST"
+                        >Remove</a
+                      >
+                    </div>
+                    <!-- <div class="col-xs-6">
                       <a href="/region/{{region.id}}">Details</a>
                       <a href="/region-remove/{{region.id}}/{{coveragedata.id}}" method="POST">Remove</a>
-                    </div>
+                    </div> -->
                   </td>
                 </tr>
                 {% endfor %}
@@ -45,8 +58,16 @@
                 <td>{{user.security_level}}</td>
                 <td>
                   <div class="col-xs-6">
-                    <a href="/delete-access/{{coveragedata.id}}/{{user.id}}" method="POST">Delete</a>
+                    <a
+                      href="/delete-access/{{coveragedata.id}}/{{user.id}}"
+                      class="btn btn-danger btn-xs"
+                      method="POST"
+                      >Remove</a
+                    >
                   </div>
+                  <!-- <div class="col-xs-6">
+                    <a href="/delete-access/{{coveragedata.id}}/{{user.id}}" method="POST">Delete</a>
+                  </div> -->
                 </td>
             </tr>
             {% endfor %}
@@ -58,14 +79,14 @@
 <script>
   $(document).ready( function () {
     $('table.table').DataTable({ 
-      scrollY: '225px',
+      scrollY: '300px',
       scrollCollapse: true,
       "columns": [
         null,
-        { "width": "20%" }       
+        { "width": "25%" }
         ]
-      } );
-  });
+      });
+    });
 </script>
 {% endblock %}
 {% endif %}

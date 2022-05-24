@@ -3,7 +3,7 @@
 
 <div class="container p-3 mb-3">
   <div class="row">
-    <div class="col shadow p-3 mb-2 rounded" style="height: 525px;">
+    <div class="col shadow p-3 mb-2 rounded" style="height: 600px;">
       <div class="row">
         <div class="col">
           <h3>Create User</h3>
@@ -91,6 +91,23 @@
             />
           </div>
         </div>
+        <div class="input-group row">
+          <div class="col-md-10">
+            <label for="confirm-password" class="col-sm-6 col-form-label"
+              >Confirm Password:</label
+            >
+          </div>
+          <div class="col-md-10">
+            <input
+              class="form-control"
+              type="text"
+              id="confirm-password"
+              name="confirm-password"
+              placeholder="Confirm Password"
+              required
+            />
+          </div>
+        </div>
         <br />
         <div class="col-12">
           <button type="submit" class="btn btn-primary">Create User</button>
@@ -98,14 +115,14 @@
       </form>
     </div>
 
-    <div id="userDiv" class="col-8  shadow p-3 mb-5 ms-5 rounded" style="height: 525px;">
+    <div id="userDiv" class="col-8  shadow p-3 mb-5 ms-5 rounded" style="height: 600px;">
       <div class="container">
-        <div class="row">
+        <div class="row mb-2">
           <div class="col">
             <h3>Users</h3>
           </div>
           <div class="col-md-auto"></div>
-          <div class="col-md-3">
+          <div class="col-md-2 align-self-end">
             <a
               href=""
               class="btn btn-primary"
@@ -116,7 +133,7 @@
           </div>
         </div>
       </div>
-      <div class="container" style="max-height:300px; width: 100%;">
+      <div class="container" style="max-height:400px; width: 100%;"> 
         <table id="data" class="table table-striped" data-column-defs='[{"sortable": false, "targets": [3]}]'>
 
           <thead>
@@ -157,9 +174,9 @@
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h4 class="modal-title">
-                      Edit User {{user.first_name}}, {{user.last_name}}
-                    </h4>
+                    <h5 class="modal-title">
+                      Edit User: {{user.first_name}}, {{user.last_name}}
+                    </h5>
                   </div>
                   <div class="modal-body">
                     <form action="/update/{{user.id}}" method="POST">
@@ -340,6 +357,17 @@
               required
             />
           </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input
+              class="form-control"
+              type="text"
+              id="confirm-password"
+              name="confirm-password"
+              placeholder="Confirm Password"
+              required
+            />
+          </div>
           <div class="modal-footer">
             <button
               type="button"
@@ -358,7 +386,7 @@
 <script>
   $(document).ready( function () {
     $('#data').DataTable( {
-      scrollY: '275px',
+      scrollY: '325px',
       scrollCollapse: true,
     });
   });
