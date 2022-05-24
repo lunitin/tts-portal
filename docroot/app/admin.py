@@ -285,7 +285,7 @@ def delete_coverage(coverage_id):
 """
 Remove Region From Coverage. 
 """
-@admin.route('/region-remove/<int:region_id>/<int:coverage_id>')
+@admin.route('/region-remove/<int:region_id>/<int:coverage_id>', methods=['POST'])
 @login_required
 @admin_required
 def remove_region(region_id, coverage_id):
@@ -342,7 +342,7 @@ def create_region():
 """
 Remove Region
 """
-@admin.route('/region-delete/<int:region_id>', methods=['DELETE'])
+@admin.route('/region-delete/<int:region_id>', methods=['POST'])
 @login_required
 @admin_required
 def delete_region(region_id):
