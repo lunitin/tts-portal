@@ -5,6 +5,8 @@ from flask import jsonify, request
 from flask_login import current_user
 BASE_URL = 'http://localhost/api/'
 
+
+# request coverages that belong to the current user for drop down selector
 def get_coverages_by_user():
 
     url = BASE_URL+'users/coverages/' + str(current_user.id)
@@ -18,6 +20,7 @@ def get_coverages_by_user():
     else:
         return 0
 
+# request regions that belong to a given coverage id for drop down selector
 def get_regions_by_coverage(id):
     res = requests.get(BASE_URL+'coverages/regions/'+str(id), cookies=request.cookies)
     if res.status_code == 200:
@@ -28,6 +31,7 @@ def get_regions_by_coverage(id):
     else:
         return 0
 
+# request signals based on region id for drop down selector
 def get_signals_by_region(id):
     res = requests.get(BASE_URL+'regions/signals/'+str(id), cookies=request.cookies)
     if res.status_code == 200:
@@ -38,6 +42,7 @@ def get_signals_by_region(id):
     else:
         return 0
 
+# request the arrivalPieChart plotly plot with the given parameters
 def get_arrivalPieChart(signal, day, approach, tdirection):
     data = requests.get(
         url=BASE_URL+'dashboard/arrivalPieChart',
@@ -54,6 +59,7 @@ def get_arrivalPieChart(signal, day, approach, tdirection):
     p = plotly.io.from_json(data['plot'])
     return p, data['greenArrivalRate'], data['arrivalCrossings']
 
+# request the peakScatterPlot plotly plot with the given parameters
 def get_peakScatterPlot(signal, day, approach, tdirection):
     data = requests.get(
         url=BASE_URL+'dashboard/peakScatterPlot',
@@ -69,6 +75,7 @@ def get_peakScatterPlot(signal, day, approach, tdirection):
     p = plotly.io.from_json(data['plot'])
     return p
 
+# request the totalDelayChart plotly plot given the parameters
 def get_totalDelayChart(signal, day, approach, tdirection):
 
     data = requests.get(
@@ -86,6 +93,7 @@ def get_totalDelayChart(signal, day, approach, tdirection):
     p = plotly.io.from_json(data['plot'])
     return p, data['delayCrossings'], data['avgDelay'], data['totalDelay']
 
+# request the splitPieChart plotly plot given the parameters
 def get_splitPieChart(signal, day, approach, tdirection):
     data = requests.get(
         url=BASE_URL+'dashboard/splitPieChart',
@@ -101,6 +109,7 @@ def get_splitPieChart(signal, day, approach, tdirection):
     p = plotly.io.from_json(data['plot'])
     return p, data['splitCrossings'], data['totalSplitFailure'], data['splitRate']
 
+# request the movementBarChart plotly plot given the parameters
 def get_movementBarChart(signal, day, approach, tdirection):
     data = requests.get(
         url=BASE_URL+'dashboard/movementBarChart',
