@@ -121,4 +121,5 @@ Login page background images are loaded randomly from `docroot/app/static/images
 ## API Docs
 
 To view the API documentation, simply navigate to the BASE_URL/apidocs
+
 Ex. http://localhost:8080/apidocs
