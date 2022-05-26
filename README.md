@@ -117,3 +117,8 @@ Edit `docker-compose.yml` and uncomment the `tmpfs:` section.
 Login page background images are loaded randomly from `docroot/app/static/images/splash`. Simply add more images to expand the options.
 
 **Ensure only valid image files exist in this directory.**
+
+## API Docs
+
+To view the API documentation, simply navigate to the BASE_URL/apidocs
+Ex. http://localhost:8080/apidocs
