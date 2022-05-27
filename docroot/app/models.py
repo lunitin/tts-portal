@@ -3,19 +3,15 @@
 Python objects for the SQLAlchemy database models
 
 """
-
-from logging import raiseExceptions
-import datetime
 import json
 from flask_login import UserMixin
 from flask import make_response, jsonify
 from . import db
-from typing import List
 from sqlalchemy.exc import SQLAlchemyError
-import enum
-from sqlalchemy import Enum
 
-
+"""
+Base model for all db models
+"""
 class BaseModel(db.Model):
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
@@ -49,7 +45,6 @@ class BaseModel(db.Model):
                 my_dict[c.name] = str(getattr(self, c.name))
             else:
                 my_dict[c.name] = getattr(self, c.name)
-        #my_dict = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         return my_dict
 
 
@@ -73,6 +68,11 @@ class BaseModel(db.Model):
         else:
             return make_response("Entity deleted successfully", 204)
 
+
+"""
+The access table contains information regarding which users
+have access to certain coverages
+"""
 access_table = db.Table('access', BaseModel.metadata,
                   db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
                   db.Column('coverage_id', db.Integer, db.ForeignKey('coverages.id'), primary_key=True)
@@ -120,17 +120,6 @@ class User(UserMixin, BaseModel):
         return 0
 
 
-class ApproachDirection(enum.Enum):
-    Straight = "Straight"
-    Right = "Right"
-    Left = "Left"
-
-class TravelDirection(enum.Enum):
-    Northbound = "Northbound"
-    Eastbound = "Eastbound"
-    Southbound = "Southbound"
-    Westbound = "Westbound"
-
 class Vehicle(BaseModel):
     __tablename__ = "vehicles"
     # primary keys are required by SQLAlchemy
@@ -153,11 +142,7 @@ class Vehicle(BaseModel):
     uturn = db.Column(db.Boolean,nullable=True)
     hour = db.Column(db.Integer, nullable=True)
     peak = db.Column(db.String(length=64), nullable=True)
-    #travel_direction = db.Column(Enum(TravelDirection), nullable=True) # Not JSON Serializable
-    #approach_direction = db.Column(Enum(ApproachDirection), nullable=True) # Not JSON Serializable
 
-
-    # coverage_id = db.Column(db.Integer, db.ForeignKey('coverages.id'), nullable=True)
 
     @classmethod
     def search_by(cls, EntryTime=None, ExitTime=None, TravelDirection=None, ApproachDirection=None,
@@ -167,7 +152,6 @@ class Vehicle(BaseModel):
             Peak=None, Hour=None):
 
         query = db.session.query(Vehicle)
-        #print('Day: {}, SignalID: {}, TravelDirection: {}, ApproachDirection: {}'.format(Day, SignalID, TravelDirection, ApproachDirection))
         if EntryTime is not None: query = query.filter(Vehicle.entry_time>=EntryTime)
         if ExitTime is not None: query = query.filter(Vehicle.exit_time<=ExitTime)
         if TravelDirection is not None: query = query.filter(Vehicle.travel_direction==TravelDirection)
@@ -206,9 +190,7 @@ class Signal(BaseModel):
                 self.vehicles.append(vehicle)
             else:
                 return(veh_id)
-        return 0 # All were added good
-
-    #def remove_vehicles(self, vehicles)
+        return 0
 
 
 class Region(BaseModel):
@@ -231,19 +213,3 @@ class Coverage(BaseModel):
 
     def get_regions_from_coverage(self):
         return json.dumps([c.as_dict() for c in self.regions])
-
-    # def add_signals(self, signals, delete_old):
-    #     if delete_old == True:
-    #         self.signals = []
-    #     if signals:
-    #         for signal_id in signals:
-    #             signal = Signal.find_by_id(signal_id)
-    #             if signal:
-    #                 self.signals.append(signal)
-    #             else:    id = Column(Integer, primary_key=True)
-    #                 return(signal_id)
-    #     else:
-    #         self.signals = []
-    #     return 0 # All were added good
-
-    #def remove_signals(self, signals) # For a later time :)

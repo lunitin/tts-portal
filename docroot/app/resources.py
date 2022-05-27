@@ -171,6 +171,10 @@ api.add_namespace(region_ns)
 api.add_namespace(regions_ns)
 api.add_namespace(dashboard_ns)
 
+"""
+ The following namespace models are strictly for documentation purposes in
+ the Swagger API Documentation
+"""
 user = users_ns.model('User', {
     'id': fields.Integer(required=False),
     'email_address': fields.String(default=None),
