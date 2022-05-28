@@ -1,10 +1,15 @@
 # tts-portal
 
+GIT REPOSITORY:
+
+https://github.com/lunitin/tts-portal
+
+The visibility of this repository is public.
+
 ## Development Environment Setup
 
 - [Install Docker](https://docs.docker.com/get-docker/)
 - [Install Docker Compose](https://docs.docker.com/compose/install/)
-
 
 After cloning the repository create a local configuration file:
 
@@ -13,7 +18,6 @@ cp docroot/app/config.example.py docroot/app/config.py
 ```
 
 Edit `docroot/app/config.py` and customize the URL, port, mail settings, and secret keys as needed.
-
 
 ## Architecture
 
@@ -28,7 +32,6 @@ These files determine how to build and configure each container.
 | web       | Dockerfile.web |
 | db        | Dockerfile.db  |
 
-
 ### Networking
 
 Docker compose builds the private network **tts-net** that facilitates communication between the Python application and the MariaDB database.
@@ -41,8 +44,11 @@ http://localhost:8080/
 
 This port can be customized in `docroot/app/config.py`
 
-
 ### Containers
+
+## Python requirements
+
+Python packages that are required are listed in the `requirements.txt`. These are automatically installed using pip when the web container is built.
 
 #### MariaDB
 
@@ -106,11 +112,9 @@ Edit `Dockerfile.web` and customize the NGINX and UWSGI worker processes.
 
 For details on these options see: https://hub.docker.com/r/tiangolo/uwsgi-nginx-flask/
 
-
 If running on Linux/OSX, tmpfs can be enabled to load the database into memory for faster performance.
 
 Edit `docker-compose.yml` and uncomment the `tmpfs:` section.
-
 
 ## Splash Images
 
@@ -123,3 +127,15 @@ Login page background images are loaded randomly from `docroot/app/static/images
 To view the API documentation, simply navigate to the BASE_URL/apidocs
 
 Ex. http://localhost:8080/apidocs
+
+## Unrealized Features
+
+The core features were implemented for the project.
+
+Some ideas for additional features include:
+
+- Modify User Objects so admins have access to all zones instead of using the API to override
+- Optimize callbacks to reduce the number of HTTP transactions
+- Migrate to a higher UWSGI stack with higher performance
+- Implement password complexity requirements
+- Add widgets that could be used to create custom graphs using a query builder.
